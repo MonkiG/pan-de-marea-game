@@ -1,6 +1,6 @@
 # Fuentes pixel art v1
 
-Estas imágenes fueron producidas con ImageGen integrado. Bigotes partió de `assets/bigotes-assets.png`; los enemigos usan sus PNG legacy sólo como identidad conceptual y la hoja final de Bigotes como ancla obligatoria de estilo. No sustituyen los PNG legacy: son fuentes de trabajo para el procesamiento reproducible de `scripts/process-pixel-art.mjs`.
+Estas imágenes fueron producidas con ImageGen integrado. Bigotes partió de `assets/bigotes-assets.png`; los enemigos y fondos usan sus PNG legacy sólo como identidad conceptual y el arte pixel-v1 aprobado como ancla obligatoria de estilo. No sustituyen los PNG legacy: son fuentes de trabajo para el procesamiento reproducible de `scripts/process-pixel-art.mjs`.
 
 ## Dirección cerrada
 
@@ -56,3 +56,20 @@ Cada llamada generó una sola fila horizontal y añadió el contrato de acción 
 | Sentinela | hurt / defeat | 4 / 8 | Armadura abierta vulnerable y colapso en roca/coral. |
 
 Los frames maestros y tiras chroma viven en `rastrero/`, `escupemasas/` y `sentinela/`. El procesador aísla poses por componentes conectados, asigna partículas al cuerpo más cercano, normaliza cada personaje a su propia paleta cerrada y ensambla las hojas exactas declaradas en `pixel_art_prompt.md`.
+
+## Prompt compartido del lote de fondos
+
+> Genera una capa parallax 16:9 para un videojuego submarino 2D, usando el arte pixel-v1 adjunto como ancla obligatoria de tamaño de píxel, clusters, outline y densidad; usa el PNG legacy únicamente como referencia conceptual del entorno. Pixel art cartoon nativo, píxeles cuadrados duros, formas grandes, dos tonos por material, paleta limitada y contraste subordinado a personajes y plataformas. Mantén el centro calmado, evita líneas horizontales que parezcan superficies jugables y diseña continuidad natural entre los bordes izquierdo y derecho. Sin personajes, enemigos, objetos interactivos, texto, UI, blur, antialias, degradados suaves, textura pictórica, fotorealismo ni ruido fino.
+
+Cada llamada añadió el contrato específico de una sola capa:
+
+| Fuente | Bioma | Profundidad | Contrato visual |
+|---|---|---|---|
+| `panaderia-undida-bg-1-source.png` | Panadería | Lejana | Agua azul petróleo, haces de luz y ruinas panaderas remotas; opaca y de bajo contraste. |
+| `panaderia-undida-bg-2-source.png` | Panadería | Media | Hornos redondos, arcos y tuberías distantes con ámbar muy contenido; opaca y sin suelo falso. |
+| `panaderia-undida-bg-3-source.png` | Panadería | Cercana | Utilería erosionada aislada en bordes sobre chroma `#ff00ff`; centro y banda inferior despejados. |
+| `mercado-undido-1-source.png` | Mercado | Lejana | Ciudad turquesa vertical; una segunda llamada rompió pasarelas largas en ruinas discontinuas. |
+| `mercado-undido-2-source.png` | Mercado | Media | Arcos, tuberías y faroles fríos; una segunda llamada redujo toldos, contraste y densidad. |
+| `mercado-undido-3-source.png` | Mercado | Cercana | Cuerdas, algas, burbujas y bronce aislados en bordes sobre chroma `#ff00ff`. |
+
+El procesador recorta a 16:9, muestrea a 320×180, corrige la costura horizontal, cuantiza a una paleta compartida por bioma, convierte el chroma cercano a alpha binario y amplía 2× con nearest-neighbor. Los resultados exactos de 640×360 viven en `assets/pixel-art/v1/backgrounds/`.

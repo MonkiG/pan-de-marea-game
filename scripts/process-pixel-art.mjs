@@ -39,6 +39,33 @@ const EFFECT_PALETTE = [
   [255, 169, 20], [255, 211, 79], [255, 239, 177], [255, 255, 255],
 ];
 
+const BAKERY_BACKGROUND_PALETTE = [
+  [5, 15, 31], [5, 27, 48], [7, 42, 67], [8, 57, 83],
+  [10, 75, 101], [12, 94, 121], [18, 116, 142], [25, 140, 163],
+  [39, 166, 183], [68, 192, 199], [111, 213, 211], [18, 33, 48],
+  [28, 49, 61], [44, 69, 75], [65, 91, 91], [94, 119, 110],
+  [137, 158, 130], [78, 43, 31], [116, 62, 8], [166, 91, 7],
+  [216, 132, 12], [247, 177, 39], [218, 199, 150], [249, 235, 190],
+];
+
+const MARKET_BACKGROUND_PALETTE = [
+  [5, 15, 31], [5, 30, 46], [5, 45, 58], [5, 61, 70],
+  [5, 78, 82], [7, 96, 96], [8, 116, 110], [10, 137, 125],
+  [15, 160, 144], [36, 187, 164], [75, 215, 185], [130, 235, 205],
+  [12, 25, 44], [27, 39, 58], [48, 61, 75], [72, 88, 91],
+  [94, 119, 110], [137, 158, 130], [78, 43, 31], [116, 62, 8],
+  [166, 91, 7], [198, 91, 7], [235, 133, 30], [218, 190, 112],
+];
+
+const backgroundSpecs = [
+  { file: 'panaderia-undida-bg-1.png', palette: BAKERY_BACKGROUND_PALETTE, transparent: false },
+  { file: 'panaderia-undida-bg-2.png', palette: BAKERY_BACKGROUND_PALETTE, transparent: false },
+  { file: 'panaderia-undida-bg-3.png', palette: BAKERY_BACKGROUND_PALETTE, transparent: true },
+  { file: 'mercado-undido-1.png', palette: MARKET_BACKGROUND_PALETTE, transparent: false },
+  { file: 'mercado-undido-2.png', palette: MARKET_BACKGROUND_PALETTE, transparent: false },
+  { file: 'mercado-undido-3.png', palette: MARKET_BACKGROUND_PALETTE, transparent: true },
+];
+
 const bigotesRows = [
   ['idle', 6], ['swim', 8], ['jump', 3], ['fall', 4],
   ['attack', 8], ['hurt', 4], ['defeat', 6], ['interact', 4],
@@ -66,6 +93,11 @@ const isChroma = (red, green, blue) => red > 90
   && blue > 90
   && Math.min(red, blue) - green > 45
   && Math.abs(red - blue) < 125;
+
+const isBackgroundChroma = (red, green, blue) => red > 170
+  && blue > 150
+  && green < 110
+  && Math.min(red, blue) - green > 85;
 
 const segmentFrames = (image, count, adaptiveCuts = false) => {
   const columnInk = Array.from({ length: image.width }, (_, x) => {
@@ -341,10 +373,102 @@ async function processEffect(name, count, frameSize) {
   return output;
 }
 
+const sampleBackground = (image, transparent) => {
+  const logicalWidth = 320;
+  const logicalHeight = 180;
+  const cropWidth = Math.min(image.width, Math.floor(image.height * (16 / 9)));
+  const cropHeight = Math.min(image.height, Math.floor(cropWidth * (9 / 16)));
+  const cropLeft = Math.floor((image.width - cropWidth) / 2);
+  const cropTop = Math.floor((image.height - cropHeight) / 2);
+  const logical = emptyImage(logicalWidth, logicalHeight);
+
+  for (let y = 0; y < logicalHeight; y += 1) {
+    for (let x = 0; x < logicalWidth; x += 1) {
+      const sourceX = cropLeft + Math.min(cropWidth - 1, Math.floor((x + 0.5) * cropWidth / logicalWidth));
+      const sourceY = cropTop + Math.min(cropHeight - 1, Math.floor((y + 0.5) * cropHeight / logicalHeight));
+      const sourceOffset = (sourceY * image.width + sourceX) * 4;
+      const targetOffset = (y * logicalWidth + x) * 4;
+      const red = image.pixels[sourceOffset];
+      const green = image.pixels[sourceOffset + 1];
+      const blue = image.pixels[sourceOffset + 2];
+      const alpha = transparent && isBackgroundChroma(red, green, blue) ? 0 : 255;
+      logical.pixels.set([red, green, blue, alpha], targetOffset);
+    }
+  }
+  return logical;
+};
+
+const blendHorizontalSeam = (image, band = 12) => {
+  const original = new Uint8Array(image.pixels);
+  for (let y = 0; y < image.height; y += 1) {
+    for (let distance = 0; distance < band; distance += 1) {
+      const leftX = distance;
+      const rightX = image.width - 1 - distance;
+      const leftOffset = (y * image.width + leftX) * 4;
+      const rightOffset = (y * image.width + rightX) * 4;
+      const progress = band === 1 ? 1 : distance / (band - 1);
+      const smooth = progress * progress * (3 - 2 * progress);
+      const leftAlpha = original[leftOffset + 3];
+      const rightAlpha = original[rightOffset + 3];
+      const pairAlpha = Math.max(leftAlpha, rightAlpha);
+      const opaqueOffset = leftAlpha >= rightAlpha ? leftOffset : rightOffset;
+
+      for (let channel = 0; channel < 3; channel += 1) {
+        const pairColor = leftAlpha && rightAlpha
+          ? Math.round((original[leftOffset + channel] + original[rightOffset + channel]) / 2)
+          : original[opaqueOffset + channel];
+        image.pixels[leftOffset + channel] = Math.round(pairColor + (original[leftOffset + channel] - pairColor) * smooth);
+        image.pixels[rightOffset + channel] = Math.round(pairColor + (original[rightOffset + channel] - pairColor) * smooth);
+      }
+      image.pixels[leftOffset + 3] = Math.round(pairAlpha + (leftAlpha - pairAlpha) * smooth) >= 128 ? 255 : 0;
+      image.pixels[rightOffset + 3] = Math.round(pairAlpha + (rightAlpha - pairAlpha) * smooth) >= 128 ? 255 : 0;
+    }
+  }
+};
+
+const quantizeBackground = (image, palette) => {
+  for (let offset = 0; offset < image.pixels.length; offset += 4) {
+    if (image.pixels[offset + 3] === 0) {
+      image.pixels.set([0, 0, 0, 0], offset);
+      continue;
+    }
+    const color = nearestColor(
+      image.pixels[offset], image.pixels[offset + 1], image.pixels[offset + 2], palette,
+    );
+    image.pixels.set([...color, 255], offset);
+  }
+};
+
+const upscaleBackground = (logical) => {
+  const output = emptyImage(640, 360);
+  for (let y = 0; y < output.height; y += 1) {
+    for (let x = 0; x < output.width; x += 1) {
+      const sourceOffset = (Math.floor(y / 2) * logical.width + Math.floor(x / 2)) * 4;
+      const targetOffset = (y * output.width + x) * 4;
+      output.pixels.set(logical.pixels.subarray(sourceOffset, sourceOffset + 4), targetOffset);
+    }
+  }
+  return output;
+};
+
+async function processBackground(spec) {
+  const input = source('backgrounds', spec.file.replace('.png', '-source.png'));
+  const image = await readPng(input);
+  const logical = sampleBackground(image, spec.transparent);
+  blendHorizontalSeam(logical);
+  quantizeBackground(logical, spec.palette);
+  const outputImage = upscaleBackground(logical);
+  const output = target('backgrounds', spec.file);
+  await mkdir(dirname(output), { recursive: true });
+  await writePng(output, outputImage);
+  return output;
+}
+
 const outputs = [
   await processBigotes(),
   ...await Promise.all(characterSheets.map(processCharacter)),
   await processEffect('player-attack', 6, 32),
   await processEffect('hit-spark', 6, 24),
+  ...await Promise.all(backgroundSpecs.map(processBackground)),
 ];
 outputs.forEach((output) => console.log(`Generated ${output}`));
