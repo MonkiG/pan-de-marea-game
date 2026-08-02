@@ -177,6 +177,17 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 - `b75cf21 fix(game): align pixel-art parallax to viewport`
 - `d38fce3 docs(art): document parallax background workflow`
 
+### PDM-025 — Completar fallbacks, tileset y assets restantes
+
+**Fecha:** 2026-08-02
+**Prompt:** “Ok, ahora, puedes generar los assets faltantes en los niveles donde usaste fallbacks, despues cambiar los tilesets para que no haya discrepancia en las coliciones y al final redise;ar el resto de assets usados en los niveles? todo esto usando el nuevo estilo para los assets que definimos”
+**Resultado:** se completó el perfil `pixel-v1` en las tres fases solicitadas. ImageGen integrado produjo fuentes chroma independientes para los siete recursos que antes dependían de fallbacks, el tileset modular, Levadura, compuerta térmica, horno, respiradero y cuatro efectos. El pipeline normaliza todos los resultados a hojas exactas, alpha binario y paletas de 8–16 colores. Las plataformas ahora se ensamblan con tapas y centro repetible desde la misma coordenada superior del collider, sin estirar sprites; puestos con colisión usan su tamaño visual real y el coral peligroso repite un módulo sobre una zona coincidente. Los props cambian de frame según estado, proyectiles y respiraderos están animados y los bursts pixel-v1 reemplazan las partículas fallback. Se corrigió además el frame inicial del Centinela, detectado durante QA en navegador. `legacy` permanece intacto y no se hizo push.
+**Archivos:** `art-source/pixel-art/v1/README.md`, `art-source/pixel-art/v1/props/`, `art-source/pixel-art/v1/tiles/`, `art-source/pixel-art/v1/effects/`, `assets/pixel-art/v1/props/`, `assets/pixel-art/v1/tiles/`, `assets/pixel-art/v1/effects/`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/game/art/levelArt.js`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/animationData.js`, `src/game/entities/`, `src/game/projectiles/CorruptedDoughProjectile.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `PROMPTS.md`.
+**Commits:**
+
+- `604da7c feat(art): add remaining pixel-art level assets`
+- `99980f7 feat(game): integrate modular pixel-art level set`
+
 ## Feature: gobernanza y documentación del proyecto
 
 ### PDM-009 — Registrar prompts e instruir a otros agentes
