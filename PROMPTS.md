@@ -96,6 +96,31 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Archivos:** `GUIA_ASSETS_Y_AUDIO.md`, `README.md`.
 **Commits:** `c69ca41 docs(assets): add production guide for art and audio`.
 
+### PDM-017 — Especificar la migración a pixel art y las animaciones
+
+**Fecha:** 2026-08-02
+**Prompt:** “Okey, dame un .md con los assets que tengo, los que me faltan y que tengo que modificar para que sea pixel art, con movimientos/animaciones claras, porque ahorita ciertas cosas no funcionan, tambien toma en cuenta el ataque del jugador que creo que no esta funcionando del todo”
+**Resultado:** se creó una guía independiente que inventaría los trece PNG actuales, los fallbacks y piezas faltantes, define tamaños y hojas uniformes para cada entidad, estados y fases de animación, reglas de fondos/tiles/UI, orden de producción y cambios de integración. La revisión del ataque documenta el desacople actual entre su animación aproximada de 429 ms y el estado físico que termina a los 200 ms, además de recortes, hitbox, frames activos y una propuesta concreta de corrección.
+**Archivos:** `GUIA_PIXEL_ART_Y_ANIMACIONES.md`, `README.md` y `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
+### PDM-018 — Crear prompts base para cada pixel art
+
+**Fecha:** 2026-08-02
+**Prompt:** “De acuerdo a la guia de pixel art, dame un prompt base para cada pixel art a generar. ascribelo en un .md si quieres (tu puedes gerar el pixelart?)”
+**Corrección del usuario:** “No los metas en prompts.md, metelos en pixel_art_prompt.md”.
+**Resultado:** se creó un banco independiente con 41 prompts base, uno por cada redibujo o asset P0/P1 de la guía, además de reglas comunes, flujo de uso y checklist de validación. Los prompts artísticos están únicamente en `pixel_art_prompt.md`; este registro conserva sólo la trazabilidad administrativa obligatoria del encargo.
+**Archivos:** `pixel_art_prompt.md`, `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
+### PDM-019 — Implementar la migración iterativa a pixel art cartoon
+
+**Fecha:** 2026-08-02
+**Prompt:** “PLEASE IMPLEMENT THIS PLAN: Migración iterativa a pixel art cartoon”. El plan solicita publicar primero los cambios estables de `main`, crear `codex/pixel-art-v1`, producir un piloto no destructivo de Bigotes y combate mediante ImageGen, incorporar perfiles `legacy`/`pixel-v1`, sincronizar ataque e hitbox con frames, añadir herramientas de revisión/validación y escalar los demás assets sólo después de aprobar el piloto.
+**Resultado:** implementación en curso; se adoptó una dirección cartoon submarina de baja complejidad, assets versionados en paralelo y un primer hito limitado a Bigotes y efectos de combate.
+**Archivos:** `PROMPTS.md`, `art-source/pixel-art/v1/`, `assets/pixel-art/v1/`, configuración y sistemas de arte/combate relacionados.
+**Commits:** pendiente (working tree).
+
 ## Feature: gobernanza y documentación del proyecto
 
 ### PDM-009 — Registrar prompts e instruir a otros agentes
@@ -165,6 +190,16 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Resultado:** el enlace centrado al portfolio ahora muestra “Made with love by MonkiG”, conservando su destino y comportamiento externo seguro.
 **Archivos:** `src/components/NonGameLinks.jsx` y `PROMPTS.md`.
 **Commits:** `414e36c`, `590d374`.
+
+## Feature: estabilidad y progreso entre niveles
+
+### PDM-016 — Corregir congelamiento y desbloqueo del Mercado
+
+**Fecha:** 2026-08-02
+**Prompt:** “hay un bug en el segundo nivel donde se congela todo y no se puede hacer nada, tambien, cuando se completa el primer nivel y se regresa al home, el segundo nivel no sale como desbloqueado, me ayudas a solulcionarlo?”
+**Resultado:** se identificó que el Escupemasas mutaba y expandía el rectángulo interno de la cámara en cada frame, provocando crecimiento ilimitado y degradación hasta el congelamiento. La zona de activación ahora se calcula mediante una copia inmutable. El progreso se incorpora a los snapshots Phaser–React, se fusiona sin perder desbloqueos y el inicio de nivel consulta también el estado sincronizado de React.
+**Archivos:** `src/App.jsx`, `src/game/entities/AbyssalSpitter.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `src/game/systems/ActivationBounds.js`, `src/game/systems/SessionProgress.js`, `src/game/systems/levelTwoSystems.test.js` y `PROMPTS.md`.
+**Commits:** `320faab fix(game): stabilize Mercado activation and progression`.
 
 ## Anexo A — Prompt original de la demo
 

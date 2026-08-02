@@ -147,6 +147,8 @@ Las posiciones jugables, límites de patrulla, zonas y objetos están centraliza
 
 La lista completa de material existente, faltante y recomendado está en [`GUIA_ASSETS_Y_AUDIO.md`](GUIA_ASSETS_Y_AUDIO.md).
 
+La especificación para redibujar el proyecto como pixel art, incluyendo hojas uniformes, movimientos por enemigo y el contrato visual/técnico del ataque de Bigotes, está en [`GUIA_PIXEL_ART_Y_ANIMACIONES.md`](GUIA_PIXEL_ART_Y_ANIMACIONES.md).
+
 ## Spritesheets y recortes
 
 Las láminas no utilizan una cuadrícula uniforme: hay márgenes, padding y tamaños variables. Por ello se cargan como imágenes normales y `src/game/assetManifest.js` registra frames con `texture.add(nombre, sourceIndex, x, y, ancho, alto)`.
