@@ -13,6 +13,27 @@ const CHARACTER_PALETTE = [
   [249, 235, 190], [5, 145, 188], [56, 205, 235], [255, 255, 255],
 ];
 
+const CRAWLER_PALETTE = [
+  [5, 15, 31], [9, 31, 58], [22, 45, 79], [48, 61, 104],
+  [83, 72, 122], [101, 91, 55], [151, 127, 67], [218, 190, 112],
+  [249, 235, 190], [116, 62, 8], [198, 91, 7], [247, 128, 13],
+  [47, 107, 91], [5, 145, 166], [56, 205, 213], [225, 255, 244],
+];
+
+const SPITTER_PALETTE = [
+  [5, 15, 31], [14, 27, 46], [35, 39, 52], [64, 61, 67],
+  [101, 91, 93], [154, 143, 136], [7, 69, 42], [10, 111, 45],
+  [20, 154, 44], [83, 190, 42], [158, 222, 50], [224, 246, 112],
+  [5, 145, 166], [56, 205, 213], [225, 255, 244], [166, 91, 7],
+];
+
+const SENTINEL_PALETTE = [
+  [5, 15, 31], [12, 25, 44], [27, 39, 58], [48, 61, 75],
+  [72, 88, 91], [94, 119, 110], [137, 158, 130], [187, 198, 151],
+  [5, 85, 72], [5, 145, 116], [8, 205, 145], [66, 244, 179],
+  [92, 255, 210], [116, 62, 8], [198, 91, 7], [235, 133, 30],
+];
+
 const EFFECT_PALETTE = [
   [5, 15, 31], [78, 43, 31], [139, 69, 5], [216, 121, 7],
   [255, 169, 20], [255, 211, 79], [255, 239, 177], [255, 255, 255],
@@ -21,6 +42,24 @@ const EFFECT_PALETTE = [
 const bigotesRows = [
   ['idle', 6], ['swim', 8], ['jump', 3], ['fall', 4],
   ['attack', 8], ['hurt', 4], ['defeat', 6], ['interact', 4],
+];
+
+const characterSheets = [
+  {
+    folder: 'rastrero', file: 'brine-crawler.png', width: 640, height: 336,
+    frame: [80, 48], palette: CRAWLER_PALETTE,
+    rows: [['idle', 6], ['patrol', 8], ['alert', 4], ['attack', 8, false], ['hurt', 4], ['stun', 4], ['defeat', 6]],
+  },
+  {
+    folder: 'escupemasas', file: 'abyssal-spitter.png', width: 640, height: 384,
+    frame: [80, 64], palette: SPITTER_PALETTE,
+    rows: [['idle', 6], ['move', 6], ['charge', 6], ['shoot', 8], ['hurt', 4], ['defeat', 8]],
+  },
+  {
+    folder: 'sentinela', file: 'black-coral-sentinel.png', width: 768, height: 784,
+    frame: [96, 112], palette: SENTINEL_PALETTE,
+    rows: [['sleep', 6], ['alert', 4], ['walk', 8], ['attack', 8], ['charge', 8], ['hurt', 4], ['defeat', 8]],
+  },
 ];
 
 const isChroma = (red, green, blue) => red > 90
@@ -54,9 +93,12 @@ const segmentFrames = (image, count, adaptiveCuts = false) => {
     if (!adaptiveCuts) return Math.round(expected);
     const candidates = emptyRuns.filter((run) => Math.abs(run.center - expected) <= nominalWidth * 0.42);
     if (!candidates.length) return Math.round(expected);
-    return candidates.reduce((best, run) => (
-      Math.abs(run.center - expected) < Math.abs(best.center - expected) ? run : best
-    )).center;
+    return candidates.reduce((best, run) => {
+      const width = run.end - run.start + 1;
+      const bestWidth = best.end - best.start + 1;
+      if (width !== bestWidth) return width > bestWidth ? run : best;
+      return Math.abs(run.center - expected) < Math.abs(best.center - expected) ? run : best;
+    }).center;
   });
   const boundaries = [0, ...cuts, image.width];
   return Array.from({ length: count }, (_, index) => {
@@ -79,6 +121,100 @@ const segmentFrames = (image, count, adaptiveCuts = false) => {
       }
     }
     return { width, height: image.height, pixels };
+  });
+};
+
+const segmentFramesByComponents = (image, count) => {
+  const pixelCount = image.width * image.height;
+  const visited = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  const components = [];
+
+  for (let start = 0; start < pixelCount; start += 1) {
+    if (visited[start]) continue;
+    visited[start] = 1;
+    const sourceOffset = start * 4;
+    if (isChroma(
+      image.pixels[sourceOffset], image.pixels[sourceOffset + 1], image.pixels[sourceOffset + 2],
+    )) continue;
+
+    let head = 0;
+    let tail = 1;
+    queue[0] = start;
+    const points = [];
+    let left = image.width;
+    let top = image.height;
+    let right = -1;
+    let bottom = -1;
+
+    while (head < tail) {
+      const pixel = queue[head];
+      head += 1;
+      points.push(pixel);
+      const x = pixel % image.width;
+      const y = Math.floor(pixel / image.width);
+      left = Math.min(left, x);
+      top = Math.min(top, y);
+      right = Math.max(right, x);
+      bottom = Math.max(bottom, y);
+
+      for (let deltaY = -1; deltaY <= 1; deltaY += 1) {
+        for (let deltaX = -1; deltaX <= 1; deltaX += 1) {
+          if (deltaX === 0 && deltaY === 0) continue;
+          const nextX = x + deltaX;
+          const nextY = y + deltaY;
+          if (nextX < 0 || nextY < 0 || nextX >= image.width || nextY >= image.height) continue;
+          const next = nextY * image.width + nextX;
+          if (visited[next]) continue;
+          visited[next] = 1;
+          const nextOffset = next * 4;
+          if (!isChroma(
+            image.pixels[nextOffset], image.pixels[nextOffset + 1], image.pixels[nextOffset + 2],
+          )) {
+            queue[tail] = next;
+            tail += 1;
+          }
+        }
+      }
+    }
+    components.push({ points, left, top, right, bottom, centerX: (left + right) / 2 });
+  }
+
+  const mainComponents = [...components]
+    .sort((left, right) => right.points.length - left.points.length)
+    .slice(0, count)
+    .sort((left, right) => left.centerX - right.centerX);
+  if (mainComponents.length !== count) {
+    throw new Error(`No se encontraron ${count} poses conectadas en la tira`);
+  }
+
+  const groups = mainComponents.map((main) => [main]);
+  const mainSet = new Set(mainComponents);
+  components.forEach((component) => {
+    if (mainSet.has(component) || component.points.length < 4) return;
+    const nearestIndex = mainComponents.reduce((bestIndex, main, index) => (
+      Math.abs(component.centerX - main.centerX)
+        < Math.abs(component.centerX - mainComponents[bestIndex].centerX) ? index : bestIndex
+    ), 0);
+    groups[nearestIndex].push(component);
+  });
+
+  return groups.map((group) => {
+    const left = Math.min(...group.map((component) => component.left));
+    const top = Math.min(...group.map((component) => component.top));
+    const right = Math.max(...group.map((component) => component.right));
+    const bottom = Math.max(...group.map((component) => component.bottom));
+    const frame = emptyImage(right - left + 1, bottom - top + 1);
+    group.forEach((component) => component.points.forEach((pixel) => {
+      const sourceX = pixel % image.width;
+      const sourceY = Math.floor(pixel / image.width);
+      const originalOffset = pixel * 4;
+      const frameOffset = ((sourceY - top) * frame.width + sourceX - left) * 4;
+      frame.pixels.set([
+        image.pixels[originalOffset], image.pixels[originalOffset + 1], image.pixels[originalOffset + 2], 255,
+      ], frameOffset);
+    }));
+    return frame;
   });
 };
 
@@ -141,8 +277,11 @@ const blit = (sourceImage, targetImage, offsetX, offsetY) => {
   }
 };
 
-async function processStrip(inputPath, count, frameWidth, frameHeight, palette, alignBottom = true, adaptiveCuts = false) {
-  const frames = segmentFrames(await readPng(inputPath), count, adaptiveCuts);
+async function processStrip(inputPath, count, frameWidth, frameHeight, palette, alignBottom = true, segmentation = false) {
+  const image = await readPng(inputPath);
+  const frames = segmentation === 'components'
+    ? segmentFramesByComponents(image, count)
+    : segmentFrames(image, count, segmentation);
   const frameBounds = frames.map(bounds);
   const maxWidth = Math.max(...frameBounds.filter(Boolean).map((value) => value.width));
   const maxHeight = Math.max(...frameBounds.filter(Boolean).map((value) => value.height));
@@ -168,6 +307,28 @@ async function processBigotes() {
   return output;
 }
 
+async function processCharacter(spec) {
+  const [frameWidth, frameHeight] = spec.frame;
+  const sheet = emptyImage(spec.width, spec.height);
+  for (let row = 0; row < spec.rows.length; row += 1) {
+    const [name, count, segmentation = 'components'] = spec.rows[row];
+    const frames = await processStrip(
+      source(spec.folder, `${spec.folder}-${name}-chroma.png`),
+      count,
+      frameWidth,
+      frameHeight,
+      spec.palette,
+      true,
+      segmentation,
+    );
+    frames.forEach((frame, column) => blit(frame, sheet, column * frameWidth, row * frameHeight));
+  }
+  const output = target('characters', spec.file);
+  await mkdir(dirname(output), { recursive: true });
+  await writePng(output, sheet);
+  return output;
+}
+
 async function processEffect(name, count, frameSize) {
   const frames = await processStrip(
     source('effects', `${name}-chroma.png`), count, frameSize, frameSize, EFFECT_PALETTE, false,
@@ -182,6 +343,7 @@ async function processEffect(name, count, frameSize) {
 
 const outputs = [
   await processBigotes(),
+  ...await Promise.all(characterSheets.map(processCharacter)),
   await processEffect('player-attack', 6, 32),
   await processEffect('hit-spark', 6, 24),
 ];

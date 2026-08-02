@@ -1,6 +1,6 @@
-# Fuente del piloto pixel art v1
+# Fuentes pixel art v1
 
-Estas imágenes fueron producidas con ImageGen integrado a partir de `assets/bigotes-assets.png` como referencia conceptual. No sustituyen los PNG legacy: son fuentes de trabajo para el procesamiento reproducible de `scripts/process-pixel-art.mjs`.
+Estas imágenes fueron producidas con ImageGen integrado. Bigotes partió de `assets/bigotes-assets.png`; los enemigos usan sus PNG legacy sólo como identidad conceptual y la hoja final de Bigotes como ancla obligatoria de estilo. No sustituyen los PNG legacy: son fuentes de trabajo para el procesamiento reproducible de `scripts/process-pixel-art.mjs`.
 
 ## Dirección cerrada
 
@@ -31,3 +31,28 @@ Cada tira añadió al prompt maestro una instrucción de storyboard horizontal, 
 | `effects/hit-spark-chroma.png` | 6 | 18 FPS | Destello de contacto compacto, sin personaje ni fondo. |
 
 Los archivos `bigotes-master*` conservan el frame maestro y pruebas de limpieza de chroma. Los resultados de juego se generan con `npm run art:process`; no deben editarse manualmente.
+
+## Prompt compartido del lote de enemigos
+
+> Crea pixel art nativo para Pan de Marea usando el PNG legacy adjunto sólo como referencia de identidad y `assets/pixel-art/v1/characters/bigotes.png` como ancla obligatoria de estilo, densidad de detalle, outline y acabado. Conserva la silueta y rasgos reconocibles del enemigo, pero simplifícalos con proporciones cartoon expresivas, outline azul marino equivalente a un píxel, clusters duros, dos tonos por material y 12–16 colores opacos. Personaje mirando a la derecha, punto de apoyo inferior constante y fondo chroma `#ff00ff` perfectamente plano. Sin textura pictórica, sombras, suelo, rejilla, texto, blur, antialias, semitransparencia ni elementos compartidos entre poses. La fluidez proviene de arcos, anticipación, overshoot, peso y recuperación; no de añadir detalle.
+
+Cada llamada generó una sola fila horizontal y añadió el contrato de acción correspondiente:
+
+| Personaje | Fila | Frames | Contrato de acción |
+|---|---|---:|---|
+| Rastrero | idle | 6 | Respiración y flotación leve en loop. |
+| Rastrero | patrol | 8 | Ciclo de arrastre con pinzas y patas alternadas. |
+| Rastrero | alert | 4 | Ojos y pinzas anticipan el peligro. |
+| Rastrero | attack | 8 | Dos anticipaciones, tres contactos y tres recuperaciones. |
+| Rastrero | hurt / stun / defeat | 4 / 4 / 6 | Retroceso, vulnerabilidad legible y colapso progresivo. |
+| Escupemasas | idle / move | 6 / 6 | Pulso orgánico y desplazamiento corto con socket fijo. |
+| Escupemasas | charge | 6 | Brillo de boca creciente hasta máximo inequívoco. |
+| Escupemasas | shoot | 8 | Ignición en el mismo socket, disparo, recoil y recuperación. |
+| Escupemasas | hurt / defeat | 4 / 8 | Pérdida de brillo y disolución/desinflado. |
+| Sentinela | sleep / alert | 6 / 4 | Peso contenido y despertar hacia postura amenazante. |
+| Sentinela | walk | 8 | Marcha pesada con transferencia de peso. |
+| Sentinela | attack | 8 | Levantar brazo, golpe, contacto y recuperación. |
+| Sentinela | charge | 8 | Embestida agachada claramente distinta de caminar. |
+| Sentinela | hurt / defeat | 4 / 8 | Armadura abierta vulnerable y colapso en roca/coral. |
+
+Los frames maestros y tiras chroma viven en `rastrero/`, `escupemasas/` y `sentinela/`. El procesador aísla poses por componentes conectados, asigna partículas al cuerpo más cercano, normaliza cada personaje a su propia paleta cerrada y ensambla las hojas exactas declaradas en `pixel_art_prompt.md`.
