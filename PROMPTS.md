@@ -118,6 +118,50 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 - `c69ca41 docs(assets): add production guide for art and audio`
 - `cd4417a docs(process): add prompt history and agent instructions`
 
+### PDM-015 — Publicar los cambios actuales
+
+**Fecha:** 2026-08-02
+**Prompt:** “commits semanticos y push”
+**Resultado:** se solicitó dividir la implementación pendiente del Mercado Sumergido, su interfaz y documentación en commits semánticos comprobables y publicarlos en `origin/main`.
+**Archivos:** todos los cambios pendientes relacionados con PDM-011 a PDM-014 y este registro.
+**Commits:** pendiente (working tree).
+
+## Feature: segundo nivel — El Mercado Sumergido
+
+### PDM-011 — Implementar el segundo nivel completo
+
+**Fecha:** 2026-08-02
+**Prompt:** solicitud extensa para ampliar el proyecto con El Mercado Sumergido: auditoría y priorización de assets restantes, registro y resolución central de fallbacks, transición y selector de niveles, estado de sesión, mundo más amplio y vertical, siete Levaduras, tres reguladores, checkpoint, Pan de Presión, Escupemasas con proyectiles pooled, Centinela, oxígeno, HUD ampliado, salida, resultados, documentación y pruebas. El prompt exige conservar el primer nivel y completar ambos sin descargar recursos externos.
+**Resultado:** se implementó el segundo nivel completo conservando el primero: registro y auditoría central de assets, fallbacks visibles, selector con desbloqueo de sesión, transición sin segunda instancia de Phaser, mundo de 7,200×720, siete Levaduras, tres reguladores, checkpoint, receta y Pan de Presión, Escupemasas con proyectiles pooled, Sentinela del Coral Negro, oxígeno, corrientes, peligros, HUD/resultados dinámicos y pruebas. Los trece PNG aportados se conservaron intactos; siete recursos inexistentes usan fallbacks documentados. La QA comprobó ambos arranques, capas del Mercado, bloqueo del selector, pausa/reanudación y consola sin errores críticos.
+**Archivos:** `src/App.jsx`, `src/components/{GameContainer,HUD,LevelSelect,MainMenu,ResultScreen}.jsx`, `src/game/{PhaserGame,assetManifest,config,constants}.js`, `src/game/assets/*.js`, `src/game/data/{animationData,levelTwoData}.js`, `src/game/entities/{AbyssalSpitter,BlackCoralSentinel,MarketExit,PressureOven,PressureRegulator}.js`, `src/game/projectiles/CorruptedDoughProjectile.js`, `src/game/scenes/{BootScene,LevelOneScene,LevelTwoScene,PreloadScene}.js`, `src/game/systems/{CheckpointSystem,FallbackFactory,MarketProgressionSystem,PressureRecipeSystem,ProjectilePoolPolicy,SessionProgress,levelTwoSystems.test}.js`, `src/styles/global.css`, `README.md`, `GUIA_ASSETS_Y_AUDIO.md`, `docs/asset-audit.md` y `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
+## Feature: interfaz de selección de niveles
+
+### PDM-012 — Crear una pantalla exclusiva para niveles
+
+**Fecha:** 2026-08-02
+**Prompt:** “crea una interfaz exclusiva para los niveles porfa, pon opaco los que esten bloqueados”
+**Resultado:** se separó la selección del menú principal en una pantalla completa con galería visual, fondos propios por nivel, destino seleccionado, acciones de volver/iniciar, estados disponible/completado/bloqueado y tarjetas bloqueadas deshabilitadas con opacidad y desaturación. La navegación sigue siendo accesible mediante teclado.
+**Archivos:** `src/App.jsx`, `src/components/MainMenu.jsx`, `src/components/LevelSelectScreen.jsx`, `src/styles/global.css`, `README.md` y `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
+### PDM-013 — Añadir favicon y enlaces del proyecto
+
+**Fecha:** 2026-08-02
+**Prompt:** “pon un pan emoji en el favicon, en el footer d elas vistas que no son el juego haz un link en el centro que lleve a mi portfolio monkig.dev y arriba a alderecha por el icono de github para que lleve al repo del juego github.com/monkig/pan-de-marea-game”
+**Resultado:** se añadió un favicon SVG con el emoji de pan y un marco compartido para las vistas no jugables: icono accesible de GitHub arriba a la derecha y enlace centrado al portfolio en el footer. Ambos enlaces externos se abren de forma segura en una pestaña nueva y desaparecen durante el juego.
+**Archivos:** `assets/favicon.svg`, `index.html`, `src/App.jsx`, `src/components/MainMenu.jsx`, `src/components/NonGameLinks.jsx`, `src/styles/global.css` y `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
+### PDM-014 — Cambiar el texto del footer
+
+**Fecha:** 2026-08-02
+**Prompt:** “cambia el footer por \"Made with love by\"”
+**Resultado:** el enlace centrado al portfolio ahora muestra “Made with love by MonkiG”, conservando su destino y comportamiento externo seguro.
+**Archivos:** `src/components/NonGameLinks.jsx` y `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
 ## Anexo A — Prompt original de la demo
 
 <details>

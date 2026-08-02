@@ -1,6 +1,6 @@
 # Guía de assets y audio pendientes
 
-Documento de producción para completar el apartado visual y sonoro de **Pan de Marea: La Última Panadería**.
+Documento de producción para completar el apartado visual y sonoro de los dos niveles de **Pan de Marea: La Última Panadería**. La auditoría exacta del registro está en [`docs/asset-audit.md`](docs/asset-audit.md).
 
 Aquí se distingue entre:
 
@@ -51,11 +51,17 @@ La cuadrícula 16×16 sirve para construir y alinear. No significa que un person
 - [ ] Variantes visuales de plataformas para reducir repetición.
 - [ ] Retratos o ilustraciones para resultados/tutoriales.
 
-### Prioridad P2: contenido futuro
+### Prioridad P2: arte definitivo del Mercado Sumergido
 
-- [ ] Assets funcionales del Mercado Sumergido.
-- [ ] Animaciones completas de Escupemasas.
-- [ ] Animaciones completas del Sentinela del Coral Negro.
+- [x] Fondos funcionales del Mercado Sumergido.
+- [x] Recortes funcionales de Escupemasas.
+- [x] Recortes funcionales del Sentinela del Coral Negro.
+- [ ] Proyectil de Masa Corrupta.
+- [ ] Regulador de presión.
+- [ ] Estación/horno de presión.
+- [ ] Salida del mercado y checkpoint.
+- [ ] Puestos modulares y coral peligroso.
+- [ ] Animaciones artísticas completas y uniformes de ambos enemigos.
 - [ ] Música y ambiente propios del segundo nivel.
 - [ ] Iconografía de selección de nivel.
 
@@ -71,11 +77,11 @@ La cuadrícula 16×16 sirve para construir y alinear. No significa que un person
 | `panaderia-undida-bg-2.png` | 1536×1024 | 2.18 MB | Parallax medio |
 | `panaderia-undida-bg-3.png` | 1536×1024 | 1.94 MB | Parallax cercano |
 | `tileset.png` | 1536×1024 | 2.95 MB | Suelo, plataformas y decoración |
-| `mercado-undido-1.png` | 1536×1024 | 1.98 MB | Reservado |
-| `mercado-undido-2.png` | 1536×1024 | 2.72 MB | Reservado |
-| `mercado-undido-3.png` | 1536×1024 | 3.70 MB | Reservado |
-| `escupemasas.png` | 1536×1024 | 2.97 MB | Reservado |
-| `sentinela-del-coral-negro.png` | 1024×1536 | 2.93 MB | Reservado |
+| `mercado-undido-1.png` | 1536×1024 | 1.98 MB | Parallax lejano del Nivel II |
+| `mercado-undido-2.png` | 1536×1024 | 2.72 MB | Parallax medio del Nivel II |
+| `mercado-undido-3.png` | 1536×1024 | 3.70 MB | Parallax cercano del Nivel II |
+| `escupemasas.png` | 1536×1024 | 2.97 MB | Escupemasas Abisal del Nivel II |
+| `sentinela-del-coral-negro.png` | 1024×1536 | 2.93 MB | Sentinela del Coral Negro del Nivel II |
 
 Los PNG actuales tienen estilo pictórico, frames y márgenes irregulares. Son utilizables, pero no son pixel art nativo. Su autoría y licencia deben confirmarse antes de una publicación comercial.
 
@@ -97,6 +103,13 @@ Estas medidas están pensadas para arte nuevo dibujado directamente en pixel art
 | Partícula pequeña | 4×4 u 8×8 px | — | Recomendada |
 | Tile base | 16×16 px | 1×1 | Recomendado al rehacer tileset |
 | Bloque modular | 32×32 px | 2×2 | Recomendado al rehacer tileset |
+| Proyectil de Masa Corrupta | 16×16 o 24×24 px | 1×1 aprox. | **Faltante Nivel II** |
+| Regulador de presión | 48×64 px | 3×4 | **Faltante Nivel II** |
+| Estación de presión | 96×96 px | 6×6 | **Faltante Nivel II** |
+| Checkpoint del mercado | 48×80 px | 3×5 | **Faltante Nivel II** |
+| Salida del mercado | 128×160 px | 8×10 | **Faltante Nivel II** |
+| Puesto modular | 128×96 px | 8×6 | **Faltante Nivel II** |
+| Coral peligroso | 32×32 o 64×32 px | 2×2 o 4×2 | **Faltante Nivel II** |
 
 No se recomienda reducir automáticamente las ilustraciones actuales a estas dimensiones. Las siluetas deben redibujarse o simplificarse manualmente.
 
@@ -249,7 +262,7 @@ No incluir texto dentro de los PNG. Los textos deben seguir siendo HTML/React pa
 
 ## 8. Audio requerido
 
-Actualmente no existe ningún archivo de audio. Estas siete claves ya son llamadas por el código:
+Actualmente no existe ningún archivo de audio. Estas claves ya son llamadas por el código; `AudioManager` usa silencio seguro mientras los archivos no existan:
 
 | Clave | Archivo sugerido | Duración |
 |---|---|---:|
@@ -260,13 +273,21 @@ Actualmente no existe ningún archivo de audio. Estas siete claves ya son llamad
 | `oven` | `audio/sfx/oven.ogg` | 1.0–1.5 s |
 | `gate` | `audio/sfx/gate.ogg` | 1.5–3.0 s |
 | `enemy-defeat` | `audio/sfx/enemy-defeat.ogg` | 0.4–1.0 s |
+| `spitter-projectile` | `audio/sfx/spitter-projectile.ogg` | 0.25–0.60 s |
+| `regulator` | `audio/sfx/regulator.ogg` | 0.8–1.8 s |
+| `oxygen-station` | `audio/sfx/oxygen-station.ogg` | 0.6–1.4 s |
+| `checkpoint` | `audio/sfx/checkpoint.ogg` | 0.5–1.2 s |
+| `pressure-oven` | `audio/sfx/pressure-oven.ogg` | 1.5–2.2 s |
+| `market-exit` | `audio/sfx/market-exit.ogg` | 1.5–3.0 s |
 
 ### Audio adicional recomendado
 
 | Archivo sugerido | Uso | Loop |
 |---|---|---|
 | `audio/music/bakery-loop.ogg` | música del primer nivel | Sí |
+| `audio/music/market-loop.ogg` | música del Mercado Sumergido | Sí |
 | `audio/ambience/underwater-loop.ogg` | agua, burbujas y estructura | Sí |
+| `audio/ambience/market-current-loop.ogg` | corrientes y estructuras del Mercado | Sí |
 | `audio/sfx/low-oxygen.ogg` | alerta de oxígeno bajo | No |
 | `audio/sfx/vent.ogg` | recuperación de oxígeno | No |
 | `audio/sfx/enemy-alert.ogg` | alerta del Rastrero | No |

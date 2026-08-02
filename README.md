@@ -1,6 +1,6 @@
 # Pan de Marea: La Última Panadería
 
-Demo jugable del primer nivel, **La Panadería Hundida**. Bigotes debe explorar su antigua panadería familiar, reunir tres Levaduras de Burbuja, preparar un Pan Térmico y abrir la Compuerta de la Marea Térmica.
+Demo jugable de dos niveles. En **La Panadería Hundida**, Bigotes recupera el horno familiar y prepara un Pan Térmico. Al completar esa ruta se desbloquea **El Mercado Sumergido**, un recorrido más amplio con reguladores de presión, proyectiles, checkpoint, un guardián pesado y la receta del Pan de Presión.
 
 ## Tecnologías y requisitos
 
@@ -95,7 +95,11 @@ Plataformas reposicionadas en La Panadería Hundida:
 - los escalones `final-step`/`final-rise` y `rest-step`/`gate-rise` quedaron dentro del margen seguro;
 - la tercera levadura se centró sobre una plataforma alcanzable directamente desde el suelo.
 
-## Flujo del nivel
+## Flujo de los niveles
+
+El botón **Jugar** abre una pantalla exclusiva de selección con tarjetas ilustradas. Los destinos bloqueados aparecen opacos y desaturados, no aceptan interacción y explican su requisito. El Mercado Sumergido permanece bloqueado durante la sesión hasta completar La Panadería Hundida; la transición de resultados puede iniciarlo sin crear una segunda instancia de Phaser.
+
+### Nivel I — La Panadería Hundida
 
 1. Aprende movimiento y salto en la zona segura.
 2. Recoge tres Levaduras de Burbuja; cada una recupera oxígeno.
@@ -107,23 +111,37 @@ Plataformas reposicionadas en La Panadería Hundida:
 
 La derrota ocurre al perder los tres puntos de salud. Si el oxígeno llega a cero, Bigotes recibe daño periódico hasta encontrar recuperación o caer derrotado.
 
+### Nivel II — El Mercado Sumergido
+
+1. Explora un mundo de 7,200×720 px dividido en ocho zonas y rutas verticales opcionales.
+2. Reúne al menos cinco de las siete Levaduras de Burbuja y activa tres reguladores de presión.
+3. Usa puestos y desniveles como cobertura contra los Escupemasas y sus proyectiles de Masa Corrupta.
+4. Enfrenta o supera al Sentinela del Coral Negro, que combina ataques básicos y una carga pesada.
+5. Activa el checkpoint del mercado para conservar ingredientes, reguladores, salud, oxígeno y estadísticas al reiniciar tras una derrota.
+6. Interactúa con la estación de presión para preparar el Pan de Presión.
+7. Lleva el pan a la salida del mercado y completa el nivel.
+
+El nivel contiene corrientes submarinas, coral dañino, dos estaciones grandes de oxígeno, tres Rastreros compartidos, tres Escupemasas y un Sentinela. El camino crítico mantiene suelo continuo; las plataformas elevadas dan acceso a recursos y rutas opcionales.
+
 ## Estructura
 
 ```text
 src/
   components/       Menú, HUD, ajustes, pausa y resultados
   game/
-    data/            Animaciones y colocación completa del nivel
-    entities/        Bigotes, Rastrero, Levadura, horno y compuerta
-    scenes/          Arranque, precarga y primer nivel
-    systems/         Audio, animaciones, combate, inventario, oxígeno y receta
+    assets/          Registro central, auditoría, resolución y fallbacks
+    data/            Animaciones y colocación completa de ambos niveles
+    entities/        Jugador, enemigos, ingredientes y objetos interactivos
+    projectiles/     Pool de Masa Corrupta
+    scenes/          Arranque, precarga y escenas de los dos niveles
+    systems/         Reglas puras, progreso, combate, oxígeno, recetas y checkpoint
     EventBus.js      Contrato desacoplado entre React y Phaser
     PhaserGame.js    Ciclo de vida de la instancia de Phaser
   styles/            Interfaz responsive y presentación pixelada
 assets/              PNG originales, conservados sin modificaciones
 ```
 
-Las posiciones jugables, límites de patrulla, zonas y objetos están centralizados en `src/game/data/levelOneData.js`. Las cifras de balance están en `src/game/constants.js`.
+Las posiciones jugables, límites de patrulla, zonas y objetos están centralizados en `src/game/data/levelOneData.js` y `src/game/data/levelTwoData.js`. Las cifras de balance están en `src/game/constants.js`. El informe técnico del inventario visual está en [`docs/asset-audit.md`](docs/asset-audit.md).
 
 ## Producción de assets y audio
 
@@ -148,6 +166,7 @@ Si una textura o animación no se puede cargar, el juego avisa en consola y util
 - **Respiradero:** representación geométrica con brillo y burbujas.
 - **Partículas:** puntos reutilizables generados por Phaser.
 - **Audio:** no se encontraron archivos de sonido. `AudioManager` conserva las llamadas de salto, ataque, daño, recolección, horno, enemigo y compuerta, pero utiliza silencio sin romper la partida.
+- **Mercado:** reguladores, estación de presión, proyectil, checkpoint, puestos, coral peligroso y salida usan fallbacks identificables de Phaser Graphics hasta recibir arte definitivo.
 - Algunos estados comparten el frame estático más cercano cuando la lámina original no contiene una secuencia inequívoca.
 
 ## Assets inventariados
@@ -162,11 +181,11 @@ Si una textura o animación no se puede cargar, el juego avisa en consola y util
 | `panaderia-undida-bg-2.png` | 1536×1024 | Usado: arquitectura media |
 | `panaderia-undida-bg-3.png` | 1536×1024 | Usado: interior cercano |
 | `tileset.png` | 1536×1024 | Usado: suelo, plataformas y decoración |
-| `mercado-undido-1.png` | 1536×1024 | Reservado para el siguiente nivel |
-| `mercado-undido-2.png` | 1536×1024 | Reservado para el siguiente nivel |
-| `mercado-undido-3.png` | 1536×1024 | Reservado para el siguiente nivel |
-| `escupemasas.png` | 1536×1024 | Reservado para enemigo futuro |
-| `sentinela-del-coral-negro.png` | 1024×1536 | Reservado para enemigo futuro |
+| `mercado-undido-1.png` | 1536×1024 | Usado: parallax lejano del Mercado |
+| `mercado-undido-2.png` | 1536×1024 | Usado: parallax medio del Mercado |
+| `mercado-undido-3.png` | 1536×1024 | Usado: parallax cercano del Mercado |
+| `escupemasas.png` | 1536×1024 | Usado: Escupemasas Abisal |
+| `sentinela-del-coral-negro.png` | 1024×1536 | Usado: guardián del Mercado |
 
 Los assets fueron aportados con el proyecto. Su autoría y licencia no estaban documentadas; deben confirmarse antes de una publicación comercial.
 
@@ -180,13 +199,13 @@ Los assets fueron aportados con el proyecto. Su autoría y licencia no estaban d
 
 No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 
-## Añadir el siguiente nivel
+## Añadir un nivel futuro
 
 1. Crea un nuevo archivo de datos y una escena separada.
 2. Reutiliza los sistemas de inventario, oxígeno, combate y audio.
 3. Añade la escena a la configuración de Phaser.
 4. Emite el mismo `game:snapshot` para mantener compatible el HUD React.
-5. Inicia la nueva escena desde una futura selección de nivel o desde la pantalla de resultados.
+5. Registra el nivel en `SessionProgress`, el selector React y la pantalla de resultados.
 
 ## Accesibilidad y rendimiento
 
@@ -202,7 +221,8 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 - Las ilustraciones originales son de alta resolución y estilo pictórico; el render nearest-neighbor mantiene bordes nítidos, pero no convierte el material en pixel art nativo.
 - El tileset y las hojas de animación tienen separaciones irregulares; ciertos recortes pueden necesitar ajuste artístico fino.
 - No hay audio real ni controles táctiles.
-- El nivel siguiente, Mercado Sumergido, aún no está implementado.
+- Los objetos exclusivos del Mercado citados en la auditoría todavía usan arte geométrico de fallback.
+- El progreso de desbloqueo y checkpoint vive en memoria de la sesión; no se persiste todavía en `localStorage`.
 - Phaser constituye la mayor parte del tamaño del bundle; se carga de forma diferida para que el menú inicial siga siendo ligero.
 
 ## Pruebas
@@ -216,6 +236,12 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 - daño, invulnerabilidad y salud mínima;
 - reinicio de los sistemas principales;
 - alcance y margen de los saltos declarados.
+- auditoría y resolución de assets con fallback;
+- activación de reguladores en cualquier orden y bloqueo de salida;
+- receta del Pan de Presión con y sin requisitos;
+- copia y restauración del checkpoint;
+- desbloqueo del Mercado tras completar el Nivel I;
+- límite del pool de proyectiles.
 
 ## Créditos y asistencia por IA
 
