@@ -152,7 +152,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Prompt:** “Okey, ahora corre el server y dime en que puerto puedo ver el juego con los nuevos assets implementados”
 **Resultado:** se inició el servidor local de desarrollo con el perfil artístico `pixel-v1` para revisar dentro del juego los nuevos sprites de Bigotes, Rastrero, Escupemasas y Sentinela.
 **Archivos:** `PROMPTS.md`.
-**Commits:** pendiente (working tree).
+**Commits:** `d38fce3 docs(art): document parallax background workflow`.
 
 ### PDM-023 — Generar todos los fondos de los dos niveles
 
@@ -164,6 +164,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 
 - `54d1cd5 feat(art): add pixel-art parallax backgrounds`
 - `b75cf21 fix(game): align pixel-art parallax to viewport`
+- `d38fce3 docs(art): document parallax background workflow`
 
 ### PDM-024 — Corregir escala y colocación de los fondos
 
@@ -171,7 +172,10 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Prompt:** “ten en cuenta que actualmente los fondos no estan del todo bien, porque no cuadran bien con el juego en cuanto a tama;os y donde se encuentran ubicados”
 **Resultado:** corrección de PDM-023 aplicada: se eliminaron las escalas distintas por capa y los offsets `tilePositionY` arbitrarios. Pixel-v1 usa escala 1×, viewport exacto de 640×360, parallax exclusivamente horizontal y anclaje vertical a cámara; el Mercado conserva el fondo estable al desplazarse por su mundo de 720 px. También se corrigió el encuadre legacy mediante una escala uniforme. La inspección real de ambos niveles en el navegador confirmó lectura, cobertura y ausencia de errores.
 **Archivos:** `src/game/art/backgroundLayout.js`, `src/game/assets/assetRegistry.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `README.md`, `pixel_art_prompt.md` y `PROMPTS.md`.
-**Commits:** `b75cf21 fix(game): align pixel-art parallax to viewport`.
+**Commits:**
+
+- `b75cf21 fix(game): align pixel-art parallax to viewport`
+- `d38fce3 docs(art): document parallax background workflow`
 
 ## Feature: gobernanza y documentación del proyecto
 
