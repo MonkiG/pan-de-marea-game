@@ -7,6 +7,8 @@
     "node": ">=20.19"
   },
   "scripts": {
+    "art:process": "node scripts/process-pixel-art.mjs",
+    "art:validate": "node scripts/validate-pixel-art.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
