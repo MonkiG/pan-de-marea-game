@@ -117,13 +117,15 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 
 **Fecha:** 2026-08-02
 **Prompt:** “PLEASE IMPLEMENT THIS PLAN: Migración iterativa a pixel art cartoon”. El plan solicita publicar primero los cambios estables de `main`, crear `codex/pixel-art-v1`, producir un piloto no destructivo de Bigotes y combate mediante ImageGen, incorporar perfiles `legacy`/`pixel-v1`, sincronizar ataque e hitbox con frames, añadir herramientas de revisión/validación y escalar los demás assets sólo después de aprobar el piloto.
-**Resultado:** implementación en curso; se adoptó una dirección cartoon submarina de baja complejidad, assets versionados en paralelo y un primer hito limitado a Bigotes y efectos de combate.
-**Archivos:** `PROMPTS.md`, `art-source/pixel-art/v1/`, `assets/pixel-art/v1/`, configuración y sistemas de arte/combate relacionados.
+**Resultado:** se publicó primero el trabajo estable de `main` y se creó `codex/pixel-art-v1`. Con ImageGen integrado se produjo el frame maestro, ocho tiras de animación de Bigotes y dos efectos de combate; un pipeline local los normaliza a paleta cerrada, alpha binario, celdas exactas y hoja de 384×512 px. Se añadieron los perfiles `legacy`/`pixel-v1`, colliders por perfil, ataque de 36×30 px activo en frames 2–4, arco sincronizado, hit spark sólo tras daño confirmado y finalización del estado al completar la animación. La escena de desarrollo `?art-review=bigotes` permite comparar ambos estilos, cambiar animación/FPS, pausar, avanzar por frames, ampliar 1×/4×, invertir con `flipX` y ver collider/hitbox. El piloto fue validado en Panadería y Mercado; el resto de los 40 entregables queda deliberadamente pendiente de aprobación visual del usuario.
+**Archivos:** `PROMPTS.md`, `README.md`, `package.json`, `art-source/pixel-art/v1/`, `assets/pixel-art/v1/`, `scripts/pixel-art-png.mjs`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/App.jsx`, `src/game/art/artProfile.js`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/animationData.js`, `src/game/entities/Player.js`, `src/game/scenes/ArtReviewScene.js`, `src/game/scenes/PreloadScene.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js` y `src/game/config.js`.
 **Commits:**
 
 - `320faab fix(game): stabilize Mercado activation and progression`
 - `b035ebb docs(art): add pixel-art production workflow`
-- pendiente (piloto pixel-art)
+- `e414734 docs(prompts): record pixel-art commit references`
+- `b15738c feat(art): add Bigotes pixel-art pilot`
+- `e7b4547 feat(game): integrate frame-synced pixel-art combat`
 
 ## Feature: gobernanza y documentación del proyecto
 
