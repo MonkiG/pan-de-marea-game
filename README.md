@@ -170,7 +170,9 @@ npm run art:process
 npm run art:validate
 ```
 
-`art:process` aplica recorte, aislamiento por componentes, chroma, escala nearest-neighbor, paleta cerrada, alpha binario y ensamblado reproducible. `art:validate` comprueba dimensiones, cuadrícula, paleta, transparencia y celdas requeridas/no usadas. El perfil `pixel-v1` incluye actualmente Bigotes, Rastrero, Escupemasas, Sentinela y los dos efectos del ataque del jugador; Levadura, objetos, UI, tileset y fondos siguen pendientes.
+`art:process` aplica recorte, aislamiento por componentes, chroma, escala nearest-neighbor, paleta cerrada, alpha binario y ensamblado reproducible. En los fondos también normaliza a 320×180 internos, corrige la costura horizontal y amplía 2× hasta 640×360. `art:validate` comprueba dimensiones, cuadrícula, paleta, transparencia, bloques de píxel, costuras y celdas requeridas/no usadas. El perfil `pixel-v1` incluye actualmente Bigotes, Rastrero, Escupemasas, Sentinela, los dos efectos del ataque y las seis capas parallax de ambos niveles; Levadura, objetos, UI y tileset siguen pendientes.
+
+Los fondos pixel-v1 se muestran a escala 1×, sin offset vertical y anclados al viewport. El parallax sólo desplaza las capas horizontalmente, de modo que el Mercado no estira ni repite el fondo al recorrer su mundo vertical de 720 px.
 
 ## Spritesheets y recortes
 
