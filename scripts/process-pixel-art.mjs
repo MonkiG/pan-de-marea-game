@@ -39,6 +39,29 @@ const EFFECT_PALETTE = [
   [255, 169, 20], [255, 211, 79], [255, 239, 177], [255, 255, 255],
 ];
 
+const PROP_PALETTE = [
+  [5, 15, 31], [9, 31, 58], [16, 49, 86], [27, 77, 96],
+  [35, 111, 120], [45, 151, 151], [56, 205, 213], [225, 255, 244],
+  [78, 43, 31], [116, 62, 8], [166, 91, 7], [216, 132, 12],
+  [247, 177, 39], [178, 157, 111], [218, 199, 150], [249, 235, 190],
+];
+
+const PROJECTILE_PALETTE = [
+  [5, 15, 31], [14, 27, 46], [35, 49, 52], [54, 84, 50],
+  [76, 119, 52], [101, 154, 49], [138, 190, 45], [181, 229, 53],
+  [219, 250, 104], [56, 205, 213], [225, 255, 244], [166, 91, 7],
+];
+
+const GOLD_EFFECT_PALETTE = [
+  [5, 15, 31], [78, 43, 31], [139, 69, 5], [216, 121, 7],
+  [255, 169, 20], [255, 211, 79], [255, 239, 177], [255, 255, 255],
+];
+
+const CYAN_EFFECT_PALETTE = [
+  [5, 15, 31], [9, 31, 58], [5, 85, 96], [5, 145, 166],
+  [56, 205, 213], [130, 235, 225], [225, 255, 244], [255, 255, 255],
+];
+
 const BAKERY_BACKGROUND_PALETTE = [
   [5, 15, 31], [5, 27, 48], [7, 42, 67], [8, 57, 83],
   [10, 75, 101], [12, 94, 121], [18, 116, 142], [25, 140, 163],
@@ -361,15 +384,65 @@ async function processCharacter(spec) {
   return output;
 }
 
-async function processEffect(name, count, frameSize) {
+async function processEffect(name, count, frameSize, palette = EFFECT_PALETTE) {
   const frames = await processStrip(
-    source('effects', `${name}-chroma.png`), count, frameSize, frameSize, EFFECT_PALETTE, false,
+    source('effects', `${name}-chroma.png`), count, frameSize, frameSize, palette, false,
   );
+  const firstVisible = frames.find((frame) => bounds(frame));
   const strip = emptyImage(count * frameSize, frameSize);
-  frames.forEach((frame, index) => blit(frame, strip, index * frameSize, 0));
+  frames.forEach((frame, index) => blit(bounds(frame) ? frame : firstVisible, strip, index * frameSize, 0));
   const output = target('effects', `${name}.png`);
   await mkdir(dirname(output), { recursive: true });
   await writePng(output, strip);
+  return output;
+}
+
+async function processPropStrip({ sourceFile, outputFile, count, frameWidth, frameHeight, palette = PROP_PALETTE }) {
+  const frames = await processStrip(
+    source('props', sourceFile), count, frameWidth, frameHeight, palette, true, 'components',
+  );
+  const strip = emptyImage(count * frameWidth, frameHeight);
+  frames.forEach((frame, index) => blit(frame, strip, index * frameWidth, 0));
+  const output = target('props', outputFile);
+  await mkdir(dirname(output), { recursive: true });
+  await writePng(output, strip);
+  return output;
+}
+
+async function processLifecycleSheet({ sourceFile, outputFile, frameWidth, frameHeight, mappings, palette = PROP_PALETTE }) {
+  const sourceFrames = await processStrip(
+    source('props', sourceFile), 8, frameWidth, frameHeight, palette, true, 'components',
+  );
+  const sheet = emptyImage(frameWidth * 8, frameHeight * mappings.length);
+  mappings.forEach((mapping, row) => mapping.forEach((sourceIndex, column) => {
+    blit(sourceFrames[sourceIndex], sheet, column * frameWidth, row * frameHeight);
+  }));
+  const output = target('props', outputFile);
+  await mkdir(dirname(output), { recursive: true });
+  await writePng(output, sheet);
+  return output;
+}
+
+async function processTileset() {
+  const frameSizes = [[32, 12], [32, 12], [32, 12], [32, 36], [64, 48], [48, 64]];
+  const sourceImage = await readPng(source('tiles', 'level-tileset-chroma.png'));
+  const components = segmentFramesByComponents(sourceImage, 6);
+  const frames = components.map((frame, index) => {
+    const frameBounds = bounds(frame);
+    const [width, height] = frameSizes[index];
+    const scale = Math.min((width - 2) / frameBounds.width, (height - 2) / frameBounds.height);
+    return renderFrame(frame, frameBounds, scale, width, height, PROP_PALETTE, true);
+  });
+  const atlas = emptyImage(512, 512);
+  blit(frames[0], atlas, 0, 0);
+  blit(frames[1], atlas, 32, 0);
+  blit(frames[2], atlas, 64, 0);
+  blit(frames[3], atlas, 96, 0);
+  blit(frames[4], atlas, 0, 64);
+  blit(frames[5], atlas, 64, 64);
+  const output = target('tiles', 'level-tileset.png');
+  await mkdir(dirname(output), { recursive: true });
+  await writePng(output, atlas);
   return output;
 }
 
@@ -469,6 +542,22 @@ const outputs = [
   ...await Promise.all(characterSheets.map(processCharacter)),
   await processEffect('player-attack', 6, 32),
   await processEffect('hit-spark', 6, 24),
+  await processPropStrip({ sourceFile: 'corrupted-dough-projectile-chroma.png', outputFile: 'corrupted-dough-projectile.png', count: 6, frameWidth: 24, frameHeight: 24, palette: PROJECTILE_PALETTE }),
+  await processPropStrip({ sourceFile: 'pressure-regulator-chroma.png', outputFile: 'pressure-regulator.png', count: 3, frameWidth: 48, frameHeight: 64 }),
+  await processPropStrip({ sourceFile: 'pressure-oven-chroma.png', outputFile: 'pressure-oven.png', count: 4, frameWidth: 96, frameHeight: 96 }),
+  await processPropStrip({ sourceFile: 'market-exit-chroma.png', outputFile: 'market-exit.png', count: 3, frameWidth: 128, frameHeight: 160 }),
+  await processPropStrip({ sourceFile: 'market-checkpoint-chroma.png', outputFile: 'market-checkpoint.png', count: 3, frameWidth: 48, frameHeight: 80 }),
+  await processPropStrip({ sourceFile: 'market-stalls-chroma.png', outputFile: 'market-stalls.png', count: 5, frameWidth: 128, frameHeight: 96 }),
+  await processPropStrip({ sourceFile: 'black-coral-hazard-chroma.png', outputFile: 'black-coral-hazard.png', count: 4, frameWidth: 64, frameHeight: 32 }),
+  await processPropStrip({ sourceFile: 'thermal-oven-chroma.png', outputFile: 'thermal-oven.png', count: 4, frameWidth: 96, frameHeight: 80 }),
+  await processPropStrip({ sourceFile: 'oxygen-vent-chroma.png', outputFile: 'oxygen-vent.png', count: 4, frameWidth: 48, frameHeight: 48 }),
+  await processLifecycleSheet({ sourceFile: 'bubble-yeast-chroma.png', outputFile: 'bubble-yeast.png', frameWidth: 48, frameHeight: 48, mappings: [[0, 1, 2, 1, 0, 1], [2, 3, 4, 5, 4, 3], [0, 1, 2, 3, 4, 5, 6, 7]] }),
+  await processLifecycleSheet({ sourceFile: 'thermal-gate-chroma.png', outputFile: 'thermal-gate.png', frameWidth: 128, frameHeight: 160, mappings: [[0, 0, 1, 0, 1, 0], [0, 1, 2, 3, 4, 5, 6, 7], [7, 6, 7, 6, 7, 6]] }),
+  await processTileset(),
+  await processEffect('enemy-hit', 6, 24, CYAN_EFFECT_PALETTE),
+  await processEffect('yeast-collect', 6, 32, GOLD_EFFECT_PALETTE),
+  await processEffect('warm-burst', 6, 48, GOLD_EFFECT_PALETTE),
+  await processEffect('pressure-burst', 6, 48, CYAN_EFFECT_PALETTE),
   ...await Promise.all(backgroundSpecs.map(processBackground)),
 ];
 outputs.forEach((output) => console.log(`Generated ${output}`));

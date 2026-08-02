@@ -27,6 +27,64 @@ const specs = [
     path: 'assets/pixel-art/v1/effects/hit-spark.png', width: 144, height: 24, colors: 8,
     frame: [24, 24], usedPerRow: [6],
   },
+  {
+    path: 'assets/pixel-art/v1/props/corrupted-dough-projectile.png', width: 144, height: 24, colors: 12,
+    frame: [24, 24], usedPerRow: [6],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/pressure-regulator.png', width: 144, height: 64, colors: 16,
+    frame: [48, 64], usedPerRow: [3],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/pressure-oven.png', width: 384, height: 96, colors: 16,
+    frame: [96, 96], usedPerRow: [4],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/market-exit.png', width: 384, height: 160, colors: 16,
+    frame: [128, 160], usedPerRow: [3],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/market-checkpoint.png', width: 144, height: 80, colors: 16,
+    frame: [48, 80], usedPerRow: [3],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/market-stalls.png', width: 640, height: 96, colors: 16,
+    frame: [128, 96], usedPerRow: [5],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/black-coral-hazard.png', width: 256, height: 32, colors: 16,
+    frame: [64, 32], usedPerRow: [4],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/thermal-oven.png', width: 384, height: 80, colors: 16,
+    frame: [96, 80], usedPerRow: [4],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/oxygen-vent.png', width: 192, height: 48, colors: 16,
+    frame: [48, 48], usedPerRow: [4],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/bubble-yeast.png', width: 384, height: 144, colors: 16,
+    frame: [48, 48], usedPerRow: [6, 6, 8],
+  },
+  {
+    path: 'assets/pixel-art/v1/props/thermal-gate.png', width: 1024, height: 480, colors: 16,
+    frame: [128, 160], usedPerRow: [6, 8, 6],
+  },
+  { path: 'assets/pixel-art/v1/tiles/level-tileset.png', width: 512, height: 512, colors: 16 },
+  ...[
+    ['enemy-hit.png', 144, 24, 24],
+    ['yeast-collect.png', 192, 32, 32],
+    ['warm-burst.png', 288, 48, 48],
+    ['pressure-burst.png', 288, 48, 48],
+  ].map(([file, width, height, frameSize]) => ({
+    path: `assets/pixel-art/v1/effects/${file}`,
+    width,
+    height,
+    colors: 8,
+    frame: [frameSize, frameSize],
+    usedPerRow: [6],
+  })),
   ...[
     ['panaderia-undida-bg-1.png', 'opaque'],
     ['panaderia-undida-bg-2.png', 'opaque'],

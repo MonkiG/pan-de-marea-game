@@ -57,6 +57,33 @@ Cada llamada generó una sola fila horizontal y añadió el contrato de acción 
 
 Los frames maestros y tiras chroma viven en `rastrero/`, `escupemasas/` y `sentinela/`. El procesador aísla poses por componentes conectados, asigna partículas al cuerpo más cercano, normaliza cada personaje a su propia paleta cerrada y ensambla las hojas exactas declaradas en `pixel_art_prompt.md`.
 
+## Prompt compartido de props, tiles y efectos
+
+> Crea un asset 2D para Pan de Marea usando Bigotes y el fondo pixel-v1 del bioma como anclas obligatorias. Pixel art cartoon submarino con silueta compacta y legible, outline azul marino equivalente a un pixel, dos tonos planos por material, 12-16 colores opacos, clusters duros y proporciones exageradas. Presenta exactamente los estados o variantes solicitados, separados uniformemente, con escala, centro y baseline consistentes. Fondo chroma `#ff00ff` perfectamente plano. Sin degradados, textura pictorica, antialias, sombras proyectadas, suelo, rejilla, texto, marcas de agua ni elementos compartidos entre celdas.
+
+Cada llamada de ImageGen integrado produjo un asset distinto; el procesador elimina chroma, recorta por componentes, cuantiza y ensambla estas salidas deterministas:
+
+| Fuente | Resultado | Estados/variantes |
+|---|---|---|
+| `props/corrupted-dough-projectile-chroma.png` | `props/corrupted-dough-projectile.png` | 6 poses de vuelo, 24x24. |
+| `props/pressure-regulator-chroma.png` | `props/pressure-regulator.png` | Inactivo, energizado y sincronizado, 48x64. |
+| `props/pressure-oven-chroma.png` | `props/pressure-oven.png` | Apagado, disponible, horneando y completo, 96x96. |
+| `props/market-exit-chroma.png` | `props/market-exit.png` | Bloqueada, desbloqueada y activa, 128x160. |
+| `props/market-checkpoint-chroma.png` | `props/market-checkpoint.png` | Inactivo, activado y restaurado, 48x80. |
+| `props/market-stalls-chroma.png` | `props/market-stalls.png` | Cinco puestos tematicos, 128x96. |
+| `props/black-coral-hazard-chroma.png` | `props/black-coral-hazard.png` | Cuatro variantes de coral, 64x32. |
+| `props/bubble-yeast-chroma.png` | `props/bubble-yeast.png` | Idle, atraccion y recoleccion, 48x48. |
+| `props/thermal-gate-chroma.png` | `props/thermal-gate.png` | Inactiva, apertura y activa, 128x160. |
+| `props/thermal-oven-chroma.png` | `props/thermal-oven.png` | Apagado, disponible, horneando y completo, 96x80. |
+| `props/oxygen-vent-chroma.png` | `props/oxygen-vent.png` | Reposo y tres pulsos de burbujas, 48x48. |
+| `tiles/level-tileset-chroma.png` | `tiles/level-tileset.png` | Tapa izquierda, centro repetible, tapa derecha, suelo, rocas y coral. |
+| `effects/enemy-hit-chroma.png` | `effects/enemy-hit.png` | Impacto cian de 6 frames, 24x24. |
+| `effects/yeast-collect-chroma.png` | `effects/yeast-collect.png` | Recoleccion dorada de 6 frames, 32x32. |
+| `effects/warm-burst-chroma.png` | `effects/warm-burst.png` | Explosion termica de 6 frames, 48x48. |
+| `effects/pressure-burst-chroma.png` | `effects/pressure-burst.png` | Sincronizacion cian de 6 frames, 48x48. |
+
+En `pixel-v1`, las plataformas se dibujan con tapas y centro repetible desde la misma coordenada superior usada por el collider. No se permite escalar horizontalmente un sprite completo de plataforma, porque eso altera su grosor aparente y desacopla arte y fisica.
+
 ## Prompt compartido del lote de fondos
 
 > Genera una capa parallax 16:9 para un videojuego submarino 2D, usando el arte pixel-v1 adjunto como ancla obligatoria de tamaño de píxel, clusters, outline y densidad; usa el PNG legacy únicamente como referencia conceptual del entorno. Pixel art cartoon nativo, píxeles cuadrados duros, formas grandes, dos tonos por material, paleta limitada y contraste subordinado a personajes y plataformas. Mantén el centro calmado, evita líneas horizontales que parezcan superficies jugables y diseña continuidad natural entre los bordes izquierdo y derecho. Sin personajes, enemigos, objetos interactivos, texto, UI, blur, antialias, degradados suaves, textura pictórica, fotorealismo ni ruido fino.
