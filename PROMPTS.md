@@ -196,6 +196,28 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Archivos:** `src/game/art/artProfile.js`, `src/game/art/artProfile.test.js`, `src/game/systems/levelTwoSystems.test.js`, `README.md` y `PROMPTS.md`.
 **Commits:** `fd609a4 feat(art): make pixel art the official profile`.
 
+## Feature: audio MVP
+
+### PDM-027 — Actualizar main antes de producir audio
+
+**Fecha:** 2026-08-02
+**Prompt:** “haz pull desde main para obtener los cambios recientes”
+**Resultado:** se cambió a `main` con el working tree limpio y se ejecutó `git pull --ff-only origin main`. La rama avanzó por fast-forward de `e414734` a `b814e98`, incorporando el arte pixel oficial antes de crear `codex/audio-mvp`. Esta operación no produjo un commit propio.
+**Archivos:** sin cambios propios; actualización fast-forward desde `origin/main`.
+**Commits:** no aplica (pull fast-forward).
+
+### PDM-028 — Generar e integrar los SFX fundamentales
+
+**Fecha:** 2026-08-02
+**Prompt:** “PLEASE IMPLEMENT THIS PLAN: Audio MVP desde el `main` actualizado”. El plan solicita crear `codex/audio-mvp` desde `main`, generar trece SFX cartoon submarinos reproducibles en WAV, integrarlos mediante manifiesto y `AudioManager`, validar formato y gameplay, documentar el flujo, crear commits semánticos locales y no hacer push.
+**Resultado:** se generaron trece WAV mono PCM de 48 kHz/16-bit mediante síntesis procedural determinista, sin samples externos. Un manifiesto central define rutas, volúmenes, duraciones y cooldowns; Phaser precarga los efectos y `AudioManager` reproduce las claves existentes, limita repeticiones, respeta mute y detiene audio al pausar o salir. Los scripts `audio:generate` y `audio:validate` permiten reconstruir y comprobar el lote; se añadieron pruebas unitarias y documentación de producción.
+**Archivos:** `assets/audio/sfx/`, `scripts/generate-audio.mjs`, `scripts/validate-audio.mjs`, `src/game/audio/audioManifest.js`, `src/game/systems/AudioManager.js`, `src/game/systems/AudioManager.test.js`, `src/game/scenes/PreloadScene.js`, escenas de ambos niveles, `package.json`, `README.md`, `GUIA_ASSETS_Y_AUDIO.md` y `PROMPTS.md`.
+**Commits:**
+
+- `a905b80 feat(audio): add procedural mvp sound library`
+- `cd3d69b feat(game): integrate mvp sound effects`
+- pendiente (working tree)
+
 ## Feature: gobernanza y documentación del proyecto
 
 ### PDM-009 — Registrar prompts e instruir a otros agentes

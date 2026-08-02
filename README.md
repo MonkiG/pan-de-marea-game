@@ -174,6 +174,15 @@ npm run art:validate
 
 Los fondos pixel-v1 se muestran a escala 1×, sin offset vertical y anclados al viewport. El parallax sólo desplaza las capas horizontalmente, de modo que el Mercado no estira ni repite el fondo al recorrer su mundo vertical de 720 px.
 
+El MVP de audio incluye trece efectos cartoon submarinos para todas las acciones ya conectadas en ambos niveles. Los WAV mono de 48 kHz se generan sin samples externos y se validan de forma reproducible:
+
+```sh
+npm run audio:generate
+npm run audio:validate
+```
+
+`AudioManager` aplica el volumen y cooldown declarados en `src/game/audio/audioManifest.js`, respeta el ajuste de silencio y detiene los efectos activos al pausar o abandonar una escena. Si un archivo no puede cargarse, el juego continúa usando silencio seguro.
+
 ## Spritesheets y recortes
 
 Las láminas no utilizan una cuadrícula uniforme: hay márgenes, padding y tamaños variables. Por ello se cargan como imágenes normales y `src/game/assetManifest.js` registra frames con `texture.add(nombre, sourceIndex, x, y, ancho, alto)`.
@@ -189,7 +198,7 @@ Si una textura o animación no se puede cargar, el juego avisa en consola y util
 
 ## Recursos pendientes
 
-- **Audio:** no se encontraron archivos de sonido. `AudioManager` conserva las llamadas de salto, ataque, daño, recolección, horno, enemigo y compuerta, pero utiliza silencio sin romper la partida.
+- **Audio:** música, ambientes continuos, sonidos de UI y alertas adicionales permanecen fuera del MVP; las trece acciones fundamentales de gameplay ya tienen SFX.
 - Los fallbacks geométricos se conservan como protección técnica si una textura no puede cargarse, pero ya no forman parte de la presentación normal.
 
 ## Assets inventariados
@@ -243,7 +252,7 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 
 - Las ilustraciones originales son de alta resolución y estilo pictórico; el render nearest-neighbor mantiene bordes nítidos, pero no convierte el material en pixel art nativo.
 - El tileset y las hojas de animación tienen separaciones irregulares; ciertos recortes pueden necesitar ajuste artístico fino.
-- No hay audio real ni controles táctiles.
+- No hay música, ambientes continuos ni controles táctiles.
 - El perfil `legacy` conserva recortes irregulares y algunos estados aproximados; se mantiene sólo para comparación y contingencia.
 - El progreso de desbloqueo y checkpoint vive en memoria de la sesión; no se persiste todavía en `localStorage`.
 - Phaser constituye la mayor parte del tamaño del bundle; se carga de forma diferida para que el menú inicial siga siendo ligero.
