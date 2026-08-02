@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { GameContainer } from './components/GameContainer.jsx';
 import { HUD } from './components/HUD.jsx';
+import { LevelSelectScreen } from './components/LevelSelectScreen.jsx';
 import { MainMenu } from './components/MainMenu.jsx';
+import { NonGameLinks } from './components/NonGameLinks.jsx';
 import { PauseMenu } from './components/PauseMenu.jsx';
 import { ResultScreen } from './components/ResultScreen.jsx';
 import { eventBus } from './game/EventBus.js';
 import { OBJECTIVES, OXYGEN, PLAYER, RECIPE } from './game/constants.js';
+import { sessionProgress } from './game/systems/SessionProgress.js';
 
 const initialSnapshot = Object.freeze({
   status: 'loading',
+  levelId: 'level-one',
+  levelName: 'La Panadería Hundida',
   health: PLAYER.maxHealth,
   maxHealth: PLAYER.maxHealth,
   oxygen: OXYGEN.max,
@@ -17,20 +22,34 @@ const initialSnapshot = Object.freeze({
   yeastAvailable: 0,
   yeastRequired: RECIPE.yeastRequired,
   thermalBread: false,
+  pressureBread: false,
+  breadReady: false,
+  breadName: 'Pan Térmico',
+  regulatorsActive: 0,
+  regulatorsRequired: 0,
+  checkpointActive: false,
   objective: OBJECTIVES.explore,
   prompt: '',
   elapsedMs: 0,
   enemiesDefeated: 0,
   lowOxygen: false,
+  damageTaken: 0,
+  checkpointsUsed: 0,
+  fallbacksUsed: [],
 });
 
 export function App() {
   const [view, setView] = useState('menu');
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [settings, setSettings] = useState({ muted: false, screenShake: true, reducedParticles: false });
+  const [selectedLevel, setSelectedLevel] = useState('level-one');
+  const [progression, setProgression] = useState(() => sessionProgress.getSnapshot());
 
   useEffect(() => {
-    const update = (next) => setSnapshot(next);
+    const update = (next) => {
+      setSnapshot(next);
+      if (next.status === 'complete') setProgression(sessionProgress.getSnapshot());
+    };
     const off = [
       eventBus.on('game:ready', update),
       eventBus.on('game:snapshot', update),
@@ -49,9 +68,17 @@ export function App() {
   const gameActive = view === 'game';
   const shellClass = useMemo(() => `app-shell ${gameActive ? 'is-playing' : 'is-menu'}`, [gameActive]);
 
-  const startGame = () => {
-    setSnapshot(initialSnapshot);
+  const startGame = (levelId = selectedLevel) => {
+    if (!sessionProgress.isUnlocked(levelId)) return;
+    setSelectedLevel(levelId);
+    setSnapshot({ ...initialSnapshot, levelId, levelName: levelId === 'level-two' ? 'El Mercado Sumergido' : 'La Panadería Hundida' });
     setView('game');
+  };
+
+  const changeLevel = (levelId) => {
+    setSelectedLevel(levelId);
+    setSnapshot({ ...initialSnapshot, levelId, levelName: levelId === 'level-two' ? 'El Mercado Sumergido' : 'La Panadería Hundida' });
+    eventBus.emit('command:level', levelId);
   };
 
   const returnToMenu = () => {
@@ -68,13 +95,21 @@ export function App() {
     <main className={shellClass}>
       {view === 'menu' ? (
         <MainMenu
-          onPlay={startGame}
+          onOpenLevels={() => setView('levels')}
           settings={settings}
           onSettingsChange={updateSettings}
         />
+      ) : view === 'levels' ? (
+        <LevelSelectScreen
+          selectedLevel={selectedLevel}
+          progression={progression}
+          onSelect={setSelectedLevel}
+          onPlay={startGame}
+          onBack={() => setView('menu')}
+        />
       ) : (
-        <section className="game-screen" aria-label="La Panadería Hundida">
-          <GameContainer settings={settings} />
+        <section className="game-screen" aria-label={snapshot.levelName}>
+          <GameContainer settings={settings} initialLevel={selectedLevel} />
           <HUD snapshot={snapshot} />
           {snapshot.status === 'loading' && (
             <div className="loading-badge" role="status">Sumergiendo la panadería…</div>
@@ -93,6 +128,8 @@ export function App() {
               snapshot={snapshot}
               onRestart={() => eventBus.emit('command:restart')}
               onMenu={returnToMenu}
+              onContinue={() => changeLevel('level-two')}
+              onBakery={() => changeLevel('level-one')}
             />
           )}
           <p className="small-window-notice" role="status">
@@ -100,6 +137,7 @@ export function App() {
           </p>
         </section>
       )}
+      {!gameActive && <NonGameLinks />}
     </main>
   );
 }

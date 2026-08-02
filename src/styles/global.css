@@ -85,7 +85,96 @@ h2 { font-size: clamp(2rem, 5vw, 3.6rem); }
 kbd { color: #ffe39b; }
 .settings-panel label { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
 .settings-panel input { width: 18px; height: 18px; accent-color: var(--bread); }
-.menu-footer { position: absolute; bottom: 1rem; color: #6e9c98; font-size: 0.72rem; }
+.non-game-github {
+  position: fixed;
+  top: clamp(.8rem, 2vw, 1.3rem);
+  right: clamp(.8rem, 2vw, 1.3rem);
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(151, 221, 208, .58);
+  border-radius: 50%;
+  color: #e7f8ee;
+  background: rgba(3, 27, 34, .82);
+  box-shadow: 0 8px 24px #0008;
+  backdrop-filter: blur(5px);
+  transition: color .2s ease, border-color .2s ease, transform .2s ease;
+}
+.non-game-github:hover { color: #ffd477; border-color: #ffd477; transform: translateY(-2px); }
+.non-game-github:focus-visible, .non-game-footer a:focus-visible { outline: 3px solid #ffe084; outline-offset: 3px; }
+.non-game-github svg { width: 25px; height: 25px; fill: currentColor; }
+.non-game-footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 40;
+  transform: translateX(-50%);
+  padding: .65rem 1rem;
+  text-align: center;
+  white-space: nowrap;
+}
+.non-game-footer a { color: #8ebdb5; font-size: .7rem; text-decoration: none; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 2px 8px #000; }
+.non-game-footer a:hover { color: #ffd477; }
+
+.level-menu {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(1.2rem, 3vw, 2rem);
+  min-height: 100vh;
+  padding: clamp(1.2rem, 3vw, 2.5rem);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(2, 20, 27, 0.74), rgba(1, 12, 17, 0.97)),
+    url('/mercado-undido-2.png') center / cover fixed,
+    #041d26;
+}
+.level-menu::before, .level-menu::after { content: ""; position: absolute; z-index: -1; pointer-events: none; }
+.level-menu::before { inset: 0; background: radial-gradient(circle at 50% 15%, rgba(100, 229, 210, 0.15), transparent 42%); }
+.level-menu::after { inset: 0; box-shadow: inset 0 0 18vw 4vw #000b; }
+.level-menu-light { position: absolute; inset: 0 0 auto; height: 32vh; background: repeating-linear-gradient(108deg, transparent 0 80px, rgba(160, 255, 239, 0.04) 96px 112px, transparent 128px 190px); filter: blur(4px); pointer-events: none; }
+.level-menu-header { position: relative; z-index: 1; max-width: 860px; margin: auto; text-align: center; }
+.level-menu-header h1 { font-size: clamp(2.3rem, 6vw, 4.7rem); }
+.level-menu-header > p:last-child { margin: 0.85rem 0 0; color: #b8d4cd; }
+.level-gallery { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(2, minmax(260px, 440px)); justify-content: center; align-content: center; gap: clamp(1rem, 3vw, 2rem); width: min(100%, 960px); margin: auto; }
+.level-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  min-height: clamp(300px, 48vh, 440px);
+  overflow: hidden;
+  padding: 1.2rem;
+  border: 3px solid rgba(112, 169, 162, 0.68);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  background-image: linear-gradient(180deg, rgba(1, 15, 20, 0.08), rgba(1, 15, 20, 0.94) 76%), var(--level-background);
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 18px 50px #000b, inset 0 0 0 1px rgba(255,255,255,.08);
+  transition: opacity .2s ease, filter .2s ease, transform .2s ease, border-color .2s ease;
+}
+.level-card:hover { transform: translateY(-5px); }
+.level-card.is-selected { border-color: #ffd16c; box-shadow: 0 18px 55px #000c, 0 0 0 2px rgba(255, 209, 108, 0.22), inset 0 0 45px rgba(255, 178, 63, 0.12); }
+.level-card.is-locked { opacity: 0.36; filter: grayscale(.78) saturate(.35); cursor: not-allowed; }
+.level-card.is-locked:hover { transform: none; border-color: rgba(112, 169, 162, 0.68); }
+.level-card-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.34), transparent 55%); pointer-events: none; }
+.level-card-number, .level-card-copy, .level-card-status { position: relative; z-index: 1; }
+.level-card-number { justify-self: start; padding: .35rem .55rem; border: 1px solid rgba(171, 237, 224, .65); color: #c4f4e8; background: rgba(2, 28, 34, .82); font-size: .7rem; text-transform: uppercase; letter-spacing: .16em; }
+.level-card-copy { align-self: end; display: grid; gap: .45rem; }
+.level-card-copy small { color: #8dd6ca; text-transform: uppercase; letter-spacing: .13em; }
+.level-card-copy strong { color: #ffe4a0; font-family: Georgia, serif; font-size: clamp(1.45rem, 3vw, 2.2rem); line-height: 1; text-shadow: 0 3px 10px #000; }
+.level-card-copy > span { max-width: 42ch; color: #d9e7df; line-height: 1.45; }
+.level-card-status { justify-self: start; margin-top: 1rem; color: #ffd576; font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+.level-card.is-locked .level-card-status { color: #d2dcda; }
+.level-menu-actions { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(150px, 1fr) minmax(220px, 1.4fr) minmax(150px, 1fr); align-items: center; gap: 1rem; width: min(100%, 960px); margin: auto; padding: 1rem; border: 1px solid rgba(111, 171, 164, .5); background: rgba(3, 24, 31, .9); box-shadow: 0 12px 35px #0008; }
+.level-menu-actions > div { display: grid; gap: .2rem; text-align: center; }
+.level-menu-actions span { color: #78aca5; font-size: .65rem; text-transform: uppercase; letter-spacing: .12em; }
+.level-menu-actions strong { color: #ffe0a0; }
 
 .game-screen { position: relative; display: grid; place-items: center; width: 100vw; height: 100vh; overflow: hidden; background: #020d12; }
 .game-canvas { width: 100%; height: 100%; }
@@ -105,10 +194,12 @@ kbd { color: #ffe39b; }
 .hud-objective > span { color: #74a9a4; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.14em; }
 .hud-objective strong { display: block; color: #fff0bb; font-size: 0.83rem; }
 .hud-objective p { margin: 0.35rem 0 0; color: #9ff1df; font-size: 0.7rem; }
-.hud-inventory { display: grid; grid-template-columns: 22px auto 1fr; align-items: center; gap: 0.45rem; font-size: 0.72rem; }
+.hud-inventory { display: grid; grid-template-columns: 22px auto 1fr; align-items: center; gap: 0.35rem 0.45rem; font-size: 0.72rem; }
 .yeast-icon { width: 18px; height: 18px; border: 2px solid #96eee1; border-radius: 50%; background: #f3a91f; box-shadow: 0 0 8px #ffc34c; }
 .bread { grid-column: 1 / -1; color: #76928e; }
 .bread.ready { color: #ffc866; }
+.regulator-count { color: #8ef5e2; text-align: right; }
+.checkpoint-badge { grid-column: 1 / -1; color: #ffd176; font-size: 0.62rem; text-transform: uppercase; }
 .loading-badge { position: absolute; z-index: 6; padding: 0.8rem 1rem; color: #ffe9a9; background: #041b22e8; border: 1px solid #609b94; }
 
 .overlay { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: 1rem; background: rgba(0, 9, 13, 0.78); backdrop-filter: blur(4px); }
@@ -131,6 +222,13 @@ kbd { color: #ffe39b; }
   .menu-actions, .overlay-actions { grid-template-columns: 1fr; }
   .menu-card { padding: 1.4rem 1rem; }
   .results-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .level-menu { overflow: auto; }
+  .level-gallery { grid-template-columns: 1fr; align-content: start; }
+  .level-card { min-height: 270px; }
+  .level-menu-actions { grid-template-columns: 1fr; }
+  .level-menu-actions > div { grid-row: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
