@@ -1,6 +1,8 @@
 const percentage = (value, max) => `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
 
 export function HUD({ snapshot }) {
+  const breadReady = snapshot.breadReady ?? snapshot.thermalBread;
+  const breadName = snapshot.breadName ?? 'Pan Térmico';
   return (
     <div className="hud" aria-live="polite">
       <div className="hud-vitals">
@@ -23,9 +25,13 @@ export function HUD({ snapshot }) {
       <div className="hud-inventory">
         <span className="yeast-icon" aria-hidden="true" />
         <b>{snapshot.yeastCollected}/{snapshot.yeastRequired}</b>
-        <span className={snapshot.thermalBread ? 'bread ready' : 'bread'}>
-          {snapshot.thermalBread ? 'Pan Térmico listo' : 'Sin Pan Térmico'}
+        {snapshot.regulatorsRequired > 0 && (
+          <span className="regulator-count">Reguladores {snapshot.regulatorsActive}/{snapshot.regulatorsRequired}</span>
+        )}
+        <span className={breadReady ? 'bread ready' : 'bread'}>
+          {breadReady ? `${breadName} listo` : `Sin ${breadName}`}
         </span>
+        {snapshot.checkpointActive && <span className="checkpoint-badge">Checkpoint activo</span>}
       </div>
     </div>
   );

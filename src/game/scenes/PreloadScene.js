@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ASSET_MANIFEST, registerManifestFrames } from '../assetManifest.js';
 import { createAnimations } from '../systems/AnimationManager.js';
+import { logAssetAudit } from '../assets/assetAudit.js';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -10,7 +11,7 @@ export class PreloadScene extends Phaser.Scene {
   preload() {
     const bar = this.add.rectangle(320, 190, 280, 10, 0x163b45).setOrigin(0.5);
     const progress = this.add.rectangle(180, 190, 0, 8, 0xffb349).setOrigin(0, 0.5);
-    this.add.text(320, 160, 'Preparando La Panadería Hundida…', {
+    this.add.text(320, 160, 'Preparando las rutas de Pan de Marea…', {
       fontFamily: 'monospace', fontSize: '14px', color: '#f4e3b0',
     }).setOrigin(0.5);
     this.load.on('progress', (value) => progress.setDisplaySize(280 * value, 8));
@@ -24,6 +25,7 @@ export class PreloadScene extends Phaser.Scene {
   create() {
     registerManifestFrames(this);
     createAnimations(this);
-    this.scene.start('level-one');
+    if (import.meta.env.DEV) logAssetAudit();
+    this.scene.start(this.game.registry.get('selectedLevel') || 'level-one');
   }
 }

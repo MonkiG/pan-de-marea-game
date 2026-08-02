@@ -1,13 +1,11 @@
-export const ASSET_MANIFEST = Object.freeze([
-  { key: 'bigotes-sheet', file: 'bigotes-assets.png', width: 1024, height: 1536 },
-  { key: 'crawler-sheet', file: 'rastrero-de-salmuera.png', width: 1536, height: 1024 },
-  { key: 'yeast-sheet', file: 'golden-bubble-yeast.png', width: 1536, height: 1024 },
-  { key: 'gate-sheet', file: 'rusty-undewater-portal.png', width: 1536, height: 1024 },
-  { key: 'bakery-bg-1', file: 'panaderia-undida-bg-1.png', width: 1536, height: 1024 },
-  { key: 'bakery-bg-2', file: 'panaderia-undida-bg-2.png', width: 1536, height: 1024 },
-  { key: 'bakery-bg-3', file: 'panaderia-undida-bg-3.png', width: 1536, height: 1024 },
-  { key: 'tileset', file: 'tileset.png', width: 1536, height: 1024 },
-]);
+import { getLoadableAssets } from './assets/assetRegistry.js';
+
+export const ASSET_MANIFEST = Object.freeze(getLoadableAssets().map((asset) => ({
+  key: asset.key,
+  file: asset.path,
+  width: asset.width,
+  height: asset.height,
+})));
 
 const makeRow = (prefix, count, x, y, width, height, step = width) =>
   Array.from({ length: count }, (_, index) => ({
@@ -48,6 +46,21 @@ export const FRAME_MANIFEST = Object.freeze({
     { name: 'tile-platform-long', x: 45, y: 600, width: 395, height: 110 },
     { name: 'tile-rocks', x: 610, y: 720, width: 305, height: 140 },
     { name: 'tile-coral', x: 1180, y: 720, width: 125, height: 130 },
+  ],
+  'spitter-sheet': [
+    ...makeRow('spitter-idle', 6, 60, 28, 180, 122, 176),
+    ...makeRow('spitter-charge', 4, 60, 402, 180, 112, 176),
+    ...makeRow('spitter-attack', 5, 60, 278, 180, 124, 176),
+    ...makeRow('spitter-hurt', 4, 60, 515, 180, 110, 176),
+    ...makeRow('spitter-defeat', 6, 60, 842, 180, 130, 176),
+  ],
+  'sentinel-sheet': [
+    ...makeRow('sentinel-idle', 6, 18, 38, 165, 195, 165),
+    ...makeRow('sentinel-walk', 6, 18, 278, 165, 195, 165),
+    ...makeRow('sentinel-attack', 6, 18, 485, 165, 215, 165),
+    ...makeRow('sentinel-hurt', 6, 18, 735, 165, 185, 165),
+    ...makeRow('sentinel-charge', 6, 18, 955, 165, 190, 165),
+    ...makeRow('sentinel-defeat', 6, 18, 1185, 165, 200, 165),
   ],
 });
 

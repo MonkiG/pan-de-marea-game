@@ -7,6 +7,7 @@ export class BubbleYeast extends Phaser.Physics.Arcade.Sprite {
     super(scene, data.x, data.y, texture, frame);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(13);
     this.id = data.id;
     this.collected = false;
     this.setScale(texture === 'fallback-yeast' ? 1 : 0.32);

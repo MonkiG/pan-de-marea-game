@@ -4,7 +4,7 @@ import { BrineCrawler } from '../entities/BrineCrawler.js';
 import { Oven } from '../entities/Oven.js';
 import { Player } from '../entities/Player.js';
 import { ThermalGate } from '../entities/ThermalGate.js';
-import { CRAWLER, OBJECTIVES, OXYGEN, PLAYER, RECIPE } from '../constants.js';
+import { CRAWLER, LEVEL_IDS, OBJECTIVES, OXYGEN, PLAYER, RECIPE } from '../constants.js';
 import { eventBus } from '../EventBus.js';
 import { LEVEL_ONE_DATA } from '../data/levelOneData.js';
 import { AudioManager } from '../systems/AudioManager.js';
@@ -13,6 +13,7 @@ import { OxygenSystem } from '../systems/OxygenSystem.js';
 import { RecipeSystem, canUnlockGate } from '../systems/RecipeSystem.js';
 import { MovementDebugOverlay } from '../systems/MovementDebugOverlay.js';
 import { validateJumpLink } from '../systems/JumpReachSystem.js';
+import { sessionProgress } from '../systems/SessionProgress.js';
 
 export class LevelOneScene extends Phaser.Scene {
   constructor() {
@@ -20,6 +21,7 @@ export class LevelOneScene extends Phaser.Scene {
   }
 
   create() {
+    this.game.registry.set('currentLevel', LEVEL_IDS.bakery);
     this.status = 'playing';
     this.settings = {
       muted: false,
@@ -325,7 +327,13 @@ export class LevelOneScene extends Phaser.Scene {
     this.status = 'complete';
     this.player.setControlsEnabled(false);
     this.cameras.main.fadeOut(700, 2, 18, 22);
+    sessionProgress.completeLevel(LEVEL_IDS.bakery, {
+      elapsedMs: this.getElapsedMs(),
+      enemiesDefeated: this.enemiesDefeated,
+      yeastCollected: this.inventory.totalCollected,
+    });
     const snapshot = this.getSnapshot();
+    eventBus.emit('level:completed', snapshot);
     eventBus.emit('game:complete', snapshot);
     eventBus.emit('game:snapshot', snapshot);
   }
@@ -423,6 +431,8 @@ export class LevelOneScene extends Phaser.Scene {
   getSnapshot() {
     return {
       status: this.status,
+      levelId: LEVEL_IDS.bakery,
+      levelName: 'La Panadería Hundida',
       health: this.player?.health ?? PLAYER.maxHealth,
       maxHealth: PLAYER.maxHealth,
       oxygen: Math.round(this.oxygenSystem?.value ?? OXYGEN.max),
@@ -431,11 +441,20 @@ export class LevelOneScene extends Phaser.Scene {
       yeastAvailable: this.inventory?.availableYeast ?? 0,
       yeastRequired: RECIPE.yeastRequired,
       thermalBread: this.recipeSystem?.hasThermalBread ?? false,
+      pressureBread: false,
+      breadReady: this.recipeSystem?.hasThermalBread ?? false,
+      breadName: 'Pan Térmico',
+      regulatorsActive: 0,
+      regulatorsRequired: 0,
+      checkpointActive: false,
       objective: this.objective,
       prompt: this.contextPrompt || this.tutorialPrompt,
       elapsedMs: this.getElapsedMs(),
       enemiesDefeated: this.enemiesDefeated,
       lowOxygen: this.oxygenSystem?.isLow() ?? false,
+      damageTaken: 0,
+      checkpointsUsed: 0,
+      fallbacksUsed: [],
     };
   }
 

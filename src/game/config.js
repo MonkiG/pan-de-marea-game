@@ -3,6 +3,7 @@ import { DEBUG_PHYSICS, GAME_HEIGHT, GAME_WIDTH } from './constants.js';
 import { BootScene } from './scenes/BootScene.js';
 import { PreloadScene } from './scenes/PreloadScene.js';
 import { LevelOneScene } from './scenes/LevelOneScene.js';
+import { LevelTwoScene } from './scenes/LevelTwoScene.js';
 
 export const createGameConfig = (parent) => ({
   type: Phaser.AUTO,
@@ -31,5 +32,5 @@ export const createGameConfig = (parent) => ({
     pixelArt: true,
     roundPixels: true,
   },
-  scene: [BootScene, PreloadScene, LevelOneScene],
+  scene: [BootScene, PreloadScene, LevelOneScene, LevelTwoScene],
 });

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { eventBus } from '../game/EventBus.js';
 
-export function GameContainer({ settings }) {
+export function GameContainer({ settings, initialLevel }) {
   const containerRef = useRef(null);
   const gameRef = useRef(null);
 
@@ -11,7 +11,7 @@ export function GameContainer({ settings }) {
     import('../game/PhaserGame.js')
       .then(({ createPhaserGame }) => {
         if (cancelled || !containerRef.current) return;
-        gameRef.current = createPhaserGame(containerRef.current, settings);
+        gameRef.current = createPhaserGame(containerRef.current, settings, initialLevel);
       })
       .catch((error) => eventBus.emit('game:error', error));
     return () => {

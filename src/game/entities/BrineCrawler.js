@@ -13,6 +13,7 @@ export class BrineCrawler extends Phaser.Physics.Arcade.Sprite {
     super(scene, data.x, data.y, texture, frame);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(14);
 
     this.id = data.id;
     this.player = player;

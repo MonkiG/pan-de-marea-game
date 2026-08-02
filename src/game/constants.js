@@ -3,6 +3,13 @@ export const GAME_HEIGHT = 360;
 export const DEBUG_PHYSICS = false;
 export const DEBUG_MOVEMENT = false;
 export const DEBUG_LEVEL_GEOMETRY = false;
+export const DEBUG_LEVEL_LAYOUT = false;
+export const DEV_UNLOCK_ALL_LEVELS = false;
+
+export const LEVEL_IDS = Object.freeze({
+  bakery: 'level-one',
+  market: 'level-two',
+});
 
 export const PLAYER = Object.freeze({
   maxHealth: 3,
@@ -53,6 +60,47 @@ export const RECIPE = Object.freeze({
   bakeTimeMs: 1500,
 });
 
+export const PRESSURE_RECIPE = Object.freeze({
+  yeastRequired: 5,
+  regulatorsRequired: 3,
+  bakeTimeMs: 1700,
+});
+
+export const MARKET_OXYGEN = Object.freeze({
+  ...OXYGEN,
+  drainPerSecond: 1.4,
+  yeastRecovery: 6,
+  stationRecovery: 45,
+  criticalThreshold: 12,
+});
+
+export const SPITTER = Object.freeze({
+  maxHealth: 3,
+  contactDamage: 1,
+  projectileDamage: 1,
+  detectionRange: 320,
+  attackRange: 280,
+  minimumAttackRange: 70,
+  projectileSpeed: 115,
+  chargeDurationMs: 650,
+  attackCooldownMs: 1800,
+  recoveryDurationMs: 750,
+  activationDistance: 520,
+});
+
+export const SENTINEL = Object.freeze({
+  maxHealth: 6,
+  damage: 1,
+  detectionRange: 220,
+  walkSpeed: 32,
+  attackRange: 55,
+  basicAttackCooldownMs: 1500,
+  chargeDistance: 130,
+  chargeCooldownMs: 4000,
+  stunDurationMs: 900,
+  activationDistance: 440,
+});
+
 export const OBJECTIVES = Object.freeze({
   explore: 'Explora la panadería',
   collect: 'Recolecta 3 Levaduras de Burbuja',
@@ -60,4 +108,15 @@ export const OBJECTIVES = Object.freeze({
   bake: 'Prepara el Pan Térmico',
   gate: 'Activa la compuerta',
   complete: 'Nivel completado',
+});
+
+export const MARKET_OBJECTIVES = Object.freeze({
+  explore: 'Explora el Mercado Sumergido',
+  regulators: 'Activa los 3 reguladores de presión',
+  collect: 'Recolecta 5 Levaduras de Burbuja',
+  sentinel: 'Supera al guardián del Coral Negro',
+  oven: 'Llega a la estación de presión',
+  bake: 'Prepara el Pan de Presión',
+  exit: 'Abre la salida del mercado',
+  complete: 'El Mercado Sumergido ha sido atravesado',
 });

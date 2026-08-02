@@ -13,6 +13,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, texture, frame);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setDepth(15);
 
     this.setScale(texture === 'fallback-player' ? 1 : 0.42);
     this.setOrigin(0.5, 0.82);
