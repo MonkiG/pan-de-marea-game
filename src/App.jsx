@@ -38,8 +38,10 @@ const initialSnapshot = Object.freeze({
   fallbacksUsed: [],
 });
 
-const artReviewMode = import.meta.env.DEV
-  && new URLSearchParams(window.location.search).get('art-review') === 'bigotes';
+const artReviewAsset = import.meta.env.DEV
+  ? new URLSearchParams(window.location.search).get('art-review')
+  : null;
+const artReviewMode = ['bigotes', 'rastrero', 'escupemasas', 'sentinela'].includes(artReviewAsset);
 
 export function App() {
   const [view, setView] = useState(artReviewMode ? 'game' : 'menu');
@@ -114,7 +116,7 @@ export function App() {
           onBack={() => setView('menu')}
         />
       ) : (
-        <section className="game-screen" aria-label={artReviewMode ? 'Revisión de arte de Bigotes' : snapshot.levelName}>
+        <section className="game-screen" aria-label={artReviewMode ? `Revisión de arte: ${artReviewAsset}` : snapshot.levelName}>
           <GameContainer settings={settings} initialLevel={selectedLevel} />
           {!artReviewMode && <HUD snapshot={snapshot} />}
           {!artReviewMode && snapshot.status === 'loading' && (

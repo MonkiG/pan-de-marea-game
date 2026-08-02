@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { SPITTER } from '../constants.js';
 import { createExpandedBounds } from '../systems/ActivationBounds.js';
+import { IS_PIXEL_ART_V1 } from '../art/artProfile.js';
 
 const play = (enemy, key, ignoreIfPlaying = true) => {
   if (enemy.scene.anims.exists(key)) enemy.play(key, ignoreIfPlaying);
@@ -25,9 +26,10 @@ export class AbyssalSpitter extends Phaser.Physics.Arcade.Sprite {
     this.stateUntil = 0;
     this.nextAttackAt = 0;
     this.direction = -1;
-    this.setScale(texture === 'spitter-sheet' ? 0.42 : 1);
-    this.setOrigin(0.5, 0.82);
-    if (texture === 'spitter-sheet') this.setSize(132, 66).setOffset(23, 48);
+    this.setScale(texture === 'spitter-sheet' && !IS_PIXEL_ART_V1 ? 0.42 : 1);
+    this.setOrigin(0.5, IS_PIXEL_ART_V1 ? 1 : 0.82);
+    if (texture === 'spitter-sheet' && IS_PIXEL_ART_V1) this.setSize(60, 38).setOffset(10, 26);
+    else if (texture === 'spitter-sheet') this.setSize(132, 66).setOffset(23, 48);
     this.setCollideWorldBounds(true);
     play(this, 'spitter-idle');
   }
@@ -95,7 +97,7 @@ export class AbyssalSpitter extends Phaser.Physics.Arcade.Sprite {
     this.state = state;
     this.stateUntil = until;
     const animation = {
-      idle: 'spitter-idle', move: 'spitter-idle', charge: 'spitter-charge',
+      idle: 'spitter-idle', move: IS_PIXEL_ART_V1 ? 'spitter-move' : 'spitter-idle', charge: 'spitter-charge',
       rangedAttack: 'spitter-attack', recover: 'spitter-idle', hurt: 'spitter-hurt',
       stunned: 'spitter-hurt', defeated: 'spitter-defeat',
     }[state];

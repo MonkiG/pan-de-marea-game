@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CRAWLER } from '../constants.js';
+import { IS_PIXEL_ART_V1 } from '../art/artProfile.js';
 
 const playState = (crawler, state) => {
   const key = `crawler-${state}`;
@@ -25,9 +26,10 @@ export class BrineCrawler extends Phaser.Physics.Arcade.Sprite {
     this.direction = -1;
     this.stateUntil = scene.time.now + 350;
     this.nextAttackAt = 0;
-    this.setScale(texture === 'fallback-enemy' ? 1 : 0.43);
-    this.setOrigin(0.5, 0.82);
-    this.setSize(125, 78).setOffset(38, 50);
+    this.setScale(texture === 'fallback-enemy' || IS_PIXEL_ART_V1 ? 1 : 0.43);
+    this.setOrigin(0.5, IS_PIXEL_ART_V1 ? 1 : 0.82);
+    if (texture === 'crawler-sheet' && IS_PIXEL_ART_V1) this.setSize(58, 30).setOffset(11, 18);
+    else if (texture === 'crawler-sheet') this.setSize(125, 78).setOffset(38, 50);
     this.setCollideWorldBounds(true);
     playState(this, 'idle');
   }

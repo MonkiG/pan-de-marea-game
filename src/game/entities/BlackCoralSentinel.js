@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SENTINEL } from '../constants.js';
+import { IS_PIXEL_ART_V1 } from '../art/artProfile.js';
 
 const play = (enemy, key, ignore = true) => {
   if (enemy.scene.anims.exists(key)) enemy.play(key, ignore);
@@ -26,9 +27,10 @@ export class BlackCoralSentinel extends Phaser.Physics.Arcade.Sprite {
     this.strikeAt = 0;
     this.strikeAttempted = false;
     this.direction = -1;
-    this.setScale(texture === 'sentinel-sheet' ? 0.48 : 1);
-    this.setOrigin(0.5, 0.84);
-    if (texture === 'sentinel-sheet') this.setSize(108, 152).setOffset(28, 32);
+    this.setScale(texture === 'sentinel-sheet' && !IS_PIXEL_ART_V1 ? 0.48 : 1);
+    this.setOrigin(0.5, IS_PIXEL_ART_V1 ? 1 : 0.84);
+    if (texture === 'sentinel-sheet' && IS_PIXEL_ART_V1) this.setSize(64, 92).setOffset(16, 20);
+    else if (texture === 'sentinel-sheet') this.setSize(108, 152).setOffset(28, 32);
     this.setCollideWorldBounds(true);
     play(this, 'sentinel-idle');
   }
@@ -103,7 +105,7 @@ export class BlackCoralSentinel extends Phaser.Physics.Arcade.Sprite {
     this.state = state;
     this.stateUntil = until;
     const animation = {
-      dormant: 'sentinel-idle', idle: 'sentinel-idle', alert: 'sentinel-idle',
+      dormant: 'sentinel-idle', idle: 'sentinel-idle', alert: IS_PIXEL_ART_V1 ? 'sentinel-alert' : 'sentinel-idle',
       walk: 'sentinel-walk', basicAttack: 'sentinel-attack', chargeAttack: 'sentinel-charge',
       hurt: 'sentinel-hurt', stunned: 'sentinel-hurt', defeated: 'sentinel-defeat',
     }[state];

@@ -8,7 +8,9 @@ export const ASSET_REGISTRY = Object.freeze({
     playerAttackEffect: { key: 'player-attack-effect', path: 'pixel-art/v1/effects/player-attack.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 192, height: 32 },
     hitSpark: { key: 'hit-spark', path: 'pixel-art/v1/effects/hit-spark.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 24 },
   } : {}),
-  brineCrawler: { key: 'crawler-sheet', path: 'rastrero-de-salmuera.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-enemy' },
+  brineCrawler: IS_PIXEL_ART_V1
+    ? { key: 'crawler-sheet', path: 'pixel-art/v1/characters/brine-crawler.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 640, height: 336, fallback: 'fallback-enemy' }
+    : { key: 'crawler-sheet', path: 'rastrero-de-salmuera.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-enemy' },
   bubbleYeast: { key: 'yeast-sheet', path: 'golden-bubble-yeast.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-yeast' },
   thermalGate: { key: 'gate-sheet', path: 'rusty-undewater-portal.png', type: 'image-sheet', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024, fallback: 'fallback-gate' },
   bakeryBackgroundFar: { key: 'bakery-bg-1', path: 'panaderia-undida-bg-1.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
@@ -18,8 +20,12 @@ export const ASSET_REGISTRY = Object.freeze({
   marketBackgroundFar: { key: 'market-bg-1', path: 'mercado-undido-1.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
   marketBackgroundMid: { key: 'market-bg-2', path: 'mercado-undido-2.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
   marketBackgroundNear: { key: 'market-bg-3', path: 'mercado-undido-3.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
-  abyssalSpitter: { key: 'spitter-sheet', path: 'escupemasas.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-spitter' },
-  blackCoralSentinel: { key: 'sentinel-sheet', path: 'sentinela-del-coral-negro.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1024, height: 1536, fallback: 'fallback-sentinel' },
+  abyssalSpitter: IS_PIXEL_ART_V1
+    ? { key: 'spitter-sheet', path: 'pixel-art/v1/characters/abyssal-spitter.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 384, fallback: 'fallback-spitter' }
+    : { key: 'spitter-sheet', path: 'escupemasas.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-spitter' },
+  blackCoralSentinel: IS_PIXEL_ART_V1
+    ? { key: 'sentinel-sheet', path: 'pixel-art/v1/characters/black-coral-sentinel.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 768, height: 784, fallback: 'fallback-sentinel' }
+    : { key: 'sentinel-sheet', path: 'sentinela-del-coral-negro.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1024, height: 1536, fallback: 'fallback-sentinel' },
   corruptedDoughProjectile: { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-projectile' },
   pressureRegulator: { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-regulator' },
   pressureOven: { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-pressure-oven' },
