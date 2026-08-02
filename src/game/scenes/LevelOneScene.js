@@ -46,7 +46,7 @@ export class LevelOneScene extends Phaser.Scene {
     this.inventory = new InventorySystem();
     this.oxygenSystem = new OxygenSystem();
     this.recipeSystem = new RecipeSystem();
-    this.audioManager = new AudioManager();
+    this.audioManager = new AudioManager(this);
     this.audioManager.setMuted(this.settings.muted);
 
     this.physics.world.setBounds(0, 0, LEVEL_ONE_DATA.worldWidth, LEVEL_ONE_DATA.worldHeight);
@@ -406,6 +406,7 @@ export class LevelOneScene extends Phaser.Scene {
 
   pauseGame() {
     if (this.status !== 'playing') return;
+    this.audioManager.stopAll();
     this.status = 'paused';
     const snapshot = this.getSnapshot();
     eventBus.emit('game:pause', snapshot);

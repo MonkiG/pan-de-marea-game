@@ -47,7 +47,7 @@ export class LevelTwoScene extends Phaser.Scene {
       ...(this.game.registry.get('settings') ?? {}),
     };
     this.assetResolver = new AssetResolver(this.textures, (payload) => eventBus.emit('fallback:used', payload));
-    this.audioManager = new AudioManager();
+    this.audioManager = new AudioManager(this);
     this.audioManager.setMuted(this.settings.muted);
     this.inventory = new InventorySystem();
     this.oxygenSystem = new OxygenSystem(MARKET_OXYGEN);
@@ -740,6 +740,7 @@ export class LevelTwoScene extends Phaser.Scene {
 
   pauseGame() {
     if (this.status !== 'playing') return;
+    this.audioManager.stopAll();
     this.status = 'paused';
     const snapshot = this.getSnapshot();
     eventBus.emit('game:pause', snapshot);
