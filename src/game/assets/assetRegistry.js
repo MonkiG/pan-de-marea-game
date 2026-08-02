@@ -1,5 +1,13 @@
+import { IS_PIXEL_ART_V1 } from '../art/artProfile.js';
+
 export const ASSET_REGISTRY = Object.freeze({
-  bigotes: { key: 'bigotes-sheet', path: 'bigotes-assets.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1024, height: 1536, fallback: 'fallback-player' },
+  bigotes: IS_PIXEL_ART_V1
+    ? { key: 'bigotes-sheet', path: 'pixel-art/v1/characters/bigotes.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 384, height: 512, fallback: 'fallback-player' }
+    : { key: 'bigotes-sheet', path: 'bigotes-assets.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1024, height: 1536, fallback: 'fallback-player' },
+  ...(IS_PIXEL_ART_V1 ? {
+    playerAttackEffect: { key: 'player-attack-effect', path: 'pixel-art/v1/effects/player-attack.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 192, height: 32 },
+    hitSpark: { key: 'hit-spark', path: 'pixel-art/v1/effects/hit-spark.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 24 },
+  } : {}),
   brineCrawler: { key: 'crawler-sheet', path: 'rastrero-de-salmuera.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-enemy' },
   bubbleYeast: { key: 'yeast-sheet', path: 'golden-bubble-yeast.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-yeast' },
   thermalGate: { key: 'gate-sheet', path: 'rusty-undewater-portal.png', type: 'image-sheet', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024, fallback: 'fallback-gate' },

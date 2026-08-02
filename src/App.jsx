@@ -38,8 +38,11 @@ const initialSnapshot = Object.freeze({
   fallbacksUsed: [],
 });
 
+const artReviewMode = import.meta.env.DEV
+  && new URLSearchParams(window.location.search).get('art-review') === 'bigotes';
+
 export function App() {
-  const [view, setView] = useState('menu');
+  const [view, setView] = useState(artReviewMode ? 'game' : 'menu');
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [settings, setSettings] = useState({ muted: false, screenShake: true, reducedParticles: false });
   const [selectedLevel, setSelectedLevel] = useState('level-one');
@@ -111,13 +114,13 @@ export function App() {
           onBack={() => setView('menu')}
         />
       ) : (
-        <section className="game-screen" aria-label={snapshot.levelName}>
+        <section className="game-screen" aria-label={artReviewMode ? 'Revisión de arte de Bigotes' : snapshot.levelName}>
           <GameContainer settings={settings} initialLevel={selectedLevel} />
-          <HUD snapshot={snapshot} />
-          {snapshot.status === 'loading' && (
+          {!artReviewMode && <HUD snapshot={snapshot} />}
+          {!artReviewMode && snapshot.status === 'loading' && (
             <div className="loading-badge" role="status">Sumergiendo la panadería…</div>
           )}
-          {snapshot.status === 'paused' && (
+          {!artReviewMode && snapshot.status === 'paused' && (
             <PauseMenu
               settings={settings}
               onSettingsChange={updateSettings}
@@ -126,7 +129,7 @@ export function App() {
               onMenu={returnToMenu}
             />
           )}
-          {['defeat', 'complete'].includes(snapshot.status) && (
+          {!artReviewMode && ['defeat', 'complete'].includes(snapshot.status) && (
             <ResultScreen
               snapshot={snapshot}
               onRestart={() => eventBus.emit('command:restart')}
@@ -135,9 +138,11 @@ export function App() {
               onBakery={() => changeLevel('level-one')}
             />
           )}
-          <p className="small-window-notice" role="status">
-            Amplía la ventana para jugar con comodidad.
-          </p>
+          {!artReviewMode && (
+            <p className="small-window-notice" role="status">
+              Amplía la ventana para jugar con comodidad.
+            </p>
+          )}
         </section>
       )}
       {!gameActive && <NonGameLinks />}

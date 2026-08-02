@@ -185,7 +185,7 @@ export class LevelOneScene extends Phaser.Scene {
     this.physics.add.collider(this.enemies, this.walkableSurfaces);
     this.physics.add.overlap(this.player, this.yeasts, (_player, yeast) => this.collectYeast(yeast));
     this.physics.add.overlap(this.player.attackZone, this.enemies, (_zone, enemy) => {
-      if (this.player.canHit(enemy)) enemy.takeDamage(1, this.player.x);
+      this.player.hitEnemy(enemy);
     });
     this.physics.add.overlap(this.player, this.ventZone, () => this.useOxygenVent());
   }

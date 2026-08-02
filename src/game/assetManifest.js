@@ -1,4 +1,5 @@
 import { getLoadableAssets } from './assets/assetRegistry.js';
+import { IS_PIXEL_ART_V1 } from './art/artProfile.js';
 
 export const ASSET_MANIFEST = Object.freeze(getLoadableAssets().map((asset) => ({
   key: asset.key,
@@ -16,14 +17,33 @@ const makeRow = (prefix, count, x, y, width, height, step = width) =>
     height,
   }));
 
+export const BIGOTES_LEGACY_FRAMES = Object.freeze([
+  ...makeRow('bigotes-idle', 6, 16, 40, 160, 180, 166),
+  ...makeRow('bigotes-swim', 6, 16, 230, 160, 180, 166),
+  ...makeRow('bigotes-attack', 6, 16, 415, 160, 180, 166),
+  ...makeRow('bigotes-hurt', 4, 16, 600, 190, 180, 205),
+  ...makeRow('bigotes-defeat', 6, 16, 800, 170, 175, 166),
+]);
+
+export const BIGOTES_PIXEL_FRAMES = Object.freeze([
+  ...makeRow('bigotes-idle', 6, 0, 0, 48, 64),
+  ...makeRow('bigotes-swim', 8, 0, 64, 48, 64),
+  ...makeRow('bigotes-jump', 3, 0, 128, 48, 64),
+  ...makeRow('bigotes-fall', 4, 0, 192, 48, 64),
+  ...makeRow('bigotes-attack', 8, 0, 256, 48, 64),
+  ...makeRow('bigotes-hurt', 4, 0, 320, 48, 64),
+  ...makeRow('bigotes-defeat', 6, 0, 384, 48, 64),
+  ...makeRow('bigotes-interact', 4, 0, 448, 48, 64),
+]);
+
 export const FRAME_MANIFEST = Object.freeze({
   'bigotes-sheet': [
-    ...makeRow('bigotes-idle', 6, 16, 40, 160, 180, 166),
-    ...makeRow('bigotes-swim', 6, 16, 230, 160, 180, 166),
-    ...makeRow('bigotes-attack', 6, 16, 415, 160, 180, 166),
-    ...makeRow('bigotes-hurt', 4, 16, 600, 190, 180, 205),
-    ...makeRow('bigotes-defeat', 6, 16, 800, 170, 175, 166),
+    ...(IS_PIXEL_ART_V1 ? BIGOTES_PIXEL_FRAMES : BIGOTES_LEGACY_FRAMES),
   ],
+  ...(IS_PIXEL_ART_V1 ? {
+    'player-attack-effect': makeRow('player-attack-effect', 6, 0, 0, 32, 32),
+    'hit-spark': makeRow('hit-spark', 6, 0, 0, 24, 24),
+  } : {}),
   'crawler-sheet': [
     ...makeRow('crawler-idle', 6, 205, 45, 195, 145, 195),
     ...makeRow('crawler-patrol', 6, 165, 205, 190, 145, 170),
@@ -64,19 +84,24 @@ export const FRAME_MANIFEST = Object.freeze({
   ],
 });
 
-export function registerManifestFrames(scene) {
-  Object.entries(FRAME_MANIFEST).forEach(([textureKey, frames]) => {
-    if (!scene.textures.exists(textureKey)) {
-      console.warn(`[Assets] Falta ${textureKey}; sus animaciones usarán fallback.`);
+export function registerTextureFrames(scene, textureKey, frames) {
+  if (!scene.textures.exists(textureKey)) {
+    console.warn(`[Assets] Falta ${textureKey}; sus animaciones usarán fallback.`);
+    return false;
+  }
+  const texture = scene.textures.get(textureKey);
+  frames.forEach(({ name, x, y, width, height }) => {
+    if (x < 0 || y < 0 || x + width > texture.source[0].width || y + height > texture.source[0].height) {
+      console.warn(`[Assets] Recorte inválido ${name}; se omite.`);
       return;
     }
-    const texture = scene.textures.get(textureKey);
-    frames.forEach(({ name, x, y, width, height }) => {
-      if (x < 0 || y < 0 || x + width > texture.source[0].width || y + height > texture.source[0].height) {
-        console.warn(`[Assets] Recorte inválido ${name}; se omite.`);
-        return;
-      }
-      if (!texture.has(name)) texture.add(name, 0, x, y, width, height);
-    });
+    if (!texture.has(name)) texture.add(name, 0, x, y, width, height);
+  });
+  return true;
+}
+
+export function registerManifestFrames(scene) {
+  Object.entries(FRAME_MANIFEST).forEach(([textureKey, frames]) => {
+    registerTextureFrames(scene, textureKey, frames);
   });
 }

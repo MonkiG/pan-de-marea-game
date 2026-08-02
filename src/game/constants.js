@@ -4,7 +4,9 @@ export const DEBUG_PHYSICS = false;
 export const DEBUG_MOVEMENT = false;
 export const DEBUG_LEVEL_GEOMETRY = false;
 export const DEBUG_LEVEL_LAYOUT = false;
-export const DEV_UNLOCK_ALL_LEVELS = false;
+export const DEV_UNLOCK_ALL_LEVELS = import.meta.env?.DEV && typeof window !== 'undefined'
+  ? new URLSearchParams(window.location.search).has('unlock-all')
+  : false;
 
 export const LEVEL_IDS = Object.freeze({
   bakery: 'level-one',
@@ -28,11 +30,11 @@ export const PLAYER = Object.freeze({
   maxFallSpeed: 390,
   groundCheckDistance: 7,
   groundCheckInset: 4,
-  collider: Object.freeze({ width: 68, height: 112, offsetX: 46, offsetY: 48 }),
   invulnerabilityMs: 1000,
-  attackCooldownMs: 400,
-  attackWindupMs: 90,
-  attackActiveMs: 110,
+  attack: Object.freeze({
+    cooldownMs: 500,
+    damage: 1,
+  }),
 });
 
 export const OXYGEN = Object.freeze({

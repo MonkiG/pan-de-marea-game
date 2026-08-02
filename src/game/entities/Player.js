@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PLAYER } from '../constants.js';
+import { PLAYER_ART_PROFILE, IS_PIXEL_ART_V1 } from '../art/artProfile.js';
 import { applyDamage } from '../systems/CombatSystem.js';
 
 const safePlay = (sprite, key, ignoreIfPlaying = true) => {
@@ -15,10 +16,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
     this.setDepth(15);
 
-    this.setScale(texture === 'fallback-player' ? 1 : 0.42);
-    this.setOrigin(0.5, 0.82);
-    this.setSize(PLAYER.collider.width, PLAYER.collider.height)
-      .setOffset(PLAYER.collider.offsetX, PLAYER.collider.offsetY);
+    const visual = texture === 'fallback-player'
+      ? { scale: 1, origin: { x: 0.5, y: 1 }, collider: { width: 26, height: 46, offsetX: 7, offsetY: 10 } }
+      : PLAYER_ART_PROFILE;
+    this.setScale(visual.scale);
+    this.setOrigin(visual.origin.x, visual.origin.y);
+    this.setSize(visual.collider.width, visual.collider.height)
+      .setOffset(visual.collider.offsetX, visual.collider.offsetY);
     this.setCollideWorldBounds(true);
     this.body.setGravityY(PLAYER.gravity - scene.physics.world.gravity.y);
     this.setMaxVelocity(PLAYER.maxRunSpeed, PLAYER.maxFallSpeed);
@@ -34,6 +38,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.facing = 1;
     this.controlsEnabled = true;
     this.isAttacking = false;
+    this.attackActive = false;
     this.isDefeated = false;
     this.hitThisAttack = new Set();
 
@@ -49,10 +54,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
     this.cursors = scene.input.keyboard.createCursorKeys();
 
-    this.attackZone = scene.add.zone(x, y, 58, 48);
+    const { hitbox } = PLAYER_ART_PROFILE.attack;
+    this.attackZone = scene.add.zone(x, y, hitbox.width, hitbox.height);
     scene.physics.add.existing(this.attackZone);
     this.attackZone.body.setAllowGravity(false);
     this.attackZone.body.enable = false;
+    this.attackEffect = IS_PIXEL_ART_V1 && scene.textures.exists('player-attack-effect')
+      ? scene.add.sprite(x, y, 'player-attack-effect', 'player-attack-effect-0')
+        .setOrigin(0.5)
+        .setDepth(16)
+        .setVisible(false)
+      : null;
+    this.on(Phaser.Animations.Events.ANIMATION_UPDATE, this.handleAnimationUpdate, this);
+    this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, this.handleAnimationComplete, this);
     safePlay(this, 'bigotes-idle');
   }
 
@@ -115,7 +129,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (attackPressed) this.attack(time);
 
     if (!this.isAttacking) {
-      if (!grounded) safePlay(this, 'bigotes-swim');
+      if (!grounded && IS_PIXEL_ART_V1) {
+        safePlay(this, this.body.velocity.y < 0 ? 'bigotes-jump' : 'bigotes-fall');
+      } else if (!grounded) safePlay(this, 'bigotes-swim');
       else if (Math.abs(this.body.velocity.x) > 12) safePlay(this, 'bigotes-swim');
       else safePlay(this, 'bigotes-idle');
     }
@@ -146,35 +162,80 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   attack(time) {
-    if (this.isAttacking || time - this.lastAttackAt < PLAYER.attackCooldownMs) return;
+    if (this.isAttacking || time - this.lastAttackAt < PLAYER.attack.cooldownMs) return;
     this.isAttacking = true;
     this.lastAttackAt = time;
     this.hitThisAttack.clear();
     this.setAccelerationX(0);
     safePlay(this, 'bigotes-attack', false);
     this.scene.audioManager?.play('attack');
-
-    this.scene.time.delayedCall(PLAYER.attackWindupMs, () => {
-      if (!this.active || this.isDefeated) return;
-      this.attackZone.body.enable = true;
-      this.syncAttackZone();
-      this.scene.time.delayedCall(PLAYER.attackActiveMs, () => {
-        if (!this.active) return;
-        this.attackZone.body.enable = false;
-        this.isAttacking = false;
-      });
-    });
+    this.attackFallbackTimer?.remove(false);
+    this.attackFallbackTimer = this.scene.time.delayedCall(
+      PLAYER_ART_PROFILE.attack.fallbackDurationMs,
+      () => this.active && this.isAttacking && this.finishAttack(),
+    );
   }
 
   syncAttackZone() {
-    this.attackZone.setPosition(this.x + this.facing * 50, this.y - 34);
+    const { hitbox, effect } = PLAYER_ART_PROFILE.attack;
+    this.attackZone.setPosition(this.x + this.facing * hitbox.offsetX, this.y + hitbox.offsetY);
     this.attackZone.body?.updateFromGameObject();
+    if (this.attackEffect && effect) {
+      this.attackEffect
+        .setPosition(this.x + this.facing * effect.offsetX, this.y + effect.offsetY)
+        .setFlipX(this.facing < 0);
+    }
+  }
+
+  handleAnimationUpdate(animation, frame) {
+    if (!this.isAttacking || animation.key !== 'bigotes-attack') return;
+    const frameIndex = Number.parseInt(String(frame.textureFrame).split('-').at(-1), 10);
+    this.setAttackActive(PLAYER_ART_PROFILE.attack.activeFrames.includes(frameIndex));
+  }
+
+  handleAnimationComplete(animation) {
+    if (animation.key === 'bigotes-attack' && this.isAttacking) this.finishAttack();
+  }
+
+  setAttackActive(active) {
+    if (this.attackActive === active) return;
+    this.attackActive = active;
+    this.attackZone.body.enable = active;
+    this.syncAttackZone();
+    if (!this.attackEffect) return;
+    this.attackEffect.setVisible(active);
+    if (active) safePlay(this.attackEffect, 'player-attack-effect-animation', false);
+    else this.attackEffect.stop();
+  }
+
+  finishAttack() {
+    this.attackFallbackTimer?.remove(false);
+    this.attackFallbackTimer = null;
+    this.setAttackActive(false);
+    this.isAttacking = false;
   }
 
   canHit(enemy) {
     if (!this.attackZone.body.enable || this.hitThisAttack.has(enemy)) return false;
     this.hitThisAttack.add(enemy);
     return true;
+  }
+
+  hitEnemy(enemy) {
+    if (!this.canHit(enemy)) return false;
+    const hitConfirmed = enemy.takeDamage(PLAYER.attack.damage, this.x);
+    if (hitConfirmed) this.spawnHitSpark(enemy);
+    return hitConfirmed;
+  }
+
+  spawnHitSpark(enemy) {
+    if (!IS_PIXEL_ART_V1 || !this.scene.textures.exists('hit-spark')) return;
+    const spark = this.scene.add.sprite(enemy.x, enemy.y - 8, 'hit-spark', 'hit-spark-0')
+      .setDepth(21)
+      .setFlipX(this.facing < 0);
+    safePlay(spark, 'hit-spark-animation', false);
+    spark.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => spark.destroy());
+    this.scene.time.delayedCall(450, () => spark.active && spark.destroy());
   }
 
   consumeInteractPressed() {
@@ -192,6 +253,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     );
     if (!result.applied) return false;
 
+    if (this.isAttacking) this.finishAttack();
     this.health = result.health;
     this.invulnerableUntil = result.invulnerableUntil;
     this.setVelocity(sourceX < this.x ? 115 : -115, -105);
@@ -213,7 +275,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   defeat() {
     this.isDefeated = true;
     this.controlsEnabled = false;
-    this.attackZone.body.enable = false;
+    this.finishAttack();
     this.setAcceleration(0);
     safePlay(this, 'bigotes-defeat', false);
   }
@@ -224,6 +286,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   destroy(fromScene) {
+    this.attackFallbackTimer?.remove(false);
+    this.attackEffect?.destroy();
     this.attackZone?.destroy();
     super.destroy(fromScene);
   }

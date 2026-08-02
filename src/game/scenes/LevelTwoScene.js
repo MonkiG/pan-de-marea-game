@@ -343,7 +343,7 @@ export class LevelTwoScene extends Phaser.Scene {
     this.physics.add.collider(this.projectiles, this.solidObstacles, (projectile) => this.splashProjectile(projectile));
     this.physics.add.overlap(this.player, this.yeasts, (_player, yeast) => this.collectYeast(yeast));
     this.physics.add.overlap(this.player.attackZone, this.enemies, (_zone, enemy) => {
-      if (this.player.canHit(enemy)) enemy.takeDamage(1, this.player.x);
+      this.player.hitEnemy(enemy);
     });
     this.physics.add.overlap(this.player, this.projectiles, (_player, projectile) => {
       if (!projectile.active) return;

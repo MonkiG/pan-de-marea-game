@@ -1,9 +1,18 @@
+import { IS_PIXEL_ART_V1, PLAYER_ANIMATION_PROFILE } from '../art/artProfile.js';
+
+const playerAnimations = Object.entries(PLAYER_ANIMATION_PROFILE).map(([name, definition]) => ({
+  key: `bigotes-${name}`,
+  texture: 'bigotes-sheet',
+  prefix: `bigotes-${name}`,
+  ...definition,
+}));
+
 export const ANIMATION_DATA = Object.freeze([
-  { key: 'bigotes-idle', texture: 'bigotes-sheet', prefix: 'bigotes-idle', count: 6, frameRate: 6, repeat: -1 },
-  { key: 'bigotes-swim', texture: 'bigotes-sheet', prefix: 'bigotes-swim', count: 6, frameRate: 9, repeat: -1 },
-  { key: 'bigotes-attack', texture: 'bigotes-sheet', prefix: 'bigotes-attack', count: 6, frameRate: 14, repeat: 0 },
-  { key: 'bigotes-hurt', texture: 'bigotes-sheet', prefix: 'bigotes-hurt', count: 4, frameRate: 10, repeat: 0 },
-  { key: 'bigotes-defeat', texture: 'bigotes-sheet', prefix: 'bigotes-defeat', count: 6, frameRate: 7, repeat: 0 },
+  ...playerAnimations,
+  ...(IS_PIXEL_ART_V1 ? [
+    { key: 'player-attack-effect-animation', texture: 'player-attack-effect', prefix: 'player-attack-effect', count: 6, frameRate: 16, repeat: 0 },
+    { key: 'hit-spark-animation', texture: 'hit-spark', prefix: 'hit-spark', count: 6, frameRate: 18, repeat: 0 },
+  ] : []),
   { key: 'crawler-idle', texture: 'crawler-sheet', prefix: 'crawler-idle', count: 6, frameRate: 5, repeat: -1 },
   { key: 'crawler-patrol', texture: 'crawler-sheet', prefix: 'crawler-patrol', count: 6, frameRate: 8, repeat: -1 },
   { key: 'crawler-alert', texture: 'crawler-sheet', prefix: 'crawler-idle', count: 3, frameRate: 10, repeat: -1 },
