@@ -144,7 +144,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Prompt:** “No pushees la rama”
 **Resultado:** se canceló la publicación de `codex/pixel-art-v1`; los commits de esta tanda se conservaron únicamente en el repositorio local.
 **Archivos:** `PROMPTS.md`.
-**Commits:** pendiente (working tree).
+**Commits:** `abaf56a docs(art): document enemy pixel-art batch`.
 
 ## Feature: gobernanza y documentación del proyecto
 
