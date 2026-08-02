@@ -114,6 +114,15 @@ Usa la base técnica común, pero crea una capa de fondo opaca exacta de 640×36
 Usa la base técnica común, pero crea una capa de fondo con transparencia exacta de 640×360 px. Parallax cercano del Mercado Sumergido: cuerdas, telas desgastadas, algas, marcos parciales, pequeñas burbujas y coral en los bordes, dejando limpia la zona central. Repetición horizontal sin costura y contraste que no oculte enemigos. No incluir plataformas falsas, flechas, letreros, salidas, checkpoints ni señales que sugieran interacción.
 ```
 
+#### Contrato de producción aplicado a los seis fondos pixel-v1
+
+- Generar cada capa por separado en formato 16:9; usar Bigotes y, para Mercado, Sentinela como anclas de tamaño de píxel y densidad, mientras el PNG legacy funciona sólo como referencia conceptual.
+- Procesar a una resolución interna de 320×180 px, paleta cerrada de hasta 24 colores por nivel y ampliación 2× mediante nearest-neighbor hasta 640×360 px.
+- Hacer opacas las capas lejana y media. Generar la cercana sobre chroma `#ff00ff`, convertirla a alpha binario y mantener como mínimo el 60 % central libre de elementos.
+- Igualar la primera y última columna mediante una banda de costura determinista para repetición horizontal sin salto visible.
+- Integrar el resultado a escala 1×, sin `tilePositionY` y con `scrollFactorY = 0`; el fondo debe quedar anclado al viewport de 640×360 aunque el mundo del Nivel II tenga 720 px de alto.
+- Evitar superficies horizontales continuas, toldos o arcos alineados que puedan confundirse con suelo, plataformas, puertas u objetos activables.
+
 ## C. Combate y efectos P0
 
 ### 14. Arco de ataque de Bigotes — `effects/player-attack.png`

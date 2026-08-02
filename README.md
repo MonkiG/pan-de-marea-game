@@ -149,6 +149,31 @@ La lista completa de material existente, faltante y recomendado está en [`GUIA_
 
 La especificación para redibujar el proyecto como pixel art, incluyendo hojas uniformes, movimientos por enemigo y el contrato visual/técnico del ataque de Bigotes, está en [`GUIA_PIXEL_ART_Y_ANIMACIONES.md`](GUIA_PIXEL_ART_Y_ANIMACIONES.md).
 
+Los 41 prompts de producción están en [`pixel_art_prompt.md`](pixel_art_prompt.md). El piloto y el primer lote de personajes viven en paralelo a los PNG originales:
+
+- fuentes de ImageGen: `art-source/pixel-art/v1/`;
+- sprites normalizados: `assets/pixel-art/v1/`;
+- perfil oficial y predeterminado: `pixel-v1`;
+- perfil anterior disponible para comparación: `VITE_ART_PROFILE=legacy`.
+
+El juego carga los nuevos assets directamente con `npm run dev`, sin parámetros ni variables adicionales. En PowerShell, el perfil anterior puede ejecutarse de forma explícita con:
+
+```powershell
+$env:VITE_ART_PROFILE='legacy'
+npm run dev
+```
+
+Durante desarrollo, la escena de comparación acepta `?art-review=bigotes`, `?art-review=rastrero`, `?art-review=escupemasas` y `?art-review=sentinela`. También se puede activar temporalmente el perfil anterior mediante `?art-profile=legacy`; añade `&unlock-all` para revisar el Mercado sin completar antes la Panadería. La escena permite cambiar de animación y velocidad, pausar, avanzar por frames, alternar 1×/4×, usar `flipX` y ver el collider; Bigotes muestra además su hitbox. Para reconstruir y comprobar los PNG:
+
+```sh
+npm run art:process
+npm run art:validate
+```
+
+`art:process` aplica recorte, aislamiento por componentes, chroma, escala nearest-neighbor, paleta cerrada, alpha binario y ensamblado reproducible. En los fondos también normaliza a 320×180 internos, corrige la costura horizontal y amplía 2× hasta 640×360. `art:validate` comprueba dimensiones, cuadrícula, paleta, transparencia, bloques de píxel, costuras y celdas requeridas/no usadas. El perfil oficial `pixel-v1` incluye Bigotes, enemigos, Levadura, objetos interactivos, efectos, tileset modular y las seis capas parallax de ambos niveles.
+
+Los fondos pixel-v1 se muestran a escala 1×, sin offset vertical y anclados al viewport. El parallax sólo desplaza las capas horizontalmente, de modo que el Mercado no estira ni repite el fondo al recorrer su mundo vertical de 720 px.
+
 ## Spritesheets y recortes
 
 Las láminas no utilizan una cuadrícula uniforme: hay márgenes, padding y tamaños variables. Por ello se cargan como imágenes normales y `src/game/assetManifest.js` registra frames con `texture.add(nombre, sourceIndex, x, y, ancho, alto)`.
@@ -162,14 +187,10 @@ Para ajustar un frame:
 
 Si una textura o animación no se puede cargar, el juego avisa en consola y utiliza una figura de fallback.
 
-## Placeholders pendientes
+## Recursos pendientes
 
-- **Horno:** no existe un PNG independiente; se dibuja con Phaser Graphics y está preparado para sustituirse por una textura.
-- **Respiradero:** representación geométrica con brillo y burbujas.
-- **Partículas:** puntos reutilizables generados por Phaser.
 - **Audio:** no se encontraron archivos de sonido. `AudioManager` conserva las llamadas de salto, ataque, daño, recolección, horno, enemigo y compuerta, pero utiliza silencio sin romper la partida.
-- **Mercado:** reguladores, estación de presión, proyectil, checkpoint, puestos, coral peligroso y salida usan fallbacks identificables de Phaser Graphics hasta recibir arte definitivo.
-- Algunos estados comparten el frame estático más cercano cuando la lámina original no contiene una secuencia inequívoca.
+- Los fallbacks geométricos se conservan como protección técnica si una textura no puede cargarse, pero ya no forman parte de la presentación normal.
 
 ## Assets inventariados
 
@@ -223,7 +244,7 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 - Las ilustraciones originales son de alta resolución y estilo pictórico; el render nearest-neighbor mantiene bordes nítidos, pero no convierte el material en pixel art nativo.
 - El tileset y las hojas de animación tienen separaciones irregulares; ciertos recortes pueden necesitar ajuste artístico fino.
 - No hay audio real ni controles táctiles.
-- Los objetos exclusivos del Mercado citados en la auditoría todavía usan arte geométrico de fallback.
+- El perfil `legacy` conserva recortes irregulares y algunos estados aproximados; se mantiene sólo para comparación y contingencia.
 - El progreso de desbloqueo y checkpoint vive en memoria de la sesión; no se persiste todavía en `localStorage`.
 - Phaser constituye la mayor parte del tamaño del bundle; se carga de forma diferida para que el menú inicial siga siendo ligero.
 

@@ -1,3 +1,5 @@
+import { IS_PIXEL_ART_V1 } from '../art/artProfile.js';
+
 export class ThermalGate {
   constructor(scene, data) {
     this.scene = scene;
@@ -7,8 +9,9 @@ export class ThermalGate {
     this.state = 'inactive';
     const texture = scene.textures.exists('gate-sheet') ? 'gate-sheet' : 'fallback-gate';
     const frame = scene.textures.get(texture).has('gate-inactive-0') ? 'gate-inactive-0' : undefined;
-    this.sprite = scene.add.sprite(this.x, this.y, texture, frame).setOrigin(0.5, 0.82);
-    this.sprite.setScale(texture === 'fallback-gate' ? 1 : 0.54);
+    this.sprite = scene.add.sprite(this.x, this.y, texture, frame)
+      .setOrigin(0.5, IS_PIXEL_ART_V1 && texture === 'gate-sheet' ? 1 : 0.82);
+    this.sprite.setScale(texture === 'fallback-gate' || (IS_PIXEL_ART_V1 && texture === 'gate-sheet') ? 1 : 0.54);
     if (scene.anims.exists('gate-inactive')) this.sprite.play('gate-inactive');
   }
 

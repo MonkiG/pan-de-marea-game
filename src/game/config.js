@@ -4,6 +4,7 @@ import { BootScene } from './scenes/BootScene.js';
 import { PreloadScene } from './scenes/PreloadScene.js';
 import { LevelOneScene } from './scenes/LevelOneScene.js';
 import { LevelTwoScene } from './scenes/LevelTwoScene.js';
+import { ArtReviewScene } from './scenes/ArtReviewScene.js';
 
 export const createGameConfig = (parent) => ({
   type: Phaser.AUTO,
@@ -32,5 +33,5 @@ export const createGameConfig = (parent) => ({
     pixelArt: true,
     roundPixels: true,
   },
-  scene: [BootScene, PreloadScene, LevelOneScene, LevelTwoScene],
+  scene: [BootScene, PreloadScene, ArtReviewScene, LevelOneScene, LevelTwoScene],
 });

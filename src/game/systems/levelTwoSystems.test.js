@@ -14,11 +14,12 @@ import { mergeProgressionSnapshots, SessionProgress } from './SessionProgress.js
 afterEach(() => vi.restoreAllMocks());
 
 describe('assets del segundo nivel', () => {
-  it('audita los trece archivos reales y los fallbacks registrados', () => {
+  it('audita el inventario oficial sin assets faltantes', () => {
     const audit = createAssetAudit();
-    expect(audit.filesFound).toBe(13);
+    expect(audit.filesFound).toBe(audit.totalRegistered);
     expect(audit.usedLevelTwo).toBeGreaterThanOrEqual(10);
-    expect(audit.fallbackRequired).toBeGreaterThanOrEqual(7);
+    expect(audit.fallbackRequired).toBe(0);
+    expect(audit.invalid).toBe(0);
     expect(Object.keys(ASSET_REGISTRY)).toHaveLength(audit.totalRegistered);
   });
 

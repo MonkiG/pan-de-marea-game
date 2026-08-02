@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { IS_PIXEL_ART_V1 } from '../art/artProfile.js';
 
 export class BubbleYeast extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, data) {
@@ -10,9 +11,11 @@ export class BubbleYeast extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(13);
     this.id = data.id;
     this.collected = false;
-    this.setScale(texture === 'fallback-yeast' ? 1 : 0.32);
+    this.baseScale = texture === 'fallback-yeast' || IS_PIXEL_ART_V1 ? 1 : 0.32;
+    this.setScale(this.baseScale);
     this.body.setAllowGravity(false);
-    this.setCircle(texture === 'fallback-yeast' ? 11 : 45, texture === 'fallback-yeast' ? 1 : 40, texture === 'fallback-yeast' ? 1 : 42);
+    if (IS_PIXEL_ART_V1 && texture === 'yeast-sheet') this.setCircle(16, 8, 8);
+    else this.setCircle(texture === 'fallback-yeast' ? 11 : 45, texture === 'fallback-yeast' ? 1 : 40, texture === 'fallback-yeast' ? 1 : 42);
     if (scene.anims.exists('yeast-idle')) this.play('yeast-idle');
     scene.tweens.add({ targets: this, y: this.y - 8, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   }
@@ -22,7 +25,7 @@ export class BubbleYeast extends Phaser.Physics.Arcade.Sprite {
     const near = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y) < 120;
     if (near && this.scene.anims.exists('yeast-attract')) this.play('yeast-attract', true);
     else if (!near && this.scene.anims.exists('yeast-idle')) this.play('yeast-idle', true);
-    this.setScale((this.texture.key === 'fallback-yeast' ? 1 : 0.32) * (near ? 1.08 : 1));
+    this.setScale(this.baseScale * (near ? 1.08 : 1));
   }
 
   collect(onComplete) {

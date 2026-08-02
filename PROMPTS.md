@@ -117,13 +117,84 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 
 **Fecha:** 2026-08-02
 **Prompt:** “PLEASE IMPLEMENT THIS PLAN: Migración iterativa a pixel art cartoon”. El plan solicita publicar primero los cambios estables de `main`, crear `codex/pixel-art-v1`, producir un piloto no destructivo de Bigotes y combate mediante ImageGen, incorporar perfiles `legacy`/`pixel-v1`, sincronizar ataque e hitbox con frames, añadir herramientas de revisión/validación y escalar los demás assets sólo después de aprobar el piloto.
-**Resultado:** implementación en curso; se adoptó una dirección cartoon submarina de baja complejidad, assets versionados en paralelo y un primer hito limitado a Bigotes y efectos de combate.
-**Archivos:** `PROMPTS.md`, `art-source/pixel-art/v1/`, `assets/pixel-art/v1/`, configuración y sistemas de arte/combate relacionados.
+**Resultado:** se publicó primero el trabajo estable de `main` y se creó `codex/pixel-art-v1`. Con ImageGen integrado se produjo el frame maestro, ocho tiras de animación de Bigotes y dos efectos de combate; un pipeline local los normaliza a paleta cerrada, alpha binario, celdas exactas y hoja de 384×512 px. Se añadieron los perfiles `legacy`/`pixel-v1`, colliders por perfil, ataque de 36×30 px activo en frames 2–4, arco sincronizado, hit spark sólo tras daño confirmado y finalización del estado al completar la animación. La escena de desarrollo `?art-review=bigotes` permite comparar ambos estilos, cambiar animación/FPS, pausar, avanzar por frames, ampliar 1×/4×, invertir con `flipX` y ver collider/hitbox. El piloto fue validado en Panadería y Mercado; el resto de los 40 entregables queda deliberadamente pendiente de aprobación visual del usuario.
+**Archivos:** `PROMPTS.md`, `README.md`, `package.json`, `art-source/pixel-art/v1/`, `assets/pixel-art/v1/`, `scripts/pixel-art-png.mjs`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/App.jsx`, `src/game/art/artProfile.js`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/animationData.js`, `src/game/entities/Player.js`, `src/game/scenes/ArtReviewScene.js`, `src/game/scenes/PreloadScene.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js` y `src/game/config.js`.
 **Commits:**
 
 - `320faab fix(game): stabilize Mercado activation and progression`
 - `b035ebb docs(art): add pixel-art production workflow`
-- pendiente (piloto pixel-art)
+- `e414734 docs(prompts): record pixel-art commit references`
+- `b15738c feat(art): add Bigotes pixel-art pilot`
+- `e7b4547 feat(game): integrate frame-synced pixel-art combat`
+
+### PDM-020 — Generar los personajes restantes desde la base de Bigotes
+
+**Fecha:** 2026-08-02
+**Prompt:** “toma como base la configuracion de bigotes y genera los assets correspondientes del resto de personajes, esto para ahorrar tokens en ajustes que ya no deberian suceder porque ya esta la base del primer personaje y el contexto del juego”
+**Resultado:** se cerró el alcance a los tres enemigos con personaje jugable —Rastrero, Escupemasas y Sentinela— y se reutilizó sin reabrir decisiones la dirección de Bigotes: cartoon submarino, outline azul marino, 12–16 colores, baja densidad de detalle y fluidez mediante poses. ImageGen integrado produjo tres maestros y veinte filas de animación; el pipeline aísla poses por componentes, elimina chroma, normaliza paleta/alpha y ensambla hojas exactas de 640×336, 640×384 y 768×784 px. El perfil `pixel-v1` carga las nuevas hojas con frames, FPS, escala 1× y colliders propios; la escena de revisión acepta los tres personajes y se validaron ambos niveles. Proyectil, coleccionables, objetos, UI, tileset y fondos permanecen fuera de esta tanda.
+**Archivos:** `PROMPTS.md`, `README.md`, `art-source/pixel-art/v1/README.md`, `art-source/pixel-art/v1/rastrero/`, `art-source/pixel-art/v1/escupemasas/`, `art-source/pixel-art/v1/sentinela/`, `assets/pixel-art/v1/characters/brine-crawler.png`, `assets/pixel-art/v1/characters/abyssal-spitter.png`, `assets/pixel-art/v1/characters/black-coral-sentinel.png`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/App.jsx`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/animationData.js`, `src/game/entities/BrineCrawler.js`, `src/game/entities/AbyssalSpitter.js`, `src/game/entities/BlackCoralSentinel.js`, `src/game/scenes/ArtReviewScene.js` y `src/game/scenes/PreloadScene.js`.
+**Commits:**
+
+- `878b70e feat(art): add pixel-art enemy character batch`
+- `52a7a17 feat(game): integrate pixel-art enemy profiles`
+
+### PDM-021 — Conservar local la rama artística
+
+**Fecha:** 2026-08-02
+**Prompt:** “No pushees la rama”
+**Resultado:** se canceló la publicación de `codex/pixel-art-v1`; los commits de esta tanda se conservaron únicamente en el repositorio local.
+**Archivos:** `PROMPTS.md`.
+**Commits:** `abaf56a docs(art): document enemy pixel-art batch`.
+
+### PDM-022 — Ejecutar el juego con los nuevos assets
+
+**Fecha:** 2026-08-02
+**Prompt:** “Okey, ahora corre el server y dime en que puerto puedo ver el juego con los nuevos assets implementados”
+**Resultado:** se inició el servidor local de desarrollo con el perfil artístico `pixel-v1` para revisar dentro del juego los nuevos sprites de Bigotes, Rastrero, Escupemasas y Sentinela.
+**Archivos:** `PROMPTS.md`.
+**Commits:** `d38fce3 docs(art): document parallax background workflow`.
+
+### PDM-023 — Generar todos los fondos de los dos niveles
+
+**Fecha:** 2026-08-02
+**Prompt:** “Ok, me gusta, ahora puedes darme el background *todos* de los dos niveles de acuerdo al estilo de los nuevos assets?”
+**Resultado:** se generaron con ImageGen integrado las seis capas parallax de Panadería Hundida y Mercado Sumergido. Las fuentes 16:9 se conservaron en `art-source`; el pipeline las normaliza a 320×180 internos, paleta de hasta 24 colores por bioma, costura horizontal, alpha binario para capas cercanas y ampliación nearest-neighbor 2×. Los seis PNG finales son exactos de 640×360 y conviven con los legacy bajo el perfil `pixel-v1`.
+**Archivos:** `art-source/pixel-art/v1/backgrounds/`, `assets/pixel-art/v1/backgrounds/`, `art-source/pixel-art/v1/README.md`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/game/art/backgroundLayout.js`, `src/game/assets/assetRegistry.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `pixel_art_prompt.md`, `README.md` y `PROMPTS.md`.
+**Commits:**
+
+- `54d1cd5 feat(art): add pixel-art parallax backgrounds`
+- `b75cf21 fix(game): align pixel-art parallax to viewport`
+- `d38fce3 docs(art): document parallax background workflow`
+
+### PDM-024 — Corregir escala y colocación de los fondos
+
+**Fecha:** 2026-08-02
+**Prompt:** “ten en cuenta que actualmente los fondos no estan del todo bien, porque no cuadran bien con el juego en cuanto a tama;os y donde se encuentran ubicados”
+**Resultado:** corrección de PDM-023 aplicada: se eliminaron las escalas distintas por capa y los offsets `tilePositionY` arbitrarios. Pixel-v1 usa escala 1×, viewport exacto de 640×360, parallax exclusivamente horizontal y anclaje vertical a cámara; el Mercado conserva el fondo estable al desplazarse por su mundo de 720 px. También se corrigió el encuadre legacy mediante una escala uniforme. La inspección real de ambos niveles en el navegador confirmó lectura, cobertura y ausencia de errores.
+**Archivos:** `src/game/art/backgroundLayout.js`, `src/game/assets/assetRegistry.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `README.md`, `pixel_art_prompt.md` y `PROMPTS.md`.
+**Commits:**
+
+- `b75cf21 fix(game): align pixel-art parallax to viewport`
+- `d38fce3 docs(art): document parallax background workflow`
+
+### PDM-025 — Completar fallbacks, tileset y assets restantes
+
+**Fecha:** 2026-08-02
+**Prompt:** “Ok, ahora, puedes generar los assets faltantes en los niveles donde usaste fallbacks, despues cambiar los tilesets para que no haya discrepancia en las coliciones y al final redise;ar el resto de assets usados en los niveles? todo esto usando el nuevo estilo para los assets que definimos”
+**Resultado:** se completó el perfil `pixel-v1` en las tres fases solicitadas. ImageGen integrado produjo fuentes chroma independientes para los siete recursos que antes dependían de fallbacks, el tileset modular, Levadura, compuerta térmica, horno, respiradero y cuatro efectos. El pipeline normaliza todos los resultados a hojas exactas, alpha binario y paletas de 8–16 colores. Las plataformas ahora se ensamblan con tapas y centro repetible desde la misma coordenada superior del collider, sin estirar sprites; puestos con colisión usan su tamaño visual real y el coral peligroso repite un módulo sobre una zona coincidente. Los props cambian de frame según estado, proyectiles y respiraderos están animados y los bursts pixel-v1 reemplazan las partículas fallback. Se corrigió además el frame inicial del Centinela, detectado durante QA en navegador. `legacy` permanece intacto y no se hizo push.
+**Archivos:** `art-source/pixel-art/v1/README.md`, `art-source/pixel-art/v1/props/`, `art-source/pixel-art/v1/tiles/`, `art-source/pixel-art/v1/effects/`, `assets/pixel-art/v1/props/`, `assets/pixel-art/v1/tiles/`, `assets/pixel-art/v1/effects/`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/game/art/levelArt.js`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/animationData.js`, `src/game/entities/`, `src/game/projectiles/CorruptedDoughProjectile.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `PROMPTS.md`.
+**Commits:**
+
+- `604da7c feat(art): add remaining pixel-art level assets`
+- `99980f7 feat(game): integrate modular pixel-art level set`
+
+### PDM-026 — Convertir pixel-v1 en la versión oficial
+
+**Fecha:** 2026-08-02
+**Prompt:** “haz que se muestren los nuevos assets sin pner los parametros porfa, que ya sesa la version oficial”
+**Resultado:** `pixel-v1` pasa a ser el perfil artístico oficial y predeterminado cuando no se proporciona configuración. El juego muestra los nuevos assets con `npm run dev` y en builds normales, sin query string ni variable de entorno. `legacy` permanece disponible sólo si se solicita explícitamente mediante `VITE_ART_PROFILE=legacy` o, en desarrollo, `?art-profile=legacy`. Se añadió una prueba unitaria para fijar este contrato y se actualizó la documentación de producción.
+**Archivos:** `src/game/art/artProfile.js`, `src/game/art/artProfile.test.js`, `src/game/systems/levelTwoSystems.test.js`, `README.md` y `PROMPTS.md`.
+**Commits:** `fd609a4 feat(art): make pixel art the official profile`.
 
 ## Feature: gobernanza y documentación del proyecto
 
