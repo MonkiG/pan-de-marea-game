@@ -1,0 +1,38 @@
+export const LEVEL_ONE_DATA = Object.freeze({
+  worldWidth: 4800,
+  worldHeight: 360,
+  spawn: { x: 120, y: 270 },
+  zones: [
+    { id: 'start', from: 0, to: 700 },
+    { id: 'collect', from: 700, to: 1500 },
+    { id: 'combat', from: 1500, to: 2300 },
+    { id: 'oven', from: 2300, to: 2900 },
+    { id: 'final-path', from: 2900, to: 4100 },
+    { id: 'gate', from: 4100, to: 4800 },
+  ],
+  platforms: [
+    { x: 405, y: 284, width: 190, height: 22, frame: 'tile-platform-small' },
+    { x: 650, y: 250, width: 150, height: 20, frame: 'tile-platform-small' },
+    { x: 900, y: 278, width: 190, height: 22, frame: 'tile-platform-long' },
+    { x: 1260, y: 230, width: 190, height: 22, frame: 'tile-platform-long' },
+    { x: 1450, y: 278, width: 130, height: 20, frame: 'tile-platform-small' },
+    { x: 2050, y: 260, width: 170, height: 20, frame: 'tile-platform-long' },
+    { x: 2960, y: 275, width: 150, height: 20, frame: 'tile-platform-small' },
+    { x: 3220, y: 230, width: 170, height: 20, frame: 'tile-platform-long' },
+    { x: 3710, y: 270, width: 180, height: 20, frame: 'tile-platform-long' },
+    { x: 4010, y: 235, width: 145, height: 20, frame: 'tile-platform-small' },
+  ],
+  collectibles: [
+    { id: 'yeast-a', x: 900, y: 230 },
+    { id: 'yeast-b', x: 1260, y: 180 },
+    { id: 'yeast-c', x: 2100, y: 210 },
+  ],
+  enemies: [
+    { id: 'crawler-a', x: 1850, y: 280, patrolMin: 1650, patrolMax: 2140 },
+    { id: 'crawler-b', x: 3450, y: 280, patrolMin: 3300, patrolMax: 3650 },
+  ],
+  oven: { x: 2600, y: 270, interactionRadius: 105 },
+  gate: { x: 4450, y: 244, interactionRadius: 115 },
+  oxygenVent: { x: 2250, y: 305, radius: 55 },
+  checkpoints: [{ id: 'after-combat', x: 2300, y: 270 }],
+});
