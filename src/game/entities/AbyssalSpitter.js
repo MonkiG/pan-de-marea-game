@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SPITTER } from '../constants.js';
+import { createExpandedBounds } from '../systems/ActivationBounds.js';
 
 const play = (enemy, key, ignoreIfPlaying = true) => {
   if (enemy.scene.anims.exists(key)) enemy.play(key, ignoreIfPlaying);
@@ -35,10 +36,8 @@ export class AbyssalSpitter extends Phaser.Physics.Arcade.Sprite {
     if (!this.active || this.state === 'defeated') return;
     const distance = this.player.x - this.x;
     const absoluteDistance = Math.abs(distance);
-    const nearCamera = Phaser.Geom.Rectangle.Overlaps(
-      Phaser.Geom.Rectangle.Inflate(this.scene.cameras.main.worldView, 180, 120),
-      this.getBounds(),
-    );
+    const activationView = createExpandedBounds(this.scene.cameras.main.worldView, 180, 120);
+    const nearCamera = Phaser.Geom.Rectangle.Overlaps(activationView, this.getBounds());
     if (!nearCamera || absoluteDistance > SPITTER.activationDistance) {
       this.setVelocityX(0);
       return;

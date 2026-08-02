@@ -626,7 +626,7 @@ export class LevelTwoScene extends Phaser.Scene {
     this.status = 'complete';
     this.player.setControlsEnabled(false);
     this.game.registry.remove('level-two-checkpoint');
-    sessionProgress.completeLevel(LEVEL_IDS.market, {
+    this.completionProgression = sessionProgress.completeLevel(LEVEL_IDS.market, {
       elapsedMs: this.getElapsedMs(),
       enemiesDefeated: this.enemiesDefeated,
       damageTaken: this.damageTaken,
@@ -769,6 +769,7 @@ export class LevelTwoScene extends Phaser.Scene {
       checkpointsUsed: this.checkpointsUsed,
       lowOxygen: this.oxygenSystem?.isLow() ?? false,
       fallbacksUsed: import.meta.env.DEV ? this.assetResolver.getFallbacksUsed() : [],
+      progression: this.completionProgression,
     };
   }
 

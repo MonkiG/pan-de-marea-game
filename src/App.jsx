@@ -8,7 +8,7 @@ import { PauseMenu } from './components/PauseMenu.jsx';
 import { ResultScreen } from './components/ResultScreen.jsx';
 import { eventBus } from './game/EventBus.js';
 import { OBJECTIVES, OXYGEN, PLAYER, RECIPE } from './game/constants.js';
-import { sessionProgress } from './game/systems/SessionProgress.js';
+import { mergeProgressionSnapshots, sessionProgress } from './game/systems/SessionProgress.js';
 
 const initialSnapshot = Object.freeze({
   status: 'loading',
@@ -48,7 +48,9 @@ export function App() {
   useEffect(() => {
     const update = (next) => {
       setSnapshot(next);
-      if (next.status === 'complete') setProgression(sessionProgress.getSnapshot());
+      if (next.progression) {
+        setProgression((current) => mergeProgressionSnapshots(current, next.progression));
+      }
     };
     const off = [
       eventBus.on('game:ready', update),
@@ -69,7 +71,7 @@ export function App() {
   const shellClass = useMemo(() => `app-shell ${gameActive ? 'is-playing' : 'is-menu'}`, [gameActive]);
 
   const startGame = (levelId = selectedLevel) => {
-    if (!sessionProgress.isUnlocked(levelId)) return;
+    if (!progression.unlockedLevels.includes(levelId) && !sessionProgress.isUnlocked(levelId)) return;
     setSelectedLevel(levelId);
     setSnapshot({ ...initialSnapshot, levelId, levelName: levelId === 'level-two' ? 'El Mercado Sumergido' : 'La Panadería Hundida' });
     setView('game');
@@ -83,6 +85,7 @@ export function App() {
 
   const returnToMenu = () => {
     eventBus.emit('command:menu');
+    setProgression((current) => mergeProgressionSnapshots(current, sessionProgress.getSnapshot()));
     setView('menu');
     setSnapshot(initialSnapshot);
   };

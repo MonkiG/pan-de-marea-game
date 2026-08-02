@@ -11,6 +11,20 @@ const freshState = () => ({
   },
 });
 
+export const mergeProgressionSnapshots = (current = freshState(), incoming = freshState()) => {
+  const currentStats = current.globalStats ?? {};
+  const incomingStats = incoming.globalStats ?? {};
+  const statKeys = new Set([...Object.keys(currentStats), ...Object.keys(incomingStats)]);
+  return {
+    unlockedLevels: [...new Set([...(current.unlockedLevels ?? []), ...(incoming.unlockedLevels ?? [])])],
+    completedLevels: [...new Set([...(current.completedLevels ?? []), ...(incoming.completedLevels ?? [])])],
+    globalStats: Object.fromEntries([...statKeys].map((key) => [
+      key,
+      Math.max(Number(currentStats[key]) || 0, Number(incomingStats[key]) || 0),
+    ])),
+  };
+};
+
 export class SessionProgress {
   constructor() {
     this.reset();

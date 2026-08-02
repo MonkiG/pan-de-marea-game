@@ -327,7 +327,7 @@ export class LevelOneScene extends Phaser.Scene {
     this.status = 'complete';
     this.player.setControlsEnabled(false);
     this.cameras.main.fadeOut(700, 2, 18, 22);
-    sessionProgress.completeLevel(LEVEL_IDS.bakery, {
+    this.completionProgression = sessionProgress.completeLevel(LEVEL_IDS.bakery, {
       elapsedMs: this.getElapsedMs(),
       enemiesDefeated: this.enemiesDefeated,
       yeastCollected: this.inventory.totalCollected,
@@ -455,6 +455,7 @@ export class LevelOneScene extends Phaser.Scene {
       damageTaken: 0,
       checkpointsUsed: 0,
       fallbacksUsed: [],
+      progression: this.completionProgression,
     };
   }
 

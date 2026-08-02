@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LEVEL_TWO_DATA } from '../data/levelTwoData.js';
+import { createExpandedBounds } from './ActivationBounds.js';
 import { ASSET_REGISTRY } from '../assets/assetRegistry.js';
 import { AssetResolver } from '../assets/AssetResolver.js';
 import { createAssetAudit } from '../assets/assetAudit.js';
@@ -8,7 +9,7 @@ import { CheckpointSystem } from './CheckpointSystem.js';
 import { MarketProgressionSystem } from './MarketProgressionSystem.js';
 import { PressureRecipeSystem } from './PressureRecipeSystem.js';
 import { ProjectilePoolPolicy } from './ProjectilePoolPolicy.js';
-import { SessionProgress } from './SessionProgress.js';
+import { mergeProgressionSnapshots, SessionProgress } from './SessionProgress.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -39,6 +40,13 @@ describe('assets del segundo nivel', () => {
 });
 
 describe('progresión del Mercado Sumergido', () => {
+  it('expande la zona de activación sin mutar el rectángulo interno de cámara', () => {
+    const worldView = { x: 100, y: 40, width: 640, height: 360 };
+    const expanded = createExpandedBounds(worldView, 180, 120);
+    expect(expanded).toEqual({ x: -80, y: -80, width: 1000, height: 600 });
+    expect(worldView).toEqual({ x: 100, y: 40, width: 640, height: 360 });
+  });
+
   it('mantiene la estructura de ocho zonas, siete levaduras y tres reguladores', () => {
     expect(LEVEL_TWO_DATA.worldWidth).toBe(7200);
     expect(LEVEL_TWO_DATA.zones).toHaveLength(8);
@@ -87,6 +95,16 @@ describe('progresión del Mercado Sumergido', () => {
     progress.completeLevel('level-one', { enemiesDefeated: 2 });
     expect(progress.isUnlocked('level-two')).toBe(true);
     expect(progress.getSnapshot().globalStats.enemiesDefeated).toBe(2);
+  });
+
+  it('conserva desbloqueos al sincronizar snapshots entre Phaser y React', () => {
+    const merged = mergeProgressionSnapshots(
+      { unlockedLevels: ['level-one'], completedLevels: [], globalStats: { enemiesDefeated: 0 } },
+      { unlockedLevels: ['level-one', 'level-two'], completedLevels: ['level-one'], globalStats: { enemiesDefeated: 2 } },
+    );
+    expect(merged.unlockedLevels).toEqual(['level-one', 'level-two']);
+    expect(merged.completedLevels).toEqual(['level-one']);
+    expect(merged.globalStats.enemiesDefeated).toBe(2);
   });
 
   it('limita y recicla la política del pool de proyectiles', () => {
