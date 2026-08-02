@@ -14,6 +14,7 @@ import { RecipeSystem, canUnlockGate } from '../systems/RecipeSystem.js';
 import { MovementDebugOverlay } from '../systems/MovementDebugOverlay.js';
 import { validateJumpLink } from '../systems/JumpReachSystem.js';
 import { sessionProgress } from '../systems/SessionProgress.js';
+import { BACKGROUND_LAYOUTS, createParallaxBackground } from '../art/backgroundLayout.js';
 
 export class LevelOneScene extends Phaser.Scene {
   constructor() {
@@ -79,22 +80,14 @@ export class LevelOneScene extends Phaser.Scene {
   }
 
   createBackground() {
-    const layers = [
-      { key: 'bakery-bg-1', factor: 0.1, alpha: 0.72, tileScale: 0.42 },
-      { key: 'bakery-bg-2', factor: 0.28, alpha: 0.72, tileScale: 0.39 },
-      { key: 'bakery-bg-3', factor: 0.55, alpha: 0.62, tileScale: 0.37 },
-    ];
-    this.add.rectangle(0, 0, LEVEL_ONE_DATA.worldWidth, 360, 0x062731).setOrigin(0);
-    layers.forEach(({ key, factor, alpha, tileScale }) => {
-      if (!this.textures.exists(key)) return;
-      const layer = this.add.tileSprite(0, 0, LEVEL_ONE_DATA.worldWidth + 900, 360, key)
-        .setOrigin(0)
-        .setScrollFactor(factor, 1)
-        .setAlpha(alpha);
-      layer.setTileScale(tileScale, tileScale);
-      layer.tilePositionY = 180;
+    createParallaxBackground(this, {
+      worldWidth: LEVEL_ONE_DATA.worldWidth,
+      worldHeight: LEVEL_ONE_DATA.worldHeight,
+      baseColor: 0x062731,
+      overlayColor: 0x073744,
+      layers: BACKGROUND_LAYOUTS.bakery,
+      resolveTexture: ({ key }) => (this.textures.exists(key) ? key : null),
     });
-    this.add.rectangle(0, 0, LEVEL_ONE_DATA.worldWidth, 360, 0x073744, 0.18).setOrigin(0).setDepth(2);
   }
 
   createLevelGeometry() {

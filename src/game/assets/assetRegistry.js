@@ -13,13 +13,25 @@ export const ASSET_REGISTRY = Object.freeze({
     : { key: 'crawler-sheet', path: 'rastrero-de-salmuera.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-enemy' },
   bubbleYeast: { key: 'yeast-sheet', path: 'golden-bubble-yeast.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-yeast' },
   thermalGate: { key: 'gate-sheet', path: 'rusty-undewater-portal.png', type: 'image-sheet', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024, fallback: 'fallback-gate' },
-  bakeryBackgroundFar: { key: 'bakery-bg-1', path: 'panaderia-undida-bg-1.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
-  bakeryBackgroundMid: { key: 'bakery-bg-2', path: 'panaderia-undida-bg-2.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
-  bakeryBackgroundNear: { key: 'bakery-bg-3', path: 'panaderia-undida-bg-3.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
+  bakeryBackgroundFar: IS_PIXEL_ART_V1
+    ? { key: 'bakery-bg-1', path: 'pixel-art/v1/backgrounds/panaderia-undida-bg-1.png', type: 'image', status: 'pixel-v1', usedIn: ['level-one'], width: 640, height: 360 }
+    : { key: 'bakery-bg-1', path: 'panaderia-undida-bg-1.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
+  bakeryBackgroundMid: IS_PIXEL_ART_V1
+    ? { key: 'bakery-bg-2', path: 'pixel-art/v1/backgrounds/panaderia-undida-bg-2.png', type: 'image', status: 'pixel-v1', usedIn: ['level-one'], width: 640, height: 360 }
+    : { key: 'bakery-bg-2', path: 'panaderia-undida-bg-2.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
+  bakeryBackgroundNear: IS_PIXEL_ART_V1
+    ? { key: 'bakery-bg-3', path: 'pixel-art/v1/backgrounds/panaderia-undida-bg-3.png', type: 'image', status: 'pixel-v1', usedIn: ['level-one'], width: 640, height: 360 }
+    : { key: 'bakery-bg-3', path: 'panaderia-undida-bg-3.png', type: 'image', status: 'used-level-1', usedIn: ['level-one'], width: 1536, height: 1024 },
   sharedTileset: { key: 'tileset', path: 'tileset.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-platform' },
-  marketBackgroundFar: { key: 'market-bg-1', path: 'mercado-undido-1.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
-  marketBackgroundMid: { key: 'market-bg-2', path: 'mercado-undido-2.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
-  marketBackgroundNear: { key: 'market-bg-3', path: 'mercado-undido-3.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
+  marketBackgroundFar: IS_PIXEL_ART_V1
+    ? { key: 'market-bg-1', path: 'pixel-art/v1/backgrounds/mercado-undido-1.png', type: 'image', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 360, fallback: 'fallback-market-background' }
+    : { key: 'market-bg-1', path: 'mercado-undido-1.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
+  marketBackgroundMid: IS_PIXEL_ART_V1
+    ? { key: 'market-bg-2', path: 'pixel-art/v1/backgrounds/mercado-undido-2.png', type: 'image', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 360, fallback: 'fallback-market-background' }
+    : { key: 'market-bg-2', path: 'mercado-undido-2.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
+  marketBackgroundNear: IS_PIXEL_ART_V1
+    ? { key: 'market-bg-3', path: 'pixel-art/v1/backgrounds/mercado-undido-3.png', type: 'image', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 360, fallback: 'fallback-market-background' }
+    : { key: 'market-bg-3', path: 'mercado-undido-3.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
   abyssalSpitter: IS_PIXEL_ART_V1
     ? { key: 'spitter-sheet', path: 'pixel-art/v1/characters/abyssal-spitter.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 384, fallback: 'fallback-spitter' }
     : { key: 'spitter-sheet', path: 'escupemasas.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-spitter' },

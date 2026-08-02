@@ -29,6 +29,7 @@ import { OxygenSystem } from '../systems/OxygenSystem.js';
 import { PressureRecipeSystem } from '../systems/PressureRecipeSystem.js';
 import { sessionProgress } from '../systems/SessionProgress.js';
 import { validateJumpLink } from '../systems/JumpReachSystem.js';
+import { BACKGROUND_LAYOUTS, createParallaxBackground } from '../art/backgroundLayout.js';
 
 export class LevelTwoScene extends Phaser.Scene {
   constructor() {
@@ -166,25 +167,14 @@ export class LevelTwoScene extends Phaser.Scene {
   }
 
   createBackground() {
-    this.add.rectangle(0, 0, LEVEL_TWO_DATA.worldWidth, LEVEL_TWO_DATA.worldHeight, 0x053943).setOrigin(0);
-    const layers = [
-      { id: 'marketBackgroundFar', key: 'market-bg-1', fallback: 'fallback-market-background', factor: 0.08, alpha: 0.8, scale: 0.48 },
-      { id: 'marketBackgroundMid', key: 'market-bg-2', fallback: 'fallback-market-background', factor: 0.24, alpha: 0.56, scale: 0.44 },
-      { id: 'marketBackgroundNear', key: 'market-bg-3', fallback: 'fallback-market-background', factor: 0.48, alpha: 0.34, scale: 0.44 },
-    ];
-    layers.forEach((layer) => {
-      const texture = this.assetResolver.resolve(layer.id, layer.fallback);
-      const tile = this.add.tileSprite(0, 0, LEVEL_TWO_DATA.worldWidth + 1100, LEVEL_TWO_DATA.worldHeight, texture)
-        .setOrigin(0)
-        .setScrollFactor(layer.factor, 0.5)
-        .setAlpha(layer.alpha)
-        .setDepth(1);
-      tile.setTileScale(layer.scale, layer.scale);
-      tile.tilePositionY = 160;
+    createParallaxBackground(this, {
+      worldWidth: LEVEL_TWO_DATA.worldWidth,
+      worldHeight: LEVEL_TWO_DATA.worldHeight,
+      baseColor: 0x053943,
+      overlayColor: 0x062c34,
+      layers: BACKGROUND_LAYOUTS.market,
+      resolveTexture: ({ id }) => this.assetResolver.resolve(id, 'fallback-market-background'),
     });
-    this.add.rectangle(0, 0, LEVEL_TWO_DATA.worldWidth, LEVEL_TWO_DATA.worldHeight, 0x062c34, 0.18)
-      .setOrigin(0)
-      .setDepth(2);
   }
 
   createGeometry() {
