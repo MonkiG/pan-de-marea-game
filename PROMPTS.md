@@ -104,7 +104,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Prompt:** “Okey, ahora quiero un .md nuevo en el que vayas registrando todos los prompts que te doy pero seccionalos por features que implementas (titulo y commits). despues crea el CLAUDE.md que dirija a Agents.md para que sepan que se tiene que documentar todo lo que hablamos”
 **Resultado:** se creó este registro, `AGENTS.md` como fuente canónica y `CLAUDE.md` como enlace obligatorio a esas instrucciones.
 **Archivos:** `PROMPTS.md`, `AGENTS.md`, `CLAUDE.md`.
-**Commits:** pendiente (working tree).
+**Commits:** `cd4417a docs(process): add prompt history and agent instructions`.
 
 ### PDM-010 — Crear commits semánticos y publicar main
 
@@ -116,7 +116,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 
 - `f27ac2d feat(level): improve traversal and collision layout`
 - `c69ca41 docs(assets): add production guide for art and audio`
-- `docs(process): add prompt history and agent instructions` — pendiente hasta crear el commit.
+- `cd4417a docs(process): add prompt history and agent instructions`
 
 ## Anexo A — Prompt original de la demo
 
