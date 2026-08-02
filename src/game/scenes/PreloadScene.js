@@ -14,6 +14,7 @@ import {
 } from '../assetManifest.js';
 import { createAnimations } from '../systems/AnimationManager.js';
 import { logAssetAudit } from '../assets/assetAudit.js';
+import { AUDIO_ASSETS } from '../audio/audioManifest.js';
 
 const ART_REVIEW_ASSETS = Object.freeze({
   bigotes: {
@@ -51,9 +52,11 @@ export class PreloadScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.load.on('progress', (value) => progress.setDisplaySize(280 * value, 8));
     this.load.on('loaderror', (file) => {
-      console.warn(`[Assets] No se pudo cargar ${file.src}; se usará fallback en ${file.key}.`);
+      const fallback = file.type === 'audio' ? 'se usará silencio' : `se usará fallback en ${file.key}`;
+      console.warn(`[Assets] No se pudo cargar ${file.src}; ${fallback}.`);
     });
     ASSET_MANIFEST.forEach((asset) => this.load.image(asset.key, `/${asset.file}`));
+    AUDIO_ASSETS.forEach((asset) => this.load.audio(asset.key, `/${asset.file}`));
     if (this.artReview) {
       const review = ART_REVIEW_ASSETS[this.artReview];
       this.load.image('art-legacy-review', review.legacy);

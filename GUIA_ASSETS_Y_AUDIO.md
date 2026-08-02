@@ -262,23 +262,23 @@ No incluir texto dentro de los PNG. Los textos deben seguir siendo HTML/React pa
 
 ## 8. Audio requerido
 
-Actualmente no existe ningún archivo de audio. Estas claves ya son llamadas por el código; `AudioManager` usa silencio seguro mientras los archivos no existan:
+El lote MVP cubre las trece claves llamadas por el gameplay. Los archivos son originales, sintetizados de forma determinista por `scripts/generate-audio.mjs`; `AudioManager` conserva silencio seguro si alguno no está disponible:
 
-| Clave | Archivo sugerido | Duración |
+| Clave | Archivo integrado | Duración |
 |---|---|---:|
-| `jump` | `audio/sfx/jump.ogg` | 0.15–0.35 s |
-| `attack` | `audio/sfx/attack.ogg` | 0.20–0.45 s |
-| `hurt` | `audio/sfx/hurt.ogg` | 0.25–0.60 s |
-| `collect` | `audio/sfx/yeast-collect.ogg` | 0.35–0.80 s |
-| `oven` | `audio/sfx/oven.ogg` | 1.0–1.5 s |
-| `gate` | `audio/sfx/gate.ogg` | 1.5–3.0 s |
-| `enemy-defeat` | `audio/sfx/enemy-defeat.ogg` | 0.4–1.0 s |
-| `spitter-projectile` | `audio/sfx/spitter-projectile.ogg` | 0.25–0.60 s |
-| `regulator` | `audio/sfx/regulator.ogg` | 0.8–1.8 s |
-| `oxygen-station` | `audio/sfx/oxygen-station.ogg` | 0.6–1.4 s |
-| `checkpoint` | `audio/sfx/checkpoint.ogg` | 0.5–1.2 s |
-| `pressure-oven` | `audio/sfx/pressure-oven.ogg` | 1.5–2.2 s |
-| `market-exit` | `audio/sfx/market-exit.ogg` | 1.5–3.0 s |
+| `jump` | `audio/sfx/jump.wav` | 0.24 s |
+| `attack` | `audio/sfx/attack.wav` | 0.32 s |
+| `hurt` | `audio/sfx/hurt.wav` | 0.44 s |
+| `collect` | `audio/sfx/yeast-collect.wav` | 0.62 s |
+| `oven` | `audio/sfx/oven.wav` | 1.25 s |
+| `gate` | `audio/sfx/gate.wav` | 2.20 s |
+| `enemy-defeat` | `audio/sfx/enemy-defeat.wav` | 0.76 s |
+| `spitter-projectile` | `audio/sfx/spitter-projectile.wav` | 0.38 s |
+| `regulator` | `audio/sfx/regulator.wav` | 1.28 s |
+| `oxygen-station` | `audio/sfx/oxygen-station.wav` | 1.05 s |
+| `checkpoint` | `audio/sfx/checkpoint.wav` | 0.90 s |
+| `pressure-oven` | `audio/sfx/pressure-oven.wav` | 1.95 s |
+| `market-exit` | `audio/sfx/market-exit.wav` | 2.40 s |
 
 ### Audio adicional recomendado
 
@@ -299,8 +299,8 @@ Actualmente no existe ningún archivo de audio. Estas claves ya son llamadas por
 
 ### Especificación técnica
 
-- Máster: WAV PCM, 48 kHz, 24 bits.
-- Web: OGG Vorbis; MP3 como fallback opcional.
+- MVP web: WAV PCM mono, 48 kHz, 16 bits.
+- OGG Vorbis queda como optimización futura si se incorpora un codificador reproducible.
 - SFX: mono salvo que requieran espacialidad.
 - Música y ambiente: estéreo.
 - Pico máximo recomendado: −1 dBFS.
@@ -308,6 +308,15 @@ Actualmente no existe ningún archivo de audio. Estas claves ya son llamadas por
 - Crear loops en cruces por cero y probarlos durante varios minutos.
 - Nombres en minúsculas, sin espacios ni acentos.
 - Documentar autoría, licencia y fuente de cada archivo.
+
+Para reconstruir y validar el lote:
+
+```sh
+npm run audio:generate
+npm run audio:validate
+```
+
+El validador comprueba RIFF/WAVE PCM, canales, frecuencia, profundidad, duración, pico, inicio audible y cola anticlic. El manifiesto central define ruta, volumen y cooldown de cada clave.
 
 ### Mezcla inicial
 
