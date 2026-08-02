@@ -7,9 +7,10 @@ const developmentProfile = import.meta.env?.DEV && typeof window !== 'undefined'
   ? new URLSearchParams(window.location.search).get('art-profile')
   : null;
 const requestedProfile = developmentProfile ?? import.meta.env?.VITE_ART_PROFILE;
-export const ACTIVE_ART_PROFILE = requestedProfile === ART_PROFILES.pixelV1
-  ? ART_PROFILES.pixelV1
-  : ART_PROFILES.legacy;
+export const resolveArtProfile = (profile) => profile === ART_PROFILES.legacy
+  ? ART_PROFILES.legacy
+  : ART_PROFILES.pixelV1;
+export const ACTIVE_ART_PROFILE = resolveArtProfile(requestedProfile);
 export const IS_PIXEL_ART_V1 = ACTIVE_ART_PROFILE === ART_PROFILES.pixelV1;
 
 const legacy = Object.freeze({

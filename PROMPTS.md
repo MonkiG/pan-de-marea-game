@@ -188,6 +188,14 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 - `604da7c feat(art): add remaining pixel-art level assets`
 - `99980f7 feat(game): integrate modular pixel-art level set`
 
+### PDM-026 — Convertir pixel-v1 en la versión oficial
+
+**Fecha:** 2026-08-02
+**Prompt:** “haz que se muestren los nuevos assets sin pner los parametros porfa, que ya sesa la version oficial”
+**Resultado:** `pixel-v1` pasa a ser el perfil artístico oficial y predeterminado cuando no se proporciona configuración. El juego muestra los nuevos assets con `npm run dev` y en builds normales, sin query string ni variable de entorno. `legacy` permanece disponible sólo si se solicita explícitamente mediante `VITE_ART_PROFILE=legacy` o, en desarrollo, `?art-profile=legacy`. Se añadió una prueba unitaria para fijar este contrato y se actualizó la documentación de producción.
+**Archivos:** `src/game/art/artProfile.js`, `src/game/art/artProfile.test.js`, `src/game/systems/levelTwoSystems.test.js`, `README.md` y `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
 ## Feature: gobernanza y documentación del proyecto
 
 ### PDM-009 — Registrar prompts e instruir a otros agentes
