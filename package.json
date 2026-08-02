@@ -9,6 +9,8 @@
   "scripts": {
     "art:process": "node scripts/process-pixel-art.mjs",
     "art:validate": "node scripts/validate-pixel-art.mjs",
+    "audio:generate": "node scripts/generate-audio.mjs",
+    "audio:validate": "node scripts/validate-audio.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
