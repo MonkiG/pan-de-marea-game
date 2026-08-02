@@ -11,6 +11,8 @@ import { AudioManager } from '../systems/AudioManager.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
 import { OxygenSystem } from '../systems/OxygenSystem.js';
 import { RecipeSystem, canUnlockGate } from '../systems/RecipeSystem.js';
+import { MovementDebugOverlay } from '../systems/MovementDebugOverlay.js';
+import { validateJumpLink } from '../systems/JumpReachSystem.js';
 
 export class LevelOneScene extends Phaser.Scene {
   constructor() {
@@ -61,6 +63,8 @@ export class LevelOneScene extends Phaser.Scene {
     this.createOxygenVent();
     this.createPhysicsLinks();
     this.configureCamera();
+    this.debugOverlay = new MovementDebugOverlay(this, this.player, LEVEL_ONE_DATA);
+    this.validateLevelTraversal();
 
     this.input.keyboard.addCapture([
       'UP', 'DOWN', 'LEFT', 'RIGHT', 'SPACE', 'A', 'D', 'W', 'J', 'X', 'E', 'ENTER', 'ESC',
@@ -92,27 +96,34 @@ export class LevelOneScene extends Phaser.Scene {
   }
 
   createLevelGeometry() {
-    this.platforms = this.physics.add.staticGroup();
+    this.walkableSurfaces = this.add.group();
     const texture = this.textures.exists('tileset') && this.textures.get('tileset').has('tile-platform-long')
       ? 'tileset'
       : 'fallback-platform';
     const floorFrame = texture === 'tileset' ? 'tile-platform-long' : undefined;
     for (let x = 160; x < LEVEL_ONE_DATA.worldWidth; x += 318) {
-      const floor = this.platforms.create(x, 344, texture, floorFrame);
-      floor.setDisplaySize(320, 42).refreshBody().setDepth(8);
+      this.add.image(x, 344, texture, floorFrame).setDisplaySize(320, 42).setDepth(8);
     }
+    this.createOneWaySurface(
+      LEVEL_ONE_DATA.worldWidth / 2,
+      LEVEL_ONE_DATA.collision.floorTop,
+      LEVEL_ONE_DATA.worldWidth,
+      LEVEL_ONE_DATA.collision.floorHeight,
+    );
     LEVEL_ONE_DATA.platforms.forEach((data) => {
       const frame = texture === 'tileset' && this.textures.get(texture).has(data.frame) ? data.frame : floorFrame;
-      const platform = this.platforms.create(data.x, data.y, texture, frame);
-      platform.setDisplaySize(data.width, data.height).refreshBody().setDepth(8);
+      this.add.image(data.x, data.y, texture, frame)
+        .setDisplaySize(data.width, data.height)
+        .setDepth(8);
+      this.createOneWaySurface(
+        data.x,
+        data.y - data.height / 2,
+        data.width - LEVEL_ONE_DATA.collision.platformHorizontalInset * 2,
+        LEVEL_ONE_DATA.collision.platformThickness,
+      );
     });
 
-    const decorations = [
-      { x: 1540, y: 318, frame: 'tile-rocks', width: 155, height: 70 },
-      { x: 2860, y: 320, frame: 'tile-coral', width: 65, height: 68 },
-      { x: 3890, y: 320, frame: 'tile-rocks', width: 130, height: 60 },
-    ];
-    decorations.forEach((data) => {
+    LEVEL_ONE_DATA.decorations.forEach((data) => {
       if (texture !== 'tileset' || !this.textures.get(texture).has(data.frame)) return;
       this.add.image(data.x, data.y, texture, data.frame)
         .setDisplaySize(data.width, data.height)
@@ -120,6 +131,17 @@ export class LevelOneScene extends Phaser.Scene {
         .setDepth(7)
         .setAlpha(0.88);
     });
+  }
+
+  createOneWaySurface(x, top, width, height) {
+    const surface = this.add.zone(x, top + height / 2, width, height);
+    this.physics.add.existing(surface, true);
+    surface.body.checkCollision.up = true;
+    surface.body.checkCollision.down = false;
+    surface.body.checkCollision.left = false;
+    surface.body.checkCollision.right = false;
+    this.walkableSurfaces.add(surface);
+    return surface;
   }
 
   createAmbientDetails() {
@@ -157,8 +179,8 @@ export class LevelOneScene extends Phaser.Scene {
   }
 
   createPhysicsLinks() {
-    this.physics.add.collider(this.player, this.platforms);
-    this.physics.add.collider(this.enemies, this.platforms);
+    this.physics.add.collider(this.player, this.walkableSurfaces);
+    this.physics.add.collider(this.enemies, this.walkableSurfaces);
     this.physics.add.overlap(this.player, this.yeasts, (_player, yeast) => this.collectYeast(yeast));
     this.physics.add.overlap(this.player.attackZone, this.enemies, (_zone, enemy) => {
       if (this.player.canHit(enemy)) enemy.takeDamage(1, this.player.x);
@@ -189,7 +211,24 @@ export class LevelOneScene extends Phaser.Scene {
     this.updateTutorials(time);
     this.updateInteractions();
     this.oven.setAvailable(this.recipeSystem.canCraft(this.inventory));
+    this.debugOverlay?.update();
     this.emitSnapshot(false, time);
+  }
+
+  validateLevelTraversal() {
+    const platforms = new Map(LEVEL_ONE_DATA.platforms.map((platform) => [platform.id, platform]));
+    LEVEL_ONE_DATA.jumpLinks.forEach((link) => {
+      const from = platforms.get(link.from);
+      const to = platforms.get(link.to);
+      if (!from || !to) return;
+      const result = validateJumpLink(from, to, PLAYER);
+      if (!result.reachable) {
+        console.warn(
+          `[Nivel] Salto ${link.from} -> ${link.to} excede el margen seguro: `
+            + `${result.gap.toFixed(0)}px / ${result.recommendedReach.toFixed(0)}px.`,
+        );
+      }
+    });
   }
 
   updateTutorials(time) {
@@ -409,5 +448,6 @@ export class LevelOneScene extends Phaser.Scene {
   shutdown() {
     this.input.keyboard.off('keydown-ESC', this.handleEscape, this);
     this.audioManager?.stopAll();
+    this.debugOverlay?.destroy();
   }
 }

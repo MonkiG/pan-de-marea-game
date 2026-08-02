@@ -16,17 +16,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.setScale(texture === 'fallback-player' ? 1 : 0.42);
     this.setOrigin(0.5, 0.82);
-    this.setSize(74, 118).setOffset(43, 44);
+    this.setSize(PLAYER.collider.width, PLAYER.collider.height)
+      .setOffset(PLAYER.collider.offsetX, PLAYER.collider.offsetY);
     this.setCollideWorldBounds(true);
     this.body.setGravityY(PLAYER.gravity - scene.physics.world.gravity.y);
-    this.setMaxVelocity(PLAYER.speed, 420);
-    this.setDragX(PLAYER.drag);
+    this.setMaxVelocity(PLAYER.maxRunSpeed, PLAYER.maxFallSpeed);
+    this.setDragX(PLAYER.groundDrag);
 
     this.health = PLAYER.maxHealth;
     this.invulnerableUntil = 0;
     this.lastGroundedAt = 0;
     this.jumpQueuedAt = -Infinity;
     this.lastAttackAt = -Infinity;
+    this.jumpStartedAt = -Infinity;
+    this.jumpCutApplied = true;
     this.facing = 1;
     this.controlsEnabled = true;
     this.isAttacking = false;
@@ -60,7 +63,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    const grounded = this.body.blocked.down || this.body.touching.down;
+    const grounded = this.isGrounded();
     if (grounded) this.lastGroundedAt = time;
 
     const left = this.keys.left.isDown || this.cursors.left.isDown;
@@ -68,6 +71,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const jumpPressed = Phaser.Input.Keyboard.JustDown(this.keys.jump)
       || Phaser.Input.Keyboard.JustDown(this.keys.up)
       || Phaser.Input.Keyboard.JustDown(this.cursors.up);
+    const jumpHeld = this.keys.jump.isDown || this.keys.up.isDown || this.cursors.up.isDown;
     const attackPressed = Phaser.Input.Keyboard.JustDown(this.keys.attack)
       || Phaser.Input.Keyboard.JustDown(this.keys.attackAlt);
 
@@ -75,10 +79,26 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (time - this.jumpQueuedAt <= PLAYER.jumpBufferMs
       && time - this.lastGroundedAt <= PLAYER.coyoteTimeMs) {
       this.setVelocityY(PLAYER.jumpVelocity);
+      this.jumpStartedAt = time;
+      this.jumpCutApplied = false;
       this.jumpQueuedAt = -Infinity;
       this.lastGroundedAt = -Infinity;
       this.scene.audioManager?.play('jump');
     }
+
+    if (!jumpHeld && !this.jumpCutApplied
+      && time - this.jumpStartedAt >= PLAYER.minimumJumpHoldMs
+      && this.body.velocity.y < -60) {
+      this.setVelocityY(this.body.velocity.y * PLAYER.jumpReleaseMultiplier);
+      this.jumpCutApplied = true;
+    }
+
+    const falling = this.body.velocity.y > 0;
+    this.body.setGravityY(
+      PLAYER.gravity * (falling ? PLAYER.fallGravityMultiplier : 1)
+        - this.scene.physics.world.gravity.y,
+    );
+    this.setDragX(grounded ? PLAYER.groundDrag : PLAYER.airDrag);
 
     if (!this.isAttacking) {
       if (left === right) {
@@ -86,7 +106,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       } else {
         this.facing = left ? -1 : 1;
         this.setFlipX(this.facing < 0);
-        this.setAccelerationX(PLAYER.acceleration * this.facing);
+        const acceleration = grounded ? PLAYER.groundAcceleration : PLAYER.airAcceleration;
+        this.setAccelerationX(acceleration * this.facing);
       }
     }
 
@@ -99,6 +120,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.syncAttackZone();
+  }
+
+  isGrounded() {
+    if (this.body.blocked.down || this.body.touching.down || this.body.onFloor()) return true;
+    if (this.body.velocity.y < 0) return false;
+    const check = this.getGroundCheckRect();
+    return this.scene.walkableSurfaces?.getChildren().some((surface) => {
+      const body = surface.body;
+      if (!body?.enable) return false;
+      const surfaceRect = new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height);
+      return Phaser.Geom.Intersects.RectangleToRectangle(check, surfaceRect);
+    }) ?? false;
+  }
+
+  getGroundCheckRect() {
+    const inset = PLAYER.groundCheckInset;
+    return new Phaser.Geom.Rectangle(
+      this.body.x + inset,
+      this.body.bottom - 1,
+      Math.max(2, this.body.width - inset * 2),
+      PLAYER.groundCheckDistance,
+    );
   }
 
   attack(time) {

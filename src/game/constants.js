@@ -1,16 +1,27 @@
 export const GAME_WIDTH = 640;
 export const GAME_HEIGHT = 360;
 export const DEBUG_PHYSICS = false;
+export const DEBUG_MOVEMENT = false;
+export const DEBUG_LEVEL_GEOMETRY = false;
 
 export const PLAYER = Object.freeze({
   maxHealth: 3,
-  speed: 150,
-  acceleration: 850,
-  drag: 650,
-  gravity: 520,
-  jumpVelocity: -250,
-  coyoteTimeMs: 100,
-  jumpBufferMs: 120,
+  maxRunSpeed: 175,
+  groundAcceleration: 1050,
+  airAcceleration: 680,
+  groundDrag: 950,
+  airDrag: 45,
+  gravity: 560,
+  fallGravityMultiplier: 1.45,
+  jumpVelocity: -315,
+  jumpReleaseMultiplier: 0.48,
+  minimumJumpHoldMs: 55,
+  coyoteTimeMs: 120,
+  jumpBufferMs: 140,
+  maxFallSpeed: 390,
+  groundCheckDistance: 7,
+  groundCheckInset: 4,
+  collider: Object.freeze({ width: 68, height: 112, offsetX: 46, offsetY: 48 }),
   invulnerabilityMs: 1000,
   attackCooldownMs: 400,
   attackWindupMs: 90,

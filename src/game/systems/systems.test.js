@@ -3,6 +3,9 @@ import { InventorySystem } from './InventorySystem.js';
 import { OxygenSystem } from './OxygenSystem.js';
 import { RecipeSystem, canUnlockGate } from './RecipeSystem.js';
 import { applyDamage } from './CombatSystem.js';
+import { PLAYER } from '../constants.js';
+import { LEVEL_ONE_DATA } from '../data/levelOneData.js';
+import { calculateJumpMetrics, validateJumpLink } from './JumpReachSystem.js';
 
 describe('sistemas de La Panadería Hundida', () => {
   it('mantiene total e inventario y permite gastar levaduras', () => {
@@ -61,5 +64,17 @@ describe('sistemas de La Panadería Hundida', () => {
     expect(inventory.totalCollected).toBe(0);
     expect(oxygen.value).toBe(100);
     expect(recipe.hasThermalBread).toBe(false);
+  });
+
+  it('mantiene todos los enlaces de plataformas dentro del margen seguro', () => {
+    const metrics = calculateJumpMetrics(PLAYER);
+    expect(metrics.apexHeight).toBeGreaterThan(85);
+    expect(metrics.maximumHorizontalReach).toBeGreaterThan(170);
+
+    const platforms = new Map(LEVEL_ONE_DATA.platforms.map((platform) => [platform.id, platform]));
+    LEVEL_ONE_DATA.jumpLinks.forEach((link) => {
+      const result = validateJumpLink(platforms.get(link.from), platforms.get(link.to), PLAYER);
+      expect(result.reachable, `${link.from} -> ${link.to}`).toBe(true);
+    });
   });
 });
