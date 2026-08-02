@@ -216,7 +216,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 
 - `a905b80 feat(audio): add procedural mvp sound library`
 - `cd3d69b feat(game): integrate mvp sound effects`
-- pendiente (working tree)
+- `3be3ef5 docs(audio): document mvp sound workflow`
 
 ## Feature: gobernanza y documentación del proyecto
 
