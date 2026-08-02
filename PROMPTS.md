@@ -102,7 +102,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Prompt:** “Okey, dame un .md con los assets que tengo, los que me faltan y que tengo que modificar para que sea pixel art, con movimientos/animaciones claras, porque ahorita ciertas cosas no funcionan, tambien toma en cuenta el ataque del jugador que creo que no esta funcionando del todo”
 **Resultado:** se creó una guía independiente que inventaría los trece PNG actuales, los fallbacks y piezas faltantes, define tamaños y hojas uniformes para cada entidad, estados y fases de animación, reglas de fondos/tiles/UI, orden de producción y cambios de integración. La revisión del ataque documenta el desacople actual entre su animación aproximada de 429 ms y el estado físico que termina a los 200 ms, además de recortes, hitbox, frames activos y una propuesta concreta de corrección.
 **Archivos:** `GUIA_PIXEL_ART_Y_ANIMACIONES.md`, `README.md` y `PROMPTS.md`.
-**Commits:** pendiente (working tree).
+**Commits:** `b035ebb docs(art): add pixel-art production workflow`.
 
 ### PDM-018 — Crear prompts base para cada pixel art
 
@@ -111,7 +111,7 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Corrección del usuario:** “No los metas en prompts.md, metelos en pixel_art_prompt.md”.
 **Resultado:** se creó un banco independiente con 41 prompts base, uno por cada redibujo o asset P0/P1 de la guía, además de reglas comunes, flujo de uso y checklist de validación. Los prompts artísticos están únicamente en `pixel_art_prompt.md`; este registro conserva sólo la trazabilidad administrativa obligatoria del encargo.
 **Archivos:** `pixel_art_prompt.md`, `PROMPTS.md`.
-**Commits:** pendiente (working tree).
+**Commits:** `b035ebb docs(art): add pixel-art production workflow`.
 
 ### PDM-019 — Implementar la migración iterativa a pixel art cartoon
 
@@ -119,7 +119,11 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Prompt:** “PLEASE IMPLEMENT THIS PLAN: Migración iterativa a pixel art cartoon”. El plan solicita publicar primero los cambios estables de `main`, crear `codex/pixel-art-v1`, producir un piloto no destructivo de Bigotes y combate mediante ImageGen, incorporar perfiles `legacy`/`pixel-v1`, sincronizar ataque e hitbox con frames, añadir herramientas de revisión/validación y escalar los demás assets sólo después de aprobar el piloto.
 **Resultado:** implementación en curso; se adoptó una dirección cartoon submarina de baja complejidad, assets versionados en paralelo y un primer hito limitado a Bigotes y efectos de combate.
 **Archivos:** `PROMPTS.md`, `art-source/pixel-art/v1/`, `assets/pixel-art/v1/`, configuración y sistemas de arte/combate relacionados.
-**Commits:** pendiente (working tree).
+**Commits:**
+
+- `320faab fix(game): stabilize Mercado activation and progression`
+- `b035ebb docs(art): add pixel-art production workflow`
+- pendiente (piloto pixel-art)
 
 ## Feature: gobernanza y documentación del proyecto
 
