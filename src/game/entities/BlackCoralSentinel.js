@@ -8,8 +8,9 @@ const play = (enemy, key, ignore = true) => {
 
 export class BlackCoralSentinel extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, data, player, assetResolver, onDefeated) {
-    const texture = assetResolver.resolve('blackCoralSentinel', 'fallback-sentinel', ['sentinel-idle-0']);
-    const frame = texture === 'sentinel-sheet' ? 'sentinel-idle-0' : undefined;
+    const idleFrame = IS_PIXEL_ART_V1 ? 'sentinel-sleep-0' : 'sentinel-idle-0';
+    const texture = assetResolver.resolve('blackCoralSentinel', 'fallback-sentinel', [idleFrame]);
+    const frame = texture === 'sentinel-sheet' ? idleFrame : undefined;
     super(scene, data.x, data.y, texture, frame);
     scene.add.existing(this);
     scene.physics.add.existing(this);

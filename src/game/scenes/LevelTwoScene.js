@@ -30,6 +30,7 @@ import { PressureRecipeSystem } from '../systems/PressureRecipeSystem.js';
 import { sessionProgress } from '../systems/SessionProgress.js';
 import { validateJumpLink } from '../systems/JumpReachSystem.js';
 import { BACKGROUND_LAYOUTS, createParallaxBackground } from '../art/backgroundLayout.js';
+import { createPixelFloor, createPixelPlatform, hasPixelTileset, playPixelEffect } from '../art/levelArt.js';
 
 export class LevelTwoScene extends Phaser.Scene {
   constructor() {
@@ -180,10 +181,19 @@ export class LevelTwoScene extends Phaser.Scene {
   createGeometry() {
     this.walkableSurfaces = this.add.group();
     this.solidObstacles = this.add.group();
-    const texture = this.assetResolver.resolve('sharedTileset', 'fallback-platform', ['tile-platform-long']);
+    const pixelTiles = hasPixelTileset(this);
+    const texture = this.assetResolver.resolve(
+      'sharedTileset', 'fallback-platform', [pixelTiles ? 'tile-platform-center' : 'tile-platform-long'],
+    );
     const floorFrame = texture === 'tileset' ? 'tile-platform-long' : undefined;
-    for (let x = 160; x < LEVEL_TWO_DATA.worldWidth; x += 318) {
-      this.add.image(x, 697, texture, floorFrame).setDisplaySize(320, 45).setDepth(8);
+    if (pixelTiles) {
+      createPixelFloor(this, {
+        texture, worldWidth: LEVEL_TWO_DATA.worldWidth, top: LEVEL_TWO_DATA.collision.floorTop, depth: 8,
+      });
+    } else {
+      for (let x = 160; x < LEVEL_TWO_DATA.worldWidth; x += 318) {
+        this.add.image(x, 697, texture, floorFrame).setDisplaySize(320, 45).setDepth(8);
+      }
     }
     this.createOneWaySurface(
       LEVEL_TWO_DATA.worldWidth / 2,
@@ -192,34 +202,49 @@ export class LevelTwoScene extends Phaser.Scene {
       LEVEL_TWO_DATA.collision.floorHeight,
     );
     LEVEL_TWO_DATA.platforms.forEach((platform) => {
-      const frame = texture === 'tileset' && this.textures.get(texture).has(platform.frame)
-        ? platform.frame
-        : floorFrame;
-      this.add.image(platform.x, platform.y, texture, frame)
-        .setDisplaySize(platform.width, platform.height)
-        .setDepth(8);
+      const top = platform.y - platform.height / 2;
+      if (pixelTiles) {
+        createPixelPlatform(this, { texture, x: platform.x, top, width: platform.width, depth: 8 });
+      } else {
+        const frame = texture === 'tileset' && this.textures.get(texture).has(platform.frame)
+          ? platform.frame
+          : floorFrame;
+        this.add.image(platform.x, platform.y, texture, frame)
+          .setDisplaySize(platform.width, platform.height)
+          .setDepth(8);
+      }
       this.createOneWaySurface(
         platform.x,
-        platform.y - platform.height / 2,
+        top,
         platform.width - LEVEL_TWO_DATA.collision.platformHorizontalInset * 2,
         LEVEL_TWO_DATA.collision.platformThickness,
       );
     });
 
     const stallTexture = this.assetResolver.resolve('marketStall', 'fallback-market-stall');
-    LEVEL_TWO_DATA.decorations.forEach((decoration) => {
-      this.add.image(decoration.x, decoration.y, stallTexture)
-        .setDisplaySize(decoration.width, decoration.height)
+    LEVEL_TWO_DATA.decorations.forEach((decoration, index) => {
+      const pixelStall = stallTexture === 'market-stalls-sheet';
+      const sprite = this.add.image(
+        decoration.x, decoration.y, stallTexture, pixelStall ? `market-stall-${index % 5}` : undefined,
+      )
         .setOrigin(0.5, 1)
         .setAlpha(0.74)
         .setDepth(6);
+      if (pixelStall) sprite.setScale(Math.min(decoration.width / 128, decoration.height / 96));
+      else sprite.setDisplaySize(decoration.width, decoration.height);
     });
-    LEVEL_TWO_DATA.covers.forEach((cover) => {
-      this.add.image(cover.x, cover.y, stallTexture)
-        .setDisplaySize(cover.width, cover.height)
+    LEVEL_TWO_DATA.covers.forEach((cover, index) => {
+      const pixelStall = stallTexture === 'market-stalls-sheet';
+      const sprite = this.add.image(
+        cover.x, cover.y, stallTexture, pixelStall ? `market-stall-${(index + 1) % 5}` : undefined,
+      )
         .setOrigin(0.5, 1)
         .setDepth(9);
-      this.createSolidObstacle(cover.x, cover.y - cover.height / 2, cover.width - 14, cover.height);
+      if (pixelStall) sprite.setScale(Math.min(cover.width / 128, cover.height / 96));
+      else sprite.setDisplaySize(cover.width, cover.height);
+      this.createSolidObstacle(
+        cover.x, cover.y - sprite.displayHeight / 2, Math.max(24, sprite.displayWidth - 14), sprite.displayHeight,
+      );
     });
     if (!this.sentinelDefeated) this.createSentinelBarrier();
   }
@@ -284,9 +309,14 @@ export class LevelTwoScene extends Phaser.Scene {
 
   createOxygenStations() {
     this.oxygenStationZones = this.add.group();
-    const texture = this.assetResolver.resolve('pressureRegulator', 'fallback-regulator');
+    const texture = this.assetResolver.resolve('oxygenVent', 'fallback-regulator', ['oxygen-vent-0']);
     LEVEL_TWO_DATA.oxygenStations.forEach((station) => {
-      const sprite = this.add.image(station.x, station.y, texture).setOrigin(0.5, 1).setTint(0x8dfff3).setDepth(10);
+      const pixelVent = texture === 'oxygen-vent-sheet';
+      const sprite = this.add.sprite(
+        station.x, station.y, texture, pixelVent ? 'oxygen-vent-0' : undefined,
+      ).setOrigin(0.5, 1).setDepth(10);
+      if (pixelVent && this.anims.exists('oxygen-vent-animation')) sprite.play('oxygen-vent-animation');
+      else sprite.setTint(0x8dfff3);
       if (this.usedOxygenStations.has(station.id)) sprite.setAlpha(0.3);
       const zone = this.add.zone(station.x, station.y - 30, station.radius * 2, 100);
       zone.stationId = station.id;
@@ -299,8 +329,11 @@ export class LevelTwoScene extends Phaser.Scene {
   createCheckpoint() {
     const data = LEVEL_TWO_DATA.checkpoint;
     const texture = this.assetResolver.resolve('marketCheckpoint', 'fallback-checkpoint');
-    this.checkpointSprite = this.add.image(data.x, data.y, texture).setOrigin(0.5, 1).setDepth(10);
-    if (this.checkpointActive) this.checkpointSprite.setTint(0xffcc72);
+    const pixelCheckpoint = texture === 'market-checkpoint-sheet';
+    this.checkpointSprite = this.add.image(
+      data.x, data.y, texture, pixelCheckpoint ? `market-checkpoint-${this.checkpointActive ? 2 : 0}` : undefined,
+    ).setOrigin(0.5, 1).setDepth(10);
+    if (this.checkpointActive && !pixelCheckpoint) this.checkpointSprite.setTint(0xffcc72);
     this.checkpointZone = this.add.zone(data.x, data.y - 30, data.radius * 2, 100);
     this.physics.add.existing(this.checkpointZone, true);
   }
@@ -308,9 +341,18 @@ export class LevelTwoScene extends Phaser.Scene {
   createHazardsAndCurrents() {
     this.hazardZones = this.add.group();
     const hazardTexture = this.assetResolver.resolve('blackCoralHazard', 'fallback-hazard');
-    LEVEL_TWO_DATA.hazards.forEach((hazard) => {
-      this.add.image(hazard.x, hazard.y, hazardTexture).setDisplaySize(hazard.width, hazard.height).setOrigin(0.5, 1).setDepth(10);
-      const zone = this.add.zone(hazard.x, hazard.y - hazard.height / 2, hazard.width, hazard.height);
+    LEVEL_TWO_DATA.hazards.forEach((hazard, index) => {
+      const pixelHazard = hazardTexture === 'black-coral-hazard-sheet';
+      if (pixelHazard) {
+        this.add.tileSprite(
+          hazard.x, hazard.y, hazard.width, 32, hazardTexture, `black-coral-hazard-${index % 4}`,
+        ).setOrigin(0.5, 1).setDepth(10);
+      } else {
+        this.add.image(hazard.x, hazard.y, hazardTexture)
+          .setDisplaySize(hazard.width, hazard.height).setOrigin(0.5, 1).setDepth(10);
+      }
+      const collisionHeight = pixelHazard ? 32 : hazard.height;
+      const zone = this.add.zone(hazard.x, hazard.y - collisionHeight / 2, hazard.width, collisionHeight);
       zone.hazardId = hazard.id;
       this.physics.add.existing(zone, true);
       this.hazardZones.add(zone);
@@ -514,7 +556,9 @@ export class LevelTwoScene extends Phaser.Scene {
     if (this.checkpointActive) return;
     this.checkpointActive = true;
     this.checkpointsUsed += 1;
-    this.checkpointSprite.setTint(0xffcc72);
+    if (this.checkpointSprite.texture.key === 'market-checkpoint-sheet') {
+      this.checkpointSprite.setFrame('market-checkpoint-2').clearTint();
+    } else this.checkpointSprite.setTint(0xffcc72);
     const checkpoint = LEVEL_TWO_DATA.checkpoint;
     const state = this.getCheckpointState({ x: checkpoint.x, y: LEVEL_TWO_DATA.spawn.y });
     this.checkpointSystem.activate(checkpoint.id, state);
@@ -670,6 +714,10 @@ export class LevelTwoScene extends Phaser.Scene {
   }
 
   burst(x, y, color, large = false, overrideCount = null) {
+    const effectType = color === 0xffca57 ? 'yeast'
+      : color === 0xffcf78 || color === 0xffbd5f ? 'warm'
+        : color === 0x7bea4a ? 'hit' : 'pressure';
+    if (playPixelEffect(this, x, y, effectType)) return;
     const requested = overrideCount ?? (large ? 18 : 10);
     const count = this.settings.reducedParticles ? Math.ceil(requested / 3) : requested;
     for (let index = 0; index < count; index += 1) {

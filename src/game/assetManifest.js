@@ -90,6 +90,18 @@ export const SENTINEL_LEGACY_FRAMES = Object.freeze([
   ...makeRow('sentinel-defeat', 6, 18, 1185, 165, 200, 165),
 ]);
 
+export const YEAST_PIXEL_FRAMES = Object.freeze([
+  ...makeRow('yeast-idle', 6, 0, 0, 48, 48),
+  ...makeRow('yeast-attract', 6, 0, 48, 48, 48),
+  ...makeRow('yeast-collect', 8, 0, 96, 48, 48),
+]);
+
+export const GATE_PIXEL_FRAMES = Object.freeze([
+  ...makeRow('gate-inactive', 6, 0, 0, 128, 160),
+  ...makeRow('gate-activate', 8, 0, 160, 128, 160),
+  ...makeRow('gate-active', 6, 0, 320, 128, 160),
+]);
+
 export const FRAME_MANIFEST = Object.freeze({
   'bigotes-sheet': [
     ...(IS_PIXEL_ART_V1 ? BIGOTES_PIXEL_FRAMES : BIGOTES_LEGACY_FRAMES),
@@ -97,21 +109,45 @@ export const FRAME_MANIFEST = Object.freeze({
   ...(IS_PIXEL_ART_V1 ? {
     'player-attack-effect': makeRow('player-attack-effect', 6, 0, 0, 32, 32),
     'hit-spark': makeRow('hit-spark', 6, 0, 0, 24, 24),
+    'enemy-hit-effect': makeRow('enemy-hit-effect', 6, 0, 0, 24, 24),
+    'yeast-collect-effect': makeRow('yeast-collect-effect', 6, 0, 0, 32, 32),
+    'warm-burst-effect': makeRow('warm-burst-effect', 6, 0, 0, 48, 48),
+    'pressure-burst-effect': makeRow('pressure-burst-effect', 6, 0, 0, 48, 48),
+    'thermal-oven-sheet': makeRow('thermal-oven', 4, 0, 0, 96, 80),
+    'oxygen-vent-sheet': makeRow('oxygen-vent', 4, 0, 0, 48, 48),
+    'corrupted-projectile-sheet': makeRow('corrupted-projectile', 6, 0, 0, 24, 24),
+    'pressure-regulator-sheet': makeRow('pressure-regulator', 3, 0, 0, 48, 64),
+    'pressure-oven-sheet': makeRow('pressure-oven', 4, 0, 0, 96, 96),
+    'market-exit-sheet': makeRow('market-exit', 3, 0, 0, 128, 160),
+    'market-checkpoint-sheet': makeRow('market-checkpoint', 3, 0, 0, 48, 80),
+    'market-stalls-sheet': makeRow('market-stall', 5, 0, 0, 128, 96),
+    'black-coral-hazard-sheet': makeRow('black-coral-hazard', 4, 0, 0, 64, 32),
   } : {}),
   'crawler-sheet': [
     ...(IS_PIXEL_ART_V1 ? CRAWLER_PIXEL_FRAMES : CRAWLER_LEGACY_FRAMES),
   ],
   'yeast-sheet': [
-    ...makeRow('yeast-idle', 6, 275, 80, 165, 175, 170),
-    ...makeRow('yeast-attract', 5, 275, 340, 175, 180, 170),
-    ...makeRow('yeast-collect', 6, 275, 585, 170, 190, 170),
+    ...(IS_PIXEL_ART_V1 ? YEAST_PIXEL_FRAMES : [
+      ...makeRow('yeast-idle', 6, 275, 80, 165, 175, 170),
+      ...makeRow('yeast-attract', 5, 275, 340, 175, 180, 170),
+      ...makeRow('yeast-collect', 6, 275, 585, 170, 190, 170),
+    ]),
   ],
   'gate-sheet': [
-    ...makeRow('gate-inactive', 6, 0, 35, 256, 290, 256),
-    ...makeRow('gate-activate', 6, 0, 330, 256, 290, 256),
-    ...makeRow('gate-active', 6, 0, 620, 256, 290, 256),
+    ...(IS_PIXEL_ART_V1 ? GATE_PIXEL_FRAMES : [
+      ...makeRow('gate-inactive', 6, 0, 35, 256, 290, 256),
+      ...makeRow('gate-activate', 6, 0, 330, 256, 290, 256),
+      ...makeRow('gate-active', 6, 0, 620, 256, 290, 256),
+    ]),
   ],
-  tileset: [
+  tileset: IS_PIXEL_ART_V1 ? [
+    { name: 'tile-platform-left', x: 0, y: 0, width: 32, height: 12 },
+    { name: 'tile-platform-center', x: 32, y: 0, width: 32, height: 12 },
+    { name: 'tile-platform-right', x: 64, y: 0, width: 32, height: 12 },
+    { name: 'tile-floor', x: 96, y: 0, width: 32, height: 36 },
+    { name: 'tile-rocks', x: 0, y: 64, width: 64, height: 48 },
+    { name: 'tile-coral', x: 64, y: 64, width: 48, height: 64 },
+  ] : [
     { name: 'tile-platform-small', x: 45, y: 20, width: 135, height: 90 },
     { name: 'tile-platform-long', x: 45, y: 600, width: 395, height: 110 },
     { name: 'tile-rocks', x: 610, y: 720, width: 305, height: 140 },

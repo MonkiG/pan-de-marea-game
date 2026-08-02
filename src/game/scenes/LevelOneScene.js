@@ -15,6 +15,7 @@ import { MovementDebugOverlay } from '../systems/MovementDebugOverlay.js';
 import { validateJumpLink } from '../systems/JumpReachSystem.js';
 import { sessionProgress } from '../systems/SessionProgress.js';
 import { BACKGROUND_LAYOUTS, createParallaxBackground } from '../art/backgroundLayout.js';
+import { createPixelFloor, createPixelPlatform, hasPixelTileset, playPixelEffect } from '../art/levelArt.js';
 
 export class LevelOneScene extends Phaser.Scene {
   constructor() {
@@ -92,12 +93,19 @@ export class LevelOneScene extends Phaser.Scene {
 
   createLevelGeometry() {
     this.walkableSurfaces = this.add.group();
-    const texture = this.textures.exists('tileset') && this.textures.get('tileset').has('tile-platform-long')
+    const pixelTiles = hasPixelTileset(this);
+    const texture = this.textures.exists('tileset') && (pixelTiles || this.textures.get('tileset').has('tile-platform-long'))
       ? 'tileset'
       : 'fallback-platform';
     const floorFrame = texture === 'tileset' ? 'tile-platform-long' : undefined;
-    for (let x = 160; x < LEVEL_ONE_DATA.worldWidth; x += 318) {
-      this.add.image(x, 344, texture, floorFrame).setDisplaySize(320, 42).setDepth(8);
+    if (pixelTiles) {
+      createPixelFloor(this, {
+        texture, worldWidth: LEVEL_ONE_DATA.worldWidth, top: LEVEL_ONE_DATA.collision.floorTop, depth: 8,
+      });
+    } else {
+      for (let x = 160; x < LEVEL_ONE_DATA.worldWidth; x += 318) {
+        this.add.image(x, 344, texture, floorFrame).setDisplaySize(320, 42).setDepth(8);
+      }
     }
     this.createOneWaySurface(
       LEVEL_ONE_DATA.worldWidth / 2,
@@ -106,13 +114,18 @@ export class LevelOneScene extends Phaser.Scene {
       LEVEL_ONE_DATA.collision.floorHeight,
     );
     LEVEL_ONE_DATA.platforms.forEach((data) => {
-      const frame = texture === 'tileset' && this.textures.get(texture).has(data.frame) ? data.frame : floorFrame;
-      this.add.image(data.x, data.y, texture, frame)
-        .setDisplaySize(data.width, data.height)
-        .setDepth(8);
+      const top = data.y - data.height / 2;
+      if (pixelTiles) {
+        createPixelPlatform(this, { texture, x: data.x, top, width: data.width, depth: 8 });
+      } else {
+        const frame = texture === 'tileset' && this.textures.get(texture).has(data.frame) ? data.frame : floorFrame;
+        this.add.image(data.x, data.y, texture, frame)
+          .setDisplaySize(data.width, data.height)
+          .setDepth(8);
+      }
       this.createOneWaySurface(
         data.x,
-        data.y - data.height / 2,
+        top,
         data.width - LEVEL_ONE_DATA.collision.platformHorizontalInset * 2,
         LEVEL_ONE_DATA.collision.platformThickness,
       );
@@ -120,11 +133,12 @@ export class LevelOneScene extends Phaser.Scene {
 
     LEVEL_ONE_DATA.decorations.forEach((data) => {
       if (texture !== 'tileset' || !this.textures.get(texture).has(data.frame)) return;
-      this.add.image(data.x, data.y, texture, data.frame)
-        .setDisplaySize(data.width, data.height)
+      const decoration = this.add.image(data.x, data.y, texture, data.frame)
         .setOrigin(0.5, 1)
         .setDepth(7)
         .setAlpha(0.88);
+      if (pixelTiles) decoration.setScale(Math.min(data.width / decoration.width, data.height / decoration.height));
+      else decoration.setDisplaySize(data.width, data.height);
     });
   }
 
@@ -167,7 +181,14 @@ export class LevelOneScene extends Phaser.Scene {
   createOxygenVent() {
     const data = LEVEL_ONE_DATA.oxygenVent;
     this.ventGlow = this.add.circle(data.x, data.y - 10, 24, 0x83fff0, 0.2).setDepth(9);
-    this.add.rectangle(data.x, data.y + 6, 48, 15, 0x476d70).setDepth(9);
+    if (this.textures.exists('oxygen-vent-sheet')) {
+      this.ventSprite = this.add.sprite(data.x, data.y + 10, 'oxygen-vent-sheet', 'oxygen-vent-0')
+        .setOrigin(0.5, 1)
+        .setDepth(10);
+      if (this.anims.exists('oxygen-vent-animation')) this.ventSprite.play('oxygen-vent-animation');
+    } else {
+      this.add.rectangle(data.x, data.y + 6, 48, 15, 0x476d70).setDepth(9);
+    }
     this.tweens.add({ targets: this.ventGlow, alpha: 0.5, scale: 1.25, yoyo: true, repeat: -1, duration: 900 });
     this.ventZone = this.add.zone(data.x, data.y - 20, data.radius * 2, 90);
     this.physics.add.existing(this.ventZone, true);
@@ -361,6 +382,8 @@ export class LevelOneScene extends Phaser.Scene {
   }
 
   burst(x, y, color, large = false) {
+    const effectType = color === 0x8effef ? 'pressure' : color === 0xffc657 ? 'yeast' : 'warm';
+    if (playPixelEffect(this, x, y, effectType)) return;
     const requested = large ? 18 : 10;
     const count = this.settings.reducedParticles ? Math.ceil(requested / 3) : requested;
     for (let index = 0; index < count; index += 1) {
