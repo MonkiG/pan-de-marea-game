@@ -127,6 +127,25 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 - `b15738c feat(art): add Bigotes pixel-art pilot`
 - `e7b4547 feat(game): integrate frame-synced pixel-art combat`
 
+### PDM-020 — Generar los personajes restantes desde la base de Bigotes
+
+**Fecha:** 2026-08-02
+**Prompt:** “toma como base la configuracion de bigotes y genera los assets correspondientes del resto de personajes, esto para ahorrar tokens en ajustes que ya no deberian suceder porque ya esta la base del primer personaje y el contexto del juego”
+**Resultado:** se cerró el alcance a los tres enemigos con personaje jugable —Rastrero, Escupemasas y Sentinela— y se reutilizó sin reabrir decisiones la dirección de Bigotes: cartoon submarino, outline azul marino, 12–16 colores, baja densidad de detalle y fluidez mediante poses. ImageGen integrado produjo tres maestros y veinte filas de animación; el pipeline aísla poses por componentes, elimina chroma, normaliza paleta/alpha y ensambla hojas exactas de 640×336, 640×384 y 768×784 px. El perfil `pixel-v1` carga las nuevas hojas con frames, FPS, escala 1× y colliders propios; la escena de revisión acepta los tres personajes y se validaron ambos niveles. Proyectil, coleccionables, objetos, UI, tileset y fondos permanecen fuera de esta tanda.
+**Archivos:** `PROMPTS.md`, `README.md`, `art-source/pixel-art/v1/README.md`, `art-source/pixel-art/v1/rastrero/`, `art-source/pixel-art/v1/escupemasas/`, `art-source/pixel-art/v1/sentinela/`, `assets/pixel-art/v1/characters/brine-crawler.png`, `assets/pixel-art/v1/characters/abyssal-spitter.png`, `assets/pixel-art/v1/characters/black-coral-sentinel.png`, `scripts/process-pixel-art.mjs`, `scripts/validate-pixel-art.mjs`, `src/App.jsx`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/animationData.js`, `src/game/entities/BrineCrawler.js`, `src/game/entities/AbyssalSpitter.js`, `src/game/entities/BlackCoralSentinel.js`, `src/game/scenes/ArtReviewScene.js` y `src/game/scenes/PreloadScene.js`.
+**Commits:**
+
+- `878b70e feat(art): add pixel-art enemy character batch`
+- `52a7a17 feat(game): integrate pixel-art enemy profiles`
+
+### PDM-021 — Conservar local la rama artística
+
+**Fecha:** 2026-08-02
+**Prompt:** “No pushees la rama”
+**Resultado:** se canceló la publicación de `codex/pixel-art-v1`; los commits de esta tanda se conservaron únicamente en el repositorio local.
+**Archivos:** `PROMPTS.md`.
+**Commits:** pendiente (working tree).
+
 ## Feature: gobernanza y documentación del proyecto
 
 ### PDM-009 — Registrar prompts e instruir a otros agentes

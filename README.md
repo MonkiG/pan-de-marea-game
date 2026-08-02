@@ -149,7 +149,7 @@ La lista completa de material existente, faltante y recomendado está en [`GUIA_
 
 La especificación para redibujar el proyecto como pixel art, incluyendo hojas uniformes, movimientos por enemigo y el contrato visual/técnico del ataque de Bigotes, está en [`GUIA_PIXEL_ART_Y_ANIMACIONES.md`](GUIA_PIXEL_ART_Y_ANIMACIONES.md).
 
-Los 41 prompts de producción están en [`pixel_art_prompt.md`](pixel_art_prompt.md). El piloto aprobado técnicamente vive en paralelo a los PNG originales:
+Los 41 prompts de producción están en [`pixel_art_prompt.md`](pixel_art_prompt.md). El piloto y el primer lote de personajes viven en paralelo a los PNG originales:
 
 - fuentes de ImageGen: `art-source/pixel-art/v1/`;
 - sprites normalizados: `assets/pixel-art/v1/`;
@@ -163,14 +163,14 @@ $env:VITE_ART_PROFILE='pixel-v1'
 npm run dev
 ```
 
-Durante desarrollo, `?art-review=bigotes` abre la comparación interactiva legacy/pixel-v1. También se puede probar el perfil sin reiniciar Vite mediante `?art-profile=pixel-v1`; añade `&unlock-all` para revisar el Mercado sin completar antes la Panadería. La escena permite cambiar de animación y velocidad, pausar, avanzar por frames, alternar 1×/4×, usar `flipX` y ver collider/hitbox. Para reconstruir y comprobar los PNG:
+Durante desarrollo, la escena de comparación acepta `?art-review=bigotes`, `?art-review=rastrero`, `?art-review=escupemasas` y `?art-review=sentinela`. También se puede probar el perfil sin reiniciar Vite mediante `?art-profile=pixel-v1`; añade `&unlock-all` para revisar el Mercado sin completar antes la Panadería. La escena permite cambiar de animación y velocidad, pausar, avanzar por frames, alternar 1×/4×, usar `flipX` y ver el collider; Bigotes muestra además su hitbox. Para reconstruir y comprobar los PNG:
 
 ```sh
 npm run art:process
 npm run art:validate
 ```
 
-`art:process` aplica recorte, chroma, escala nearest-neighbor, paleta cerrada, alpha binario y ensamblado reproducible. `art:validate` comprueba dimensiones, cuadrícula, paleta, transparencia y celdas requeridas/no usadas.
+`art:process` aplica recorte, aislamiento por componentes, chroma, escala nearest-neighbor, paleta cerrada, alpha binario y ensamblado reproducible. `art:validate` comprueba dimensiones, cuadrícula, paleta, transparencia y celdas requeridas/no usadas. El perfil `pixel-v1` incluye actualmente Bigotes, Rastrero, Escupemasas, Sentinela y los dos efectos del ataque del jugador; Levadura, objetos, UI, tileset y fondos siguen pendientes.
 
 ## Spritesheets y recortes
 
