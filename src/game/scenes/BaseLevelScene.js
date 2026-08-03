@@ -17,6 +17,7 @@ import { OxygenSystem } from '../systems/OxygenSystem.js';
 import { PressureRecipeSystem } from '../systems/PressureRecipeSystem.js';
 import { sessionProgress } from '../systems/SessionProgress.js';
 import { validateJumpLink } from '../systems/JumpReachSystem.js';
+import { resolveLevelPlacements, validateLevelSupports } from '../systems/LevelSupportSystem.js';
 import { createParallaxBackground } from '../art/backgroundLayout.js';
 import { createPixelFloor, createPixelPlatform, hasPixelTileset, playPixelEffect } from '../art/levelArt.js';
 
@@ -44,7 +45,11 @@ export class BaseLevelScene extends Phaser.Scene {
   create(data = {}) {
     this.config = this.getConfig();
     this.levelId = this.config.levelId;
-    this.levelData = this.config.data;
+    const supportErrors = validateLevelSupports(this.config.data);
+    if (supportErrors.length > 0) {
+      throw new Error(`[${this.config.levelName}] Layout sin apoyo:\n${supportErrors.join('\n')}`);
+    }
+    this.levelData = resolveLevelPlacements(this.config.data);
     this.objectives = this.config.objectives;
 
     this.game.registry.set('currentLevel', this.levelId);
@@ -72,7 +77,7 @@ export class BaseLevelScene extends Phaser.Scene {
     this.createGeometry();
     this.createAmbientDetails();
 
-    const spawn = this.restoredState?.spawn ?? this.levelData.spawn;
+    const spawn = this.getSpawnPoint();
     this.player = new Player(this, spawn.x, spawn.y);
     this.createCollectibles();
     this.createEnemies();
@@ -96,6 +101,20 @@ export class BaseLevelScene extends Phaser.Scene {
     this.emitSnapshot(true);
     eventBus.emit('level:started', { levelId: this.levelId });
     eventBus.emit('game:ready', this.getSnapshot());
+  }
+
+  getSpawnPoint() {
+    if (this.restoredState?.spawn) return this.restoredState.spawn;
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
+      const reviewX = Number(new URLSearchParams(window.location.search).get('review-x'));
+      if (Number.isFinite(reviewX) && reviewX > 0) {
+        return {
+          ...this.levelData.spawn,
+          x: Phaser.Math.Clamp(reviewX, 60, this.levelData.worldWidth - 60),
+        };
+      }
+    }
+    return this.levelData.spawn;
   }
 
   restoreFromCheckpoint(data) {
@@ -168,29 +187,55 @@ export class BaseLevelScene extends Phaser.Scene {
       this.levelData.worldWidth,
       this.levelData.collision.floorHeight,
     );
-    this.levelData.platforms.forEach((platform) => {
-      const top = platform.y - platform.height / 2;
-      if (pixelTiles) {
-        createPixelPlatform(this, { texture, x: platform.x, top, width: platform.width, depth: 8 });
-      } else {
-        const frame = texture === 'tileset' && this.textures.get(texture).has(platform.frame)
-          ? platform.frame
-          : floorFrame;
-        this.add.image(platform.x, platform.y, texture, frame)
-          .setDisplaySize(platform.width, platform.height)
-          .setDepth(8);
-      }
-      this.createOneWaySurface(
-        platform.x,
-        top,
-        platform.width - this.levelData.collision.platformHorizontalInset * 2,
-        this.levelData.collision.platformThickness,
-      );
+    this.levelData.platforms.forEach((platform, index) => {
+      this.createSupportedPlatform(platform, { texture, pixelTiles, floorFrame, index });
     });
 
     this.createDecorations(texture, pixelTiles);
     this.createCovers();
     if (this.config.hasSentinel && !this.sentinelDefeated) this.createSentinelBarrier();
+  }
+
+  createSupportedPlatform(platform, { texture, pixelTiles, floorFrame, index }) {
+    const top = platform.y - platform.height / 2;
+    const floorTop = this.levelData.collision.floorTop;
+    const supportHeight = floorTop - top;
+    const colliderWidth = platform.width - this.levelData.collision.platformHorizontalInset * 2;
+
+    if (platform.supportKind === 'stall') {
+      const stallTexture = this.assetResolver.resolve('marketStall', 'fallback-market-stall');
+      const pixelStall = stallTexture === 'market-stalls-sheet';
+      this.add.image(
+        platform.x,
+        floorTop,
+        stallTexture,
+        pixelStall ? `market-stall-${index % 5}` : undefined,
+      )
+        .setOrigin(0.5, 1)
+        .setDisplaySize(platform.width, supportHeight)
+        .setDepth(8);
+    } else if (pixelTiles) {
+      createPixelPlatform(this, { texture, x: platform.x, top, width: platform.width, depth: 8 });
+      const fillHeight = Math.max(8, supportHeight - 12);
+      this.add.tileSprite(
+        platform.x,
+        top + 12,
+        Math.max(32, platform.width - 24),
+        fillHeight,
+        texture,
+        'tile-floor',
+      ).setOrigin(0.5, 0).setDepth(7);
+    } else {
+      const frame = texture === 'tileset' && this.textures.get(texture).has(platform.frame)
+        ? platform.frame
+        : floorFrame;
+      this.add.image(platform.x, top, texture, frame)
+        .setOrigin(0.5, 0)
+        .setDisplaySize(platform.width, supportHeight)
+        .setDepth(8);
+    }
+
+    this.createSolidObstacle(platform.x, top + supportHeight / 2, colliderWidth, supportHeight);
   }
 
   /** Decoración ambiental. Sobrescribible por nivel (panadería usa frames del tileset). */
@@ -212,8 +257,25 @@ export class BaseLevelScene extends Phaser.Scene {
   createCovers() {
     const covers = this.levelData.covers ?? [];
     if (covers.length === 0) return;
-    const stallTexture = this.assetResolver.resolve('marketStall', 'fallback-market-stall');
     covers.forEach((cover, index) => {
+      if (cover.kind === 'rocks') {
+        const texture = this.assetResolver.resolve('sharedTileset', 'fallback-platform', ['tile-rocks']);
+        const frame = texture === 'tileset' && this.textures.get(texture).has('tile-rocks')
+          ? 'tile-rocks'
+          : undefined;
+        this.add.image(cover.x, cover.y, texture, frame)
+          .setOrigin(0.5, 1)
+          .setDisplaySize(cover.width, cover.height)
+          .setDepth(9);
+        this.createSolidObstacle(
+          cover.x,
+          cover.y - cover.height * 0.42,
+          Math.max(24, cover.width - 18),
+          cover.height * 0.84,
+        );
+        return;
+      }
+      const stallTexture = this.assetResolver.resolve('marketStall', 'fallback-market-stall');
       const pixelStall = stallTexture === 'market-stalls-sheet';
       const sprite = this.add.image(
         cover.x, cover.y, stallTexture, pixelStall ? `market-stall-${(index + 1) % 5}` : undefined,

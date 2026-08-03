@@ -9,6 +9,7 @@ import { ResultScreen } from './components/ResultScreen.jsx';
 import { eventBus } from './game/EventBus.js';
 import { OBJECTIVES, OXYGEN, PLAYER, RECIPE } from './game/constants.js';
 import { mergeProgressionSnapshots, sessionProgress } from './game/systems/SessionProgress.js';
+import { getLevelDefinition } from './game/data/levelCatalog.js';
 
 const initialSnapshot = Object.freeze({
   status: 'loading',
@@ -42,12 +43,18 @@ const artReviewAsset = import.meta.env.DEV
   ? new URLSearchParams(window.location.search).get('art-review')
   : null;
 const artReviewMode = ['bigotes', 'rastrero', 'escupemasas', 'sentinela'].includes(artReviewAsset);
+const requestedReviewLevel = import.meta.env.DEV
+  ? new URLSearchParams(window.location.search).get('review-level')
+  : null;
+const initialSelectedLevel = ['level-one', 'level-two'].includes(requestedReviewLevel)
+  ? requestedReviewLevel
+  : 'level-one';
 
 export function App() {
   const [view, setView] = useState(artReviewMode ? 'game' : 'menu');
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [settings, setSettings] = useState({ muted: false, screenShake: true, reducedParticles: false });
-  const [selectedLevel, setSelectedLevel] = useState('level-one');
+  const [selectedLevel, setSelectedLevel] = useState(initialSelectedLevel);
   const [progression, setProgression] = useState(() => sessionProgress.getSnapshot());
 
   useEffect(() => {
@@ -78,13 +85,13 @@ export function App() {
   const startGame = (levelId = selectedLevel) => {
     if (!progression.unlockedLevels.includes(levelId) && !sessionProgress.isUnlocked(levelId)) return;
     setSelectedLevel(levelId);
-    setSnapshot({ ...initialSnapshot, levelId, levelName: levelId === 'level-two' ? 'El Mercado Sumergido' : 'La Panadería Hundida' });
+    setSnapshot({ ...initialSnapshot, levelId, levelName: getLevelDefinition(levelId).name });
     setView('game');
   };
 
   const changeLevel = (levelId) => {
     setSelectedLevel(levelId);
-    setSnapshot({ ...initialSnapshot, levelId, levelName: levelId === 'level-two' ? 'El Mercado Sumergido' : 'La Panadería Hundida' });
+    setSnapshot({ ...initialSnapshot, levelId, levelName: getLevelDefinition(levelId).name });
     eventBus.emit('command:level', levelId);
   };
 

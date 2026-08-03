@@ -10,8 +10,8 @@ export function ResultScreen({ snapshot, onRestart, onMenu, onContinue, onBakery
     <div className="overlay" role="dialog" aria-modal="true" aria-label={won ? 'Nivel completado' : 'Derrota'}>
       <div className={`overlay-card result-card ${won ? 'is-victory' : 'is-defeat'}`}>
         <p className="eyebrow">{won ? (market ? 'La presión vuelve a circular' : 'La llama familiar vuelve a arder') : 'Las mareas vencieron esta vez'}</p>
-        <h2>{won ? (market ? 'El Mercado Sumergido ha sido atravesado' : 'Nivel completado') : 'Bigotes necesita otro intento'}</h2>
-        <p>{won ? (market ? 'La salida al siguiente sector está abierta.' : 'La ruta al Mercado Sumergido está abierta.') : 'Respira, sacude las migas y vuelve al horno.'}</p>
+        <h2>{won ? (market ? 'Nivel I completado' : 'Tutorial completado') : 'Bigotes necesita otro intento'}</h2>
+        <p>{won ? (market ? 'El Mercado Sumergido ha sido atravesado.' : 'El Nivel I ya está disponible.') : 'Respira, sacude las migas y vuelve al horno.'}</p>
         <dl className="results-grid">
           <div><dt>Tiempo</dt><dd>{formatTime(snapshot.elapsedMs)}</dd></div>
           <div><dt>Levaduras</dt><dd>{snapshot.yeastCollected}</dd></div>
@@ -21,9 +21,9 @@ export function ResultScreen({ snapshot, onRestart, onMenu, onContinue, onBakery
           {market && <div><dt>Checkpoints</dt><dd>{snapshot.checkpointsUsed}</dd></div>}
         </dl>
         <div className="overlay-actions">
-          {won && !market && <button className="primary-button" type="button" onClick={onContinue} autoFocus>Continuar al Mercado Sumergido</button>}
+          {won && !market && <button className="primary-button" type="button" onClick={onContinue} autoFocus>Continuar al Nivel I</button>}
           <button className={won && !market ? '' : 'primary-button'} type="button" onClick={onRestart} autoFocus={!won || market}>Jugar de nuevo</button>
-          {won && market && <button type="button" onClick={onBakery}>Repetir desde La Panadería Hundida</button>}
+          {won && market && <button type="button" onClick={onBakery}>Repetir el Tutorial</button>}
           <button type="button" onClick={onMenu}>Volver al menú</button>
         </div>
       </div>

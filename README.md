@@ -1,6 +1,6 @@
 # Pan de Marea: La Última Panadería
 
-Demo jugable de dos niveles. En **La Panadería Hundida**, Bigotes recupera el horno familiar y prepara un Pan Térmico. Al completar esa ruta se desbloquea **El Mercado Sumergido**, un recorrido más amplio con reguladores de presión, proyectiles, checkpoint, un guardián pesado y la receta del Pan de Presión.
+Demo jugable con un **Tutorial** y un **Nivel I**. La Panadería Hundida enseña todos los sistemas base en zonas seguras; al completarla se desbloquea El Mercado Sumergido, una escalada con amenazas combinadas, cuatro reguladores, checkpoint, Sentinela y Pan de Presión.
 
 ## Tecnologías y requisitos
 
@@ -77,51 +77,45 @@ No se añadieron doble salto, dash, wall jump ni nuevas habilidades.
 
 ## Colisiones y depuración de recorrido
 
-- El suelo visual repetido utiliza un único collider continuo; esto elimina bordes entre tiles.
-- Las plataformas elevadas tienen una superficie unidireccional de 8 px: no bloquean al caminar por debajo y sólo reciben al jugador al aterrizar desde arriba.
+- El suelo visual repetido conserva un único collider continuo, sin bordes entre tiles.
+- Cada plataforma elevada es una estructura sólida conectada al suelo: terraza de piedra en el Tutorial o puesto/estructura del mercado en Nivel I.
+- Enemigos, levaduras e interactivos declaran `surfaceId`; su altura se deriva de la superficie y no de coordenadas verticales independientes.
 - Decoración, levaduras, respiradero, horno y compuerta no forman paredes sólidas. Los triggers usan overlaps.
 - El collider de Bigotes mide 68×112 píxeles de la lámina antes de aplicar la escala, aproximadamente 28.6×47 px en el mundo.
 - `DEBUG_PHYSICS` muestra los cuerpos de Arcade.
 - `DEBUG_MOVEMENT` muestra collider, ground check, velocidad y estado de suelo.
 - `DEBUG_LEVEL_GEOMETRY` muestra superficies transitables y enlaces de salto.
+- En desarrollo, `?review-level=level-two&review-x=3500` permite abrir el selector en un destino y revisar una zona concreta; no altera el build de producción.
 
 Las tres opciones están desactivadas en producción y se encuentran al inicio de `src/game/constants.js`.
 
-Plataformas reposicionadas en La Panadería Hundida:
-
-- la escalera inicial se suavizó en `intro-step` e `intro-rise`;
-- las plataformas de las levaduras A y B se acercaron, reduciendo el antiguo hueco inaccesible de 170 px a 80 px;
-- la entrada de combate se desplazó para dejar una recepción ancha y descendente;
-- los escalones `final-step`/`final-rise` y `rest-step`/`gate-rise` quedaron dentro del margen seguro;
-- la tercera levadura se centró sobre una plataforma alcanzable directamente desde el suelo.
+La validación de layout rechaza plataformas sin soporte, objetos fuera de su superficie, patrullas que abandonan una plataforma y saltos fuera del margen seguro. Horno, compuerta, estación de presión y salida se apoyan directamente en el suelo.
 
 ## Flujo de los niveles
 
-El botón **Jugar** abre una pantalla exclusiva de selección con tarjetas ilustradas. Los destinos bloqueados aparecen opacos y desaturados, no aceptan interacción y explican su requisito. El Mercado Sumergido permanece bloqueado durante la sesión hasta completar La Panadería Hundida; la transición de resultados puede iniciarlo sin crear una segunda instancia de Phaser.
+El botón **Jugar** abre una pantalla exclusiva de selección con tarjetas ilustradas. El Tutorial está disponible desde el inicio; Nivel I permanece bloqueado durante la sesión hasta completar La Panadería Hundida.
 
-### Nivel I — La Panadería Hundida
+### Tutorial — La Panadería Hundida
 
-1. Aprende movimiento y salto en la zona segura.
-2. Recoge tres Levaduras de Burbuja; cada una recupera oxígeno.
-3. Ataca o esquiva al Rastrero de Salmuera.
-4. Usa el respiradero tras el primer combate para recuperar oxígeno.
-5. Interactúa con el horno y espera 1.5 segundos para preparar el Pan Térmico.
-6. Supera el camino final y lleva el pan a la compuerta.
-7. Activa la Marea Térmica para completar el nivel.
+1. Aprende movimiento y salto en terrazas de piedra amplias.
+2. Descubre oxígeno, Levaduras de Burbuja y respiraderos.
+3. Practica combate cuerpo a cuerpo contra un Rastrero.
+4. Usa rocas como cobertura contra un Escupemasas apoyado en su percha.
+5. Cruza una corriente suave y salta coral peligroso.
+6. Activa un regulador y un checkpoint.
+7. Reúne tres Levaduras, prepara el Pan Térmico y abre la compuerta.
 
 La derrota ocurre al perder los tres puntos de salud. Si el oxígeno llega a cero, Bigotes recibe daño periódico hasta encontrar recuperación o caer derrotado.
 
-### Nivel II — El Mercado Sumergido
+### Nivel I — El Mercado Sumergido
 
-1. Explora un mundo de 7,200×720 px dividido en ocho zonas y rutas verticales opcionales.
-2. Reúne al menos cinco de las siete Levaduras de Burbuja y activa tres reguladores de presión.
-3. Usa puestos y desniveles como cobertura contra los Escupemasas y sus proyectiles de Masa Corrupta.
-4. Enfrenta o supera al Sentinela del Coral Negro, que combina ataques básicos y una carga pesada.
-5. Activa el checkpoint del mercado para conservar ingredientes, reguladores, salud, oxígeno y estadísticas al reiniciar tras una derrota.
-6. Interactúa con la estación de presión para preparar el Pan de Presión.
-7. Lleva el pan a la salida del mercado y completa el nivel.
+1. Explora un mundo de 9,000×720 px dividido en diez zonas y rutas verticales opcionales.
+2. Reúne seis de ocho Levaduras y activa cuatro reguladores, algunos sobre estructuras elevadas.
+3. Combina cobertura, cinco Escupemasas, cuatro Rastreros, corrientes fuertes y coral peligroso.
+4. Activa el checkpoint para conservar recursos y progreso tras una derrota.
+5. Supera al Sentinela del Coral Negro, prepara el Pan de Presión y abre la salida.
 
-El nivel contiene corrientes submarinas, coral dañino, dos estaciones grandes de oxígeno, tres Rastreros compartidos, tres Escupemasas y un Sentinela. El camino crítico mantiene suelo continuo; las plataformas elevadas dan acceso a recursos y rutas opcionales.
+El camino crítico mantiene suelo continuo. Las rutas elevadas descansan sobre puestos o terrazas sólidas y dan acceso a recursos y reguladores sin dejar objetos suspendidos.
 
 ## Estructura
 
@@ -268,11 +262,12 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 - daño, invulnerabilidad y salud mínima;
 - reinicio de los sistemas principales;
 - alcance y margen de los saltos declarados.
+- soportes estructurales, `surfaceId`, posiciones derivadas y límites de patrulla;
 - auditoría y resolución de assets con fallback;
 - activación de reguladores en cualquier orden y bloqueo de salida;
 - receta del Pan de Presión con y sin requisitos;
 - copia y restauración del checkpoint;
-- desbloqueo del Mercado tras completar el Nivel I;
+- desbloqueo del Nivel I tras completar el Tutorial;
 - límite del pool de proyectiles.
 
 ## Créditos y asistencia por IA

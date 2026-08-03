@@ -63,14 +63,14 @@ export const RECIPE = Object.freeze({
 });
 
 export const PRESSURE_RECIPE = Object.freeze({
-  yeastRequired: 5,
-  regulatorsRequired: 3,
+  yeastRequired: 6,
+  regulatorsRequired: 4,
   bakeTimeMs: 1700,
 });
 
 export const MARKET_OXYGEN = Object.freeze({
   ...OXYGEN,
-  drainPerSecond: 1.4,
+  drainPerSecond: 1.5,
   yeastRecovery: 6,
   stationRecovery: 45,
   criticalThreshold: 12,
@@ -115,8 +115,8 @@ export const OBJECTIVES = Object.freeze({
 
 export const MARKET_OBJECTIVES = Object.freeze({
   explore: 'Explora el Mercado Sumergido',
-  regulators: 'Activa los 3 reguladores de presión',
-  collect: 'Recolecta 5 Levaduras de Burbuja',
+  regulators: 'Activa los 4 reguladores de presión',
+  collect: 'Recolecta 6 Levaduras de Burbuja',
   sentinel: 'Supera al guardián del Coral Negro',
   oven: 'Llega a la estación de presión',
   bake: 'Prepara el Pan de Presión',

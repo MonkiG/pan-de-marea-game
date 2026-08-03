@@ -45,17 +45,17 @@ export const ASSET_REGISTRY = Object.freeze({
     ? { key: 'market-bg-3', path: 'pixel-art/v1/backgrounds/mercado-undido-3.png', type: 'image', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 360, fallback: 'fallback-market-background' }
     : { key: 'market-bg-3', path: 'mercado-undido-3.png', type: 'image', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-market-background' },
   abyssalSpitter: IS_PIXEL_ART_V1
-    ? { key: 'spitter-sheet', path: 'pixel-art/v1/characters/abyssal-spitter.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 384, fallback: 'fallback-spitter' }
-    : { key: 'spitter-sheet', path: 'escupemasas.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1536, height: 1024, fallback: 'fallback-spitter' },
+    ? { key: 'spitter-sheet', path: 'pixel-art/v1/characters/abyssal-spitter.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 640, height: 384, fallback: 'fallback-spitter' }
+    : { key: 'spitter-sheet', path: 'escupemasas.png', type: 'image-sheet', status: 'shared', usedIn: ['level-one', 'level-two'], width: 1536, height: 1024, fallback: 'fallback-spitter' },
   blackCoralSentinel: IS_PIXEL_ART_V1
     ? { key: 'sentinel-sheet', path: 'pixel-art/v1/characters/black-coral-sentinel.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 768, height: 784, fallback: 'fallback-sentinel' }
     : { key: 'sentinel-sheet', path: 'sentinela-del-coral-negro.png', type: 'image-sheet', status: 'used-level-2', usedIn: ['level-two'], width: 1024, height: 1536, fallback: 'fallback-sentinel' },
   corruptedDoughProjectile: IS_PIXEL_ART_V1
-    ? { key: 'corrupted-projectile-sheet', path: 'pixel-art/v1/props/corrupted-dough-projectile.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 144, height: 24, fallback: 'fallback-projectile' }
-    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-projectile' },
+    ? { key: 'corrupted-projectile-sheet', path: 'pixel-art/v1/props/corrupted-dough-projectile.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 24, fallback: 'fallback-projectile' }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-projectile' },
   pressureRegulator: IS_PIXEL_ART_V1
-    ? { key: 'pressure-regulator-sheet', path: 'pixel-art/v1/props/pressure-regulator.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 144, height: 64, fallback: 'fallback-regulator' }
-    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-regulator' },
+    ? { key: 'pressure-regulator-sheet', path: 'pixel-art/v1/props/pressure-regulator.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 64, fallback: 'fallback-regulator' }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-regulator' },
   pressureOven: IS_PIXEL_ART_V1
     ? { key: 'pressure-oven-sheet', path: 'pixel-art/v1/props/pressure-oven.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 384, height: 96, fallback: 'fallback-pressure-oven' }
     : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-pressure-oven' },
@@ -63,14 +63,14 @@ export const ASSET_REGISTRY = Object.freeze({
     ? { key: 'market-exit-sheet', path: 'pixel-art/v1/props/market-exit.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 384, height: 160, fallback: 'fallback-market-exit' }
     : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-market-exit' },
   marketCheckpoint: IS_PIXEL_ART_V1
-    ? { key: 'market-checkpoint-sheet', path: 'pixel-art/v1/props/market-checkpoint.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 144, height: 80, fallback: 'fallback-checkpoint' }
-    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-checkpoint' },
+    ? { key: 'market-checkpoint-sheet', path: 'pixel-art/v1/props/market-checkpoint.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 80, fallback: 'fallback-checkpoint' }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-checkpoint' },
   marketStall: IS_PIXEL_ART_V1
     ? { key: 'market-stalls-sheet', path: 'pixel-art/v1/props/market-stalls.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 640, height: 96, fallback: 'fallback-market-stall' }
     : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-market-stall' },
   blackCoralHazard: IS_PIXEL_ART_V1
-    ? { key: 'black-coral-hazard-sheet', path: 'pixel-art/v1/props/black-coral-hazard.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-two'], width: 256, height: 32, fallback: 'fallback-hazard' }
-    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-two'], fallback: 'fallback-hazard' },
+    ? { key: 'black-coral-hazard-sheet', path: 'pixel-art/v1/props/black-coral-hazard.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 256, height: 32, fallback: 'fallback-hazard' }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-hazard' },
   ...(IS_PIXEL_ART_V1 ? {
     enemyHitEffect: { key: 'enemy-hit-effect', path: 'pixel-art/v1/effects/enemy-hit.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 24 },
     yeastCollectEffect: { key: 'yeast-collect-effect', path: 'pixel-art/v1/effects/yeast-collect.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 192, height: 32 },

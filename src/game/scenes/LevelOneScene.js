@@ -11,7 +11,7 @@ import { LEVEL_ONE_DATA } from '../data/levelOneData.js';
 import { BACKGROUND_LAYOUTS } from '../art/backgroundLayout.js';
 
 /**
- * Nivel I — La Panadería Hundida (Demo Tutorial).
+ * Tutorial — La Panadería Hundida.
  * Curso guiado que introduce todas las mecánicas del juego menos el jefe.
  * Comparte el motor de {@link BaseLevelScene}; aquí sólo se declara su
  * configuración y la decoración temática de la panadería.
@@ -45,7 +45,7 @@ export class LevelOneScene extends BaseLevelScene {
       hasSentinel: false,
       audio: { oven: 'oven', exit: 'gate' },
       exitLockedPrompt: 'La compuerta necesita un Pan Térmico',
-      exitOpenPrompt: 'La ruta al Mercado Sumergido está abierta',
+      exitOpenPrompt: 'El Nivel I está desbloqueado',
       lowOxygenHint: 'Oxígeno bajo: busca burbujas de recuperación',
       yeastRecovery: OXYGEN.yeastRecovery,
       stationRecovery: OXYGEN.ventRecovery,

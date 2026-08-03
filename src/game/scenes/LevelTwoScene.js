@@ -11,7 +11,7 @@ import { LEVEL_TWO_DATA } from '../data/levelTwoData.js';
 import { BACKGROUND_LAYOUTS } from '../art/backgroundLayout.js';
 
 /**
- * Nivel II — El Mercado Sumergido.
+ * Nivel I — El Mercado Sumergido.
  * Escalada densa de todas las mecánicas del tutorial, con el jefe Sentinela
  * del Coral Negro como clímax. Toda la lógica vive en {@link BaseLevelScene};
  * aquí sólo se declara la configuración del nivel.
