@@ -1,5 +1,7 @@
 # Encargo para Claude: Escupemasas inactivo y orientación del Sentinela
 
+> Actualización: el Escupemasas fue corregido en `51fda2d`. La causa era pasar un objeto simple a `Phaser.Geom.Rectangle.Overlaps()`, lo que mantenía falsa la guarda `nearCamera`. Conserva el diagnóstico como referencia y verifica el arreglo; el defecto de orientación del Sentinela sigue pendiente.
+
 ## Contexto
 
 Trabaja sobre la rama `feat/levels` de **Pan de Marea**. No modifiques ni elimines los archivos no rastreados relacionados con recetas especiales.

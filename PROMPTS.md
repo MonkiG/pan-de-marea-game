@@ -431,6 +431,17 @@ PLEASE IMPLEMENT THIS PLAN:
 
 **Commits:** `8717c22 docs(enemies): brief Claude on unresolved gameplay bugs`.
 
+### PDM-023 — Restaurar los disparos del Escupemasas
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “arregla lo del escupemasas antes de que se acaben los creditos”
+
+**Resultado:** se identificó la causa raíz: `createExpandedBounds()` retorna una copia simple, pero `AbyssalSpitter` la entregaba a `Phaser.Geom.Rectangle.Overlaps()`, que requiere las propiedades geométricas de una instancia `Phaser.Geom.Rectangle`. La guarda `nearCamera` permanecía falsa y el enemigo abandonaba `update()` antes de cargar o disparar. Ahora se construye el rectángulo Phaser correcto; también se alineó `flipX` con la orientación real del asset y se añadió recuperación rápida cuando el pool no entrega un proyectil.
+
+**Archivos:** `src/game/entities/AbyssalSpitter.js`, `README_CLAUDE_ENEMY_BUGS.md` y `PROMPTS.md`.
+
+**Commits:** `51fda2d fix(enemies): restore abyssal spitter attacks`.
+
 ## Anexo A — Prompt original de la demo
 
 <details>
