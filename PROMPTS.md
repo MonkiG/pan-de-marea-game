@@ -495,6 +495,26 @@ PLEASE IMPLEMENT THIS PLAN:
 - `85c8a20 feat(recipes): make baguette torpedo infinite ammo`
 - `docs(recipes): record infinite baguette tweak` (este commit)
 
+### PDM-027 — Corregir el congelamiento aleatorio de Nivel I
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “haz pull de main, despues en otra rama, valida porque en los niveles hay situaciones en los que se queda congelada la pantalla y no se puede hacer nada en el juego”
+
+**Contexto:** con las recetas ya fusionadas en `main`, se hizo pull y se creó la rama `fix/level-two-freeze`. El usuario reportó que Nivel I (El Mercado Sumergido) se congela por completo en momentos aleatorios.
+
+**Causa raíz (reproducida con Playwright headless):** en las colisiones grupo-vs-grupo, Phaser recorre el grupo más pequeño e invoca el callback con los argumentos potencialmente **invertidos**. El collider `this.projectiles` vs `this.solidObstacles` asumía que el primer argumento era el proyectil (`(projectile) => splashProjectile(projectile)`); cuando Phaser lo invertía, `splashProjectile` recibía una `Zone` de obstáculo y ejecutaba `zone.deactivate()`, que no existe. La excepción se lanzaba **dentro del paso de físicas** (fuera de `update()`), mataba el render loop de Phaser y congelaba el nivel sin posibilidad de actuar. Es intermitente porque el orden depende del tamaño relativo de los grupos en cada frame, y golpea sobre todo al Mercado por su alta densidad de Escupemasas y obstáculos. Los colliders/overlaps de la Baguette compartían el mismo patrón latente.
+
+**Resultado:** se selecciona el objeto correcto por pertenencia al grupo (`pickMember`) en los colliders de proyectiles y de la Baguette, y se endurece `splashProjectile`. Como defensa en profundidad se envolvió `update()` en una guarda que encamina cualquier excepción de un frame al overlay de “Reintentar” existente, y se añadió una trampa global de errores (`errorTrap.js`) que reenvía las excepciones no atrapadas —incluidas las que escapan del render loop— al mismo overlay recuperable en vez de congelar el juego.
+
+**Validación:** reproducción y verificación con Chromium headless (Playwright): 75 s de fuego cruzado en el Mercado sin excepciones, más estrés de pausa/reanudación, reinicio y cambio de nivel sin anomalías. `npm test` (41 pruebas) y `npm run build` en verde.
+
+**Archivos:** `src/game/scenes/BaseLevelScene.js`, `src/errorTrap.js`, `src/main.jsx` y `PROMPTS.md`.
+
+**Commits:**
+
+- `a7c4e72 fix(levels): stop group-collision arg-order crash that froze levels`
+- `1e2efc3 feat(app): forward uncaught errors to the retry overlay`
+
 ## Anexo A — Prompt original de la demo
 
 <details>

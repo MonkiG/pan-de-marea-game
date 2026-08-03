@@ -160,6 +160,7 @@ export class BaseLevelScene extends Phaser.Scene {
     this.recipeMenuOpen = false;
     this.recipeFeedback = null;
     this.breadUnavailableUntil = -Infinity;
+    this.updateErrorRaised = false;
   }
 
   createBackground() {
@@ -496,7 +497,7 @@ export class BaseLevelScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.solidObstacles);
     this.physics.add.collider(this.enemies, this.walkableSurfaces);
     this.physics.add.collider(this.enemies, this.solidObstacles);
-    this.physics.add.collider(this.projectiles, this.solidObstacles, (projectile) => this.splashProjectile(projectile));
+    this.physics.add.collider(this.projectiles, this.solidObstacles, (a, b) => this.splashProjectile(this.pickMember(this.projectiles, a, b)));
     this.physics.add.overlap(this.player, this.yeasts, (_player, yeast) => this.collectYeast(yeast));
     this.physics.add.overlap(this.player.attackZone, this.enemies, (_zone, enemy) => {
       this.player.hitEnemy(enemy);
@@ -511,9 +512,22 @@ export class BaseLevelScene extends Phaser.Scene {
       this.physics.add.overlap(this.player, this.checkpointZone, () => this.activateCheckpoint());
     }
     this.physics.add.overlap(this.player, this.hazardZones, (_player, hazard) => this.damagePlayer(1, hazard.x));
-    this.physics.add.overlap(this.baguettes, this.enemies, (baguette, enemy) => baguette.impactEnemy(enemy));
-    this.physics.add.collider(this.baguettes, this.solidObstacles, (baguette) => baguette.impactSurface());
-    this.physics.add.collider(this.baguettes, this.walkableSurfaces, (baguette) => baguette.impactSurface());
+    this.physics.add.overlap(this.baguettes, this.enemies, (a, b) => {
+      const baguette = this.pickMember(this.baguettes, a, b);
+      baguette.impactEnemy(baguette === a ? b : a);
+    });
+    this.physics.add.collider(this.baguettes, this.solidObstacles, (a, b) => this.pickMember(this.baguettes, a, b).impactSurface());
+    this.physics.add.collider(this.baguettes, this.walkableSurfaces, (a, b) => this.pickMember(this.baguettes, a, b).impactSurface());
+  }
+
+  /**
+   * Devuelve el objeto que pertenece a `group`. En colisiones grupo-vs-grupo
+   * Phaser recorre el grupo más pequeño e invoca el callback con los argumentos
+   * potencialmente invertidos, así que no se puede asumir el orden (esto causaba
+   * `splashProjectile` sobre una Zone y congelaba el render loop).
+   */
+  pickMember(group, a, b) {
+    return group.contains(a) ? a : b;
   }
 
   configureCamera() {
@@ -527,22 +541,48 @@ export class BaseLevelScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.status !== 'playing') return;
-    this.player.update(time, delta);
-    this.enemies.children.each((enemy) => enemy?.update(time, delta));
-    this.yeasts.children.each((yeast) => yeast?.updateAttraction(this.player));
-    this.projectiles.children.each((projectile) => projectile?.update(time, delta));
-    this.applyCurrents(delta);
+    try {
+      this.player.update(time, delta);
+      this.enemies.children.each((enemy) => enemy?.update(time, delta));
+      this.yeasts.children.each((yeast) => yeast?.updateAttraction(this.player));
+      this.projectiles.children.each((projectile) => projectile?.update(time, delta));
+      this.applyCurrents(delta);
 
-    const desiredOffset = this.player.facing > 0 ? this.config.camera.offsetX : -this.config.camera.offsetX;
-    this.cameras.main.followOffset.x = Phaser.Math.Linear(this.cameras.main.followOffset.x, desiredOffset, 0.04);
-    const oxygen = this.oxygenSystem.tick(delta, !this.ending);
-    for (let index = 0; index < oxygen.damageCount; index += 1) this.damagePlayer(1, this.player.x);
+      const desiredOffset = this.player.facing > 0 ? this.config.camera.offsetX : -this.config.camera.offsetX;
+      this.cameras.main.followOffset.x = Phaser.Math.Linear(this.cameras.main.followOffset.x, desiredOffset, 0.04);
+      const oxygen = this.oxygenSystem.tick(delta, !this.ending);
+      for (let index = 0; index < oxygen.damageCount; index += 1) this.damagePlayer(1, this.player.x);
 
-    this.updateTutorials(time);
-    this.updateInteractions();
-    this.updateBreadInput();
-    this.oven?.setAvailable(this.canBake());
-    this.emitSnapshot(false, time);
+      this.updateTutorials(time);
+      this.updateInteractions();
+      this.updateBreadInput();
+      this.oven?.setAvailable(this.canBake());
+      this.emitSnapshot(false, time);
+    } catch (error) {
+      this.handleUpdateError(error);
+    }
+  }
+
+  /**
+   * Evita que una excepción de un frame mate el render loop de Phaser (que
+   * congelaría el juego por completo). Registra el estado, pausa la escena y
+   * encamina al overlay de error con "Reintentar" que ya escucha React.
+   */
+  handleUpdateError(error) {
+    if (this.updateErrorRaised) return;
+    this.updateErrorRaised = true;
+    console.error('[BaseLevelScene] Excepción en update()', {
+      levelId: this.levelId,
+      status: this.status,
+      ending: this.ending,
+      playerX: Math.round(this.player?.x ?? -1),
+      playerY: Math.round(this.player?.y ?? -1),
+      enemiesActive: this.enemies?.countActive?.(true) ?? -1,
+      projectilesActive: this.projectiles?.countActive?.(true) ?? -1,
+      baguettesActive: this.baguettes?.countActive?.(true) ?? -1,
+    }, error);
+    eventBus.emit('game:error', error instanceof Error ? error : new Error(String(error)));
+    if (this.scene.isActive()) this.scene.pause();
   }
 
   applyCurrents(delta) {
@@ -586,7 +626,7 @@ export class BaseLevelScene extends Phaser.Scene {
   }
 
   splashProjectile(projectile) {
-    if (!projectile?.active) return;
+    if (typeof projectile?.deactivate !== 'function' || !projectile.active) return;
     this.burst(projectile.x, projectile.y, 0x7bea4a, false, 5);
     projectile.deactivate();
   }
