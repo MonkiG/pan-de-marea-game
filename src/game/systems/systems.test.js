@@ -6,6 +6,7 @@ import { applyDamage } from './CombatSystem.js';
 import { PLAYER } from '../constants.js';
 import { LEVEL_ONE_DATA } from '../data/levelOneData.js';
 import { calculateJumpMetrics, validateJumpLink } from './JumpReachSystem.js';
+import { resolveLevelPlacements, validateLevelSupports } from './LevelSupportSystem.js';
 
 describe('sistemas de La Panadería Hundida', () => {
   it('mantiene total e inventario y permite gastar levaduras', () => {
@@ -76,5 +77,15 @@ describe('sistemas de La Panadería Hundida', () => {
       const result = validateJumpLink(platforms.get(link.from), platforms.get(link.to), PLAYER);
       expect(result.reachable, `${link.from} -> ${link.to}`).toBe(true);
     });
+  });
+
+  it('apoya todos los elementos del Tutorial y resuelve su altura desde la superficie', () => {
+    expect(validateLevelSupports(LEVEL_ONE_DATA)).toEqual([]);
+    const resolved = resolveLevelPlacements(LEVEL_ONE_DATA);
+    expect(resolved.oven.y).toBe(LEVEL_ONE_DATA.collision.floorTop);
+    expect(resolved.gate.y).toBe(LEVEL_ONE_DATA.collision.floorTop);
+    expect(resolved.spitters[0].y).toBe(240);
+    expect(resolved.collectibles[0].y).toBe(229);
+    expect(LEVEL_ONE_DATA.platforms.every((platform) => platform.supportKind === 'stone')).toBe(true);
   });
 });

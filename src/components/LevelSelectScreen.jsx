@@ -1,21 +1,4 @@
-const LEVELS = [
-  {
-    id: 'level-one',
-    number: 'Nivel I',
-    name: 'La Panadería Hundida',
-    description: 'Recupera el horno familiar, reúne tres Levaduras y prepara el Pan Térmico.',
-    objective: 'La llama familiar',
-    background: '/panaderia-undida-bg-1.png',
-  },
-  {
-    id: 'level-two',
-    number: 'Nivel II',
-    name: 'El Mercado Sumergido',
-    description: 'Estabiliza la presión del mercado y abre la salida con Pan de Presión.',
-    objective: 'Las corrientes del mercado',
-    background: '/mercado-undido-1.png',
-  },
-];
+import { LEVEL_CATALOG } from '../game/data/levelCatalog.js';
 
 export function LevelSelectScreen({
   selectedLevel,
@@ -24,7 +7,7 @@ export function LevelSelectScreen({
   onPlay,
   onBack,
 }) {
-  const selected = LEVELS.find((level) => level.id === selectedLevel) ?? LEVELS[0];
+  const selected = LEVEL_CATALOG.find((level) => level.id === selectedLevel) ?? LEVEL_CATALOG[0];
 
   return (
     <section className="level-menu" aria-labelledby="level-menu-title">
@@ -36,7 +19,7 @@ export function LevelSelectScreen({
       </header>
 
       <div className="level-gallery" aria-label="Niveles disponibles">
-        {LEVELS.map((level) => {
+        {LEVEL_CATALOG.map((level) => {
           const unlocked = progression.unlockedLevels.includes(level.id);
           const complete = progression.completedLevels.includes(level.id);
           const selectedCard = selectedLevel === level.id;
@@ -48,15 +31,15 @@ export function LevelSelectScreen({
               key={level.id}
               disabled={!unlocked}
               aria-pressed={selectedCard}
-              aria-label={`${level.number}: ${level.name}. ${complete ? 'Completado' : unlocked ? 'Disponible' : 'Bloqueado'}`}
+              aria-label={`${level.label}: ${level.name}. ${complete ? 'Completado' : unlocked ? 'Disponible' : 'Bloqueado'}`}
               onClick={() => onSelect(level.id)}
             >
               <span className="level-card-shade" aria-hidden="true" />
-              <span className="level-card-number">{level.number}</span>
+              <span className="level-card-number">{level.label}</span>
               <span className="level-card-copy">
                 <small>{level.objective}</small>
                 <strong>{level.name}</strong>
-                <span>{unlocked ? level.description : 'Completa La Panadería Hundida para desbloquear este nivel.'}</span>
+                <span>{unlocked ? level.description : level.unlockCopy}</span>
               </span>
               <span className="level-card-status">
                 {complete ? '✓ Completado' : unlocked ? 'Disponible' : '🔒 Bloqueado'}

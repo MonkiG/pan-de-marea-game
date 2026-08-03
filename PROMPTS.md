@@ -298,6 +298,161 @@ Este archivo conserva las solicitudes del usuario relacionadas con **Pan de Mare
 **Archivos:** `src/App.jsx`, `src/game/entities/AbyssalSpitter.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `src/game/systems/ActivationBounds.js`, `src/game/systems/SessionProgress.js`, `src/game/systems/levelTwoSystems.test.js` y `PROMPTS.md`.
 **Commits:** `320faab fix(game): stabilize Mercado activation and progression`.
 
+## Feature: rediseño grounded (Tutorial + Nivel I)
+
+### PDM-017 — Reacomodar los niveles con apoyos coherentes
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “Desde main, puedes hacer una rama que se llame feat/levels en el que reacomodes los niveles para que el tutorial (nivel 1 actual) muestre los fundamentos del juego y el nivel 1 (nivel 2 actual), sea el gameplay con mas complejidad, no quiero nada volando si algo ba a estar en el aire debe haber una plataforma para que el jugador pueda estar parado, que haya coherencia con los assets y la jugabilidad”
+
+**Decisiones acordadas:**
+
+- La rama `feat/levels` anterior se preservó como `codex/archive-feat-levels-20260802` y se recreó desde `main`.
+- Las etiquetas públicas son **Tutorial** y **Nivel I**, conservando los IDs internos `level-one` y `level-two`.
+- El Tutorial enseña todos los sistemas base excepto el jefe; Nivel I los combina con mayor dificultad.
+- El trabajo se aisló en un worktree y se guardó en commits semánticos sin tocar `feat/receipes`.
+
+**Resultado:** se extrajo una escena compartida dirigida por datos; se añadieron superficies declarativas mediante `surfaceId`, posiciones verticales derivadas y validación de soportes/patrullas. Todas las plataformas elevadas son terrazas de piedra o puestos conectados al suelo. El Tutorial se divide en diez zonas progresivas y Nivel I escala a 9,000 px, cuatro reguladores, ocho Levaduras, cinco Escupemasas y el Sentinela. Se centralizaron las etiquetas públicas y se actualizaron selector, resultados, assets compartidos, pruebas y README.
+
+**Validación:** `npm test` (29 pruebas), `npm run build`, `npm run art:validate` y revisión visual en navegador de controles, perchas, cobertura, reguladores elevados, jefe, horno, compuerta, estación y salida. La activación de un regulador se comprobó en runtime sin errores ni advertencias de consola.
+
+**Archivos:** `src/game/scenes/BaseLevelScene.js`, `src/game/data/levelOneData.js`, `src/game/data/levelTwoData.js`, `src/game/data/levelCatalog.js`, `src/game/systems/LevelSupportSystem.js`, componentes React, pruebas, `README.md` y `PROMPTS.md`.
+
+**Commits:**
+
+- `388f06d refactor(scenes): extract data-driven BaseLevelScene shared by both levels`
+- `e08ac21 feat(levels): ground tutorial and first level`
+
+### PDM-018 — Implementar el plan aprobado
+
+**Fecha:** 2026-08-02
+**Prompt literal:**
+
+<details>
+<summary>Mostrar plan solicitado</summary>
+
+~~~~text
+PLEASE IMPLEMENT THIS PLAN:
+# Rediseño grounded: Tutorial + Nivel I
+
+## Resumen
+
+- Preservar la rama existente como `codex/archive-feat-levels-20260802` y recrear `feat/levels` directamente desde `main`.
+- Trabajar en un worktree aislado y crear commits semánticos, sin tocar los cambios pendientes de `feat/receipes`.
+- Presentar públicamente La Panadería Hundida como **Tutorial** y El Mercado Sumergido como **Nivel I**.
+- Mantener los IDs internos `level-one` y `level-two` para conservar compatibilidad con escenas, progreso y checkpoints.
+
+## Implementación
+
+- Extraer la lógica compartida de ambas escenas a una escena base dirigida por datos, permitiendo que Tutorial y Nivel I usen las mismas mecánicas sin duplicación.
+- Rediseñar el Tutorial como diez zonas seguras y progresivas: movimiento, salto, oxígeno/levadura/respiradero, combate cuerpo a cuerpo, Escupemasas con cobertura, corriente, coral peligroso, regulador, checkpoint, horno y compuerta. No incluir al jefe.
+- Rediseñar Nivel I como escalada de esas mecánicas: recorrido más largo, enemigos combinados, menos recuperación, varias corrientes y peligros, cuatro reguladores, recursos en rutas secundarias, checkpoint y Sentinela como clímax.
+- Incorporar `surfaceId` a enemigos, coleccionables, props e interactivos. Su posición vertical se calculará desde el suelo o plataforma declarada, eliminando coordenadas que dejan horno, compuerta, levaduras o reguladores flotando.
+- Toda superficie elevada será una estructura conectada al suelo: bloque/terraza de piedra en la Panadería o techo de puesto/estructura de mercado en Nivel I. Los colliders coincidirán con su silueta y la parte superior será transitable.
+- Usar rocas y coral del tileset como cobertura de la Panadería; reservar puestos del mercado para El Mercado Sumergido. No generar ni sustituir assets.
+- Centralizar las etiquetas públicas y actualizar selector, resultados, objetivos y README para mostrar “Tutorial” y “Nivel I”. Completar el Tutorial desbloqueará Nivel I.
+- Registrar el prompt literal, las decisiones acordadas, archivos y commits reales en `PROMPTS.md`.
+
+## Interfaces y validaciones
+
+- Añadir al esquema interno de nivel superficies identificables y soportes estructurales; todos los objetos persistentes deberán declarar una superficie válida.
+- Añadir validación estática para comprobar que:
+  - cada objeto está dentro del ancho seguro de su superficie;
+  - cada plataforma elevada tiene soporte visual hasta el suelo;
+  - las patrullas no salen de su plataforma;
+  - los saltos enlazados conservan margen respecto al alcance real del jugador.
+- Burbujas ambientales, corrientes, efectos y proyectiles quedan exentos por ser elementos transitorios; cualquier enemigo, ingrediente o interactivo elevado tendrá una plataforma donde Bigotes pueda pararse.
+
+## Pruebas y entrega Git
+
+- Añadir pruebas de estructura, soportes, patrullas, requisitos, progresión y alcance de saltos para ambos niveles.
+- Ejecutar `npm test`, `npm run build` y `npm run art:validate`.
+- Recorrer visualmente ambos niveles desde spawn hasta salida, verificando plataformas, coberturas, colliders, checkpoint, horno, desbloqueo y ausencia de objetos persistentes flotantes.
+- Crear tres commits: refactor compartido de escenas, rediseño grounded de niveles/UI y registro final en `PROMPTS.md`.
+- Retirar el worktree temporal al terminar; `feat/levels` conservará los commits y el árbol actual de `feat/receipes` quedará exactamente como estaba.
+~~~~
+
+</details>
+
+**Resultado:** implementado íntegramente según PDM-017, con tres commits separados para refactor, gameplay y registro documental.
+
+**Archivos:** los mismos de PDM-017, más `PROMPTS.md` para el cierre obligatorio.
+
+**Commits:**
+
+- `388f06d refactor(scenes): extract data-driven BaseLevelScene shared by both levels`
+- `e08ac21 feat(levels): ground tutorial and first level`
+
+### PDM-019 — Corregir la carga infinita al iniciar niveles
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “No puedo inicializar niveles, se queda en la pantalla de cargando, por alguna razon”
+
+**Resultado:** se corrigió la carrera de arranque que escribía el nivel seleccionado y los ajustes después de construir Phaser. El registro ahora se inicializa en `preBoot`, antes de ejecutar `BootScene` y `PreloadScene`. También se añadió un límite de diez segundos, presentación explícita de errores y una acción de reintento que reconstruye limpiamente la instancia del juego, evitando que la interfaz permanezca indefinidamente en “Cargando”.
+
+**Validación:** `npm test` (31 pruebas), `npm run build`, `npm run art:validate` y arranque en navegador del Tutorial y Nivel I en desarrollo, más el Tutorial en la build de producción; sin errores ni advertencias de consola.
+
+**Archivos:** `src/App.jsx`, `src/components/GameContainer.jsx`, `src/game/PhaserGame.js`, `src/game/config.js`, `src/game/startup.js`, `src/game/startup.test.js` y `PROMPTS.md`.
+
+**Commits:** `55ae570 fix(levels): stabilize scene startup`.
+
+### PDM-020 — Liberar el espacio bajo las banquetas y activar al Escupemasas
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “Me encanta, solo como ultima tarea, que las banquetas flotantes no tengan nada debajo para que se pueda pasar por debajo, y haz que el enemigo escupemasas si dispare, porque ahorita como que no hace nada”
+
+**Corrección de alcance:** este prompt reemplaza para las banquetas elevadas la decisión de PDM-017 y PDM-018 que exigía soportes visuales hasta el suelo. Los objetos persistentes conservan `surfaceId`, pero las banquetas ahora permanecen libres por debajo.
+
+**Resultado:** las plataformas elevadas se renderizan como superficies delgadas de una sola dirección, sin relleno visual ni collider vertical, por lo que Bigotes puede cruzar por debajo y aterrizar encima. Al retirar esos bloques también se despejó la línea de visión del Escupemasas. Sus proyectiles de Masa Corrupta ya no colisionan con las banquetas de una sola dirección —incluida su propia percha—, aunque la cobertura sólida continúa bloqueándolos.
+
+**Archivos:** `src/game/scenes/BaseLevelScene.js`, `src/game/data/levelTwoData.js`, `src/game/systems/LevelSupportSystem.js`, `README.md` y `PROMPTS.md`.
+
+**Commits:** `88f61fd fix(levels): open space below floating platforms`.
+
+### PDM-021 — Omitir pruebas por solicitud del usuario
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “Okey para ahorrar tokens no hagas pruebas, esas las hago yo, solo arregla lo que te pedi”
+
+**Resultado:** no produjo cambios funcionales adicionales. Por indicación expresa del usuario no se ejecutaron ni añadieron pruebas automáticas, build, validación de arte o recorrido en navegador para PDM-020; la validación manual queda a cargo del usuario.
+
+**Archivos:** `PROMPTS.md`.
+
+**Commits:** `88f61fd fix(levels): open space below floating platforms`.
+
+### PDM-022 — Preparar diagnóstico de enemigos para Claude
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “sigue sin funcionar el escupemasas, haz un readme en el que detalles el problema para que claude lo resuelva, tambien que el enemigo final no cambia de posicion cuando se mueve a la izquierda, se queda viendo a la derecha siempre”
+
+**Resultado:** no se modificó la jugabilidad. Se creó un encargo técnico autocontenido para Claude con reproducción de ambos defectos, flujo actual del Escupemasas, antecedentes del intento `88f61fd`, hipótesis auditables, archivos implicados y criterios de aceptación. La inspección de la hoja del Sentinela confirmó que el asset base mira a la derecha, mientras el código aplica `flipX` con la condición opuesta y después de varios retornos tempranos.
+
+**Archivos:** `README_CLAUDE_ENEMY_BUGS.md` y `PROMPTS.md`.
+
+**Commits:** `8717c22 docs(enemies): brief Claude on unresolved gameplay bugs`.
+
+### PDM-023 — Restaurar los disparos del Escupemasas
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “arregla lo del escupemasas antes de que se acaben los creditos”
+
+**Resultado:** se identificó la causa raíz: `createExpandedBounds()` retorna una copia simple, pero `AbyssalSpitter` la entregaba a `Phaser.Geom.Rectangle.Overlaps()`, que requiere las propiedades geométricas de una instancia `Phaser.Geom.Rectangle`. La guarda `nearCamera` permanecía falsa y el enemigo abandonaba `update()` antes de cargar o disparar. Ahora se construye el rectángulo Phaser correcto; también se alineó `flipX` con la orientación real del asset y se añadió recuperación rápida cuando el pool no entrega un proyectil.
+
+**Archivos:** `src/game/entities/AbyssalSpitter.js`, `README_CLAUDE_ENEMY_BUGS.md` y `PROMPTS.md`.
+
+**Commits:** `51fda2d fix(enemies): restore abyssal spitter attacks`.
+
+### PDM-024 — Confirmar commits semánticos y cerrar la tarea
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “okey commits semanticos y nos vvemos en 1 seman”
+
+**Resultado:** no produjo cambios funcionales adicionales. Se confirmó que el arreglo del Escupemasas y su documentación ya están separados en commits semánticos.
+
+**Archivos:** `PROMPTS.md`.
+
+**Commits relacionados:** `51fda2d fix(enemies): restore abyssal spitter attacks` y `68d81f4 docs(prompts): record spitter root cause`.
+
 ## Anexo A — Prompt original de la demo
 
 <details>

@@ -4,7 +4,7 @@ import { eventBus } from './EventBus.js';
 
 export function createPhaserGame(parent, initialSettings, initialLevel = 'level-one') {
   if (!parent) throw new Error('[Phaser] Contenedor DOM inexistente.');
-  const game = new Phaser.Game(createGameConfig(parent));
+  const game = new Phaser.Game(createGameConfig(parent, initialSettings, initialLevel));
   const getScene = () => {
     const levelId = game.registry.get('currentLevel') || game.registry.get('selectedLevel') || initialLevel;
     return game.scene.getScene(levelId);
@@ -30,9 +30,6 @@ export function createPhaserGame(parent, initialSettings, initialLevel = 'level-
     }),
   ];
 
-  game.registry.set('settings', initialSettings);
-  game.registry.set('selectedLevel', initialLevel);
-  game.registry.set('currentLevel', initialLevel);
   return {
     game,
     destroy() {

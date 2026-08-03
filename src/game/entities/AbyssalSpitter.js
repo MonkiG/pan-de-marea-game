@@ -38,7 +38,13 @@ export class AbyssalSpitter extends Phaser.Physics.Arcade.Sprite {
     if (!this.active || this.state === 'defeated') return;
     const distance = this.player.x - this.x;
     const absoluteDistance = Math.abs(distance);
-    const activationView = createExpandedBounds(this.scene.cameras.main.worldView, 180, 120);
+    const expandedBounds = createExpandedBounds(this.scene.cameras.main.worldView, 180, 120);
+    const activationView = new Phaser.Geom.Rectangle(
+      expandedBounds.x,
+      expandedBounds.y,
+      expandedBounds.width,
+      expandedBounds.height,
+    );
     const nearCamera = Phaser.Geom.Rectangle.Overlaps(activationView, this.getBounds());
     if (!nearCamera || absoluteDistance > SPITTER.activationDistance) {
       this.setVelocityX(0);
@@ -46,7 +52,8 @@ export class AbyssalSpitter extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.direction = Math.sign(distance) || this.direction;
-    this.setFlipX(this.direction > 0);
+    // La hoja pixel art base mira a la derecha.
+    this.setFlipX(this.direction < 0);
 
     if (this.state === 'hurt' || this.state === 'stunned') {
       this.setVelocityX(0);
@@ -58,7 +65,11 @@ export class AbyssalSpitter extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityX(0);
       if (time >= this.stateUntil) {
         this.setState('rangedAttack', time + 220);
-        this.fireProjectile?.(this, this.player.x, this.player.y - 24);
+        const fired = this.fireProjectile?.(this, this.player.x, this.player.y - 24) ?? false;
+        if (!fired) {
+          this.nextAttackAt = time + 250;
+          this.setState('recover', time + 180);
+        }
       }
       return;
     }

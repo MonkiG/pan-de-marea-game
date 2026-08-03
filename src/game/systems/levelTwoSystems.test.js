@@ -10,6 +10,9 @@ import { MarketProgressionSystem } from './MarketProgressionSystem.js';
 import { PressureRecipeSystem } from './PressureRecipeSystem.js';
 import { ProjectilePoolPolicy } from './ProjectilePoolPolicy.js';
 import { mergeProgressionSnapshots, SessionProgress } from './SessionProgress.js';
+import { resolveLevelPlacements, validateLevelSupports } from './LevelSupportSystem.js';
+import { PLAYER } from '../constants.js';
+import { validateJumpLink } from './JumpReachSystem.js';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -48,13 +51,32 @@ describe('progresión del Mercado Sumergido', () => {
     expect(worldView).toEqual({ x: 100, y: 40, width: 640, height: 360 });
   });
 
-  it('mantiene la estructura de ocho zonas, siete levaduras y tres reguladores', () => {
-    expect(LEVEL_TWO_DATA.worldWidth).toBe(7200);
-    expect(LEVEL_TWO_DATA.zones).toHaveLength(8);
-    expect(LEVEL_TWO_DATA.collectibles).toHaveLength(7);
-    expect(LEVEL_TWO_DATA.regulators).toHaveLength(3);
-    expect(LEVEL_TWO_DATA.spitters).toHaveLength(3);
+  it('escala a diez zonas, ocho levaduras, cuatro reguladores y cinco escupemasas', () => {
+    expect(LEVEL_TWO_DATA.worldWidth).toBe(9000);
+    expect(LEVEL_TWO_DATA.zones).toHaveLength(10);
+    expect(LEVEL_TWO_DATA.collectibles).toHaveLength(8);
+    expect(LEVEL_TWO_DATA.regulators).toHaveLength(4);
+    expect(LEVEL_TWO_DATA.spitters).toHaveLength(5);
+    expect(LEVEL_TWO_DATA.requiredYeast).toBe(6);
+    expect(LEVEL_TWO_DATA.requiredRegulators).toBe(4);
     expect(LEVEL_TWO_DATA.sentinel.id).toBe('black-coral-sentinel');
+  });
+
+  it('mantiene apoyados objetos, patrullas y estructuras del Nivel I', () => {
+    expect(validateLevelSupports(LEVEL_TWO_DATA)).toEqual([]);
+    const resolved = resolveLevelPlacements(LEVEL_TWO_DATA);
+    expect(resolved.pressureOven.y).toBe(LEVEL_TWO_DATA.collision.floorTop);
+    expect(resolved.exit.y).toBe(LEVEL_TWO_DATA.collision.floorTop);
+    expect(resolved.collectibles.at(-1).y).toBe(LEVEL_TWO_DATA.collision.floorTop - 40);
+    expect(LEVEL_TWO_DATA.platforms.every((platform) => ['stone', 'stall'].includes(platform.supportKind))).toBe(true);
+  });
+
+  it('mantiene todos los enlaces de plataformas dentro del margen seguro', () => {
+    const platforms = new Map(LEVEL_TWO_DATA.platforms.map((platform) => [platform.id, platform]));
+    LEVEL_TWO_DATA.jumpLinks.forEach((link) => {
+      const result = validateJumpLink(platforms.get(link.from), platforms.get(link.to), PLAYER);
+      expect(result.reachable, `${link.from} -> ${link.to}`).toBe(true);
+    });
   });
 
   it('acepta reguladores en cualquier orden y desbloquea la salida con pan', () => {
