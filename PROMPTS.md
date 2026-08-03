@@ -383,6 +383,19 @@ PLEASE IMPLEMENT THIS PLAN:
 - `388f06d refactor(scenes): extract data-driven BaseLevelScene shared by both levels`
 - `e08ac21 feat(levels): ground tutorial and first level`
 
+### PDM-019 — Corregir la carga infinita al iniciar niveles
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “No puedo inicializar niveles, se queda en la pantalla de cargando, por alguna razon”
+
+**Resultado:** se corrigió la carrera de arranque que escribía el nivel seleccionado y los ajustes después de construir Phaser. El registro ahora se inicializa en `preBoot`, antes de ejecutar `BootScene` y `PreloadScene`. También se añadió un límite de diez segundos, presentación explícita de errores y una acción de reintento que reconstruye limpiamente la instancia del juego, evitando que la interfaz permanezca indefinidamente en “Cargando”.
+
+**Validación:** `npm test` (31 pruebas), `npm run build`, `npm run art:validate` y arranque en navegador del Tutorial y Nivel I en desarrollo, más el Tutorial en la build de producción; sin errores ni advertencias de consola.
+
+**Archivos:** `src/App.jsx`, `src/components/GameContainer.jsx`, `src/game/PhaserGame.js`, `src/game/config.js`, `src/game/startup.js`, `src/game/startup.test.js` y `PROMPTS.md`.
+
+**Commits:** `55ae570 fix(levels): stabilize scene startup`.
+
 ## Anexo A — Prompt original de la demo
 
 <details>
