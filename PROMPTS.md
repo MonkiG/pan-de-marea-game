@@ -442,6 +442,17 @@ PLEASE IMPLEMENT THIS PLAN:
 
 **Commits:** `51fda2d fix(enemies): restore abyssal spitter attacks`.
 
+### PDM-024 — Confirmar commits semánticos y cerrar la tarea
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “okey commits semanticos y nos vvemos en 1 seman”
+
+**Resultado:** no produjo cambios funcionales adicionales. Se confirmó que el arreglo del Escupemasas y su documentación ya están separados en commits semánticos.
+
+**Archivos:** `PROMPTS.md`.
+
+**Commits relacionados:** `51fda2d fix(enemies): restore abyssal spitter attacks` y `68d81f4 docs(prompts): record spitter root cause`.
+
 ## Anexo A — Prompt original de la demo
 
 <details>
