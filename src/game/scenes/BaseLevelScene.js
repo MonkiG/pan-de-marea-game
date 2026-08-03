@@ -15,6 +15,7 @@ import { buildRecipeMenuSnapshot, buildSpecialBreadSnapshot } from '../systems/r
 import { BAGUETTE_POOL_SIZE, SPECIAL_BREAD_RECIPES } from '../data/recipeData.js';
 import { eventBus } from '../EventBus.js';
 import { AudioManager } from '../systems/AudioManager.js';
+import { MUSIC_MANIFEST } from '../audio/musicManifest.js';
 import { CheckpointSystem } from '../systems/CheckpointSystem.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
 import { MarketProgressionSystem } from '../systems/MarketProgressionSystem.js';
@@ -40,11 +41,18 @@ export class BaseLevelScene extends Phaser.Scene {
    * @returns {object} definición del nivel. Debe incluir al menos:
    *   levelId, levelName, data, oxygenConfig, yeastRequired, regulatorsRequired,
    *   bakeTimeMs, breadName, breadKind ('thermal'|'pressure'), objectives,
-   *   hasSentinel, audio {oven, exit}, exitLockedPrompt, camera, background,
+   *   hasSentinel, music, audio {oven, exit}, exitLockedPrompt, camera, background,
    *   yeastRecovery, stationRecovery, lowOxygenHint.
    */
   getConfig() {
     throw new Error('getConfig() debe implementarse en la subclase del nivel.');
+  }
+
+  preload() {
+    const track = MUSIC_MANIFEST[this.getConfig().music];
+    if (track && !this.cache.audio.exists(track.key)) {
+      this.load.audio(track.key, `/${track.file}`);
+    }
   }
 
   create(data = {}) {
@@ -60,14 +68,17 @@ export class BaseLevelScene extends Phaser.Scene {
     this.game.registry.set('currentLevel', this.levelId);
     this.status = 'playing';
     this.settings = {
-      muted: false,
+      musicMuted: false,
+      sfxMuted: false,
       screenShake: true,
       reducedParticles: false,
       ...(this.game.registry.get('settings') ?? {}),
     };
     this.assetResolver = new AssetResolver(this.textures, (payload) => eventBus.emit('fallback:used', payload));
     this.audioManager = new AudioManager(this);
-    this.audioManager.setMuted(this.settings.muted);
+    this.audioManager.setMusicMuted(this.settings.musicMuted);
+    this.audioManager.setSfxMuted(this.settings.sfxMuted);
+    this.audioManager.playMusic(this.config.music);
     this.inventory = new InventorySystem();
     this.oxygenSystem = new OxygenSystem(this.config.oxygenConfig);
     this.progression = new MarketProgressionSystem(this.config.regulatorsRequired);
@@ -986,6 +997,7 @@ export class BaseLevelScene extends Phaser.Scene {
     if (this.status === 'complete') return;
     this.status = 'complete';
     this.player.setControlsEnabled(false);
+    this.audioManager.stopMusic();
     this.cameras.main.fadeOut(700, 2, 18, 22);
     this.game.registry.remove(`${this.levelId}-checkpoint`);
     this.completionProgression = sessionProgress.completeLevel(this.levelId, {
@@ -1004,6 +1016,7 @@ export class BaseLevelScene extends Phaser.Scene {
     if (this.status === 'defeat') return;
     this.status = 'defeat';
     this.player.defeat();
+    this.audioManager.stopMusic();
     const snapshot = this.getSnapshot();
     eventBus.emit('level:failed', snapshot);
     eventBus.emit('game:defeat', snapshot);
@@ -1081,6 +1094,7 @@ export class BaseLevelScene extends Phaser.Scene {
   resumeGame() {
     if (this.status !== 'paused') return;
     this.status = 'playing';
+    this.audioManager.playMusic(this.config.music);
     this.scene.resume();
     this.emitSnapshot(true);
   }
@@ -1097,14 +1111,10 @@ export class BaseLevelScene extends Phaser.Scene {
     this.audioManager.stopAll();
   }
 
-  setMuted(muted) {
-    this.settings.muted = Boolean(muted);
-    this.audioManager.setMuted(muted);
-  }
-
   setSettings(settings) {
     this.settings = { ...this.settings, ...settings };
-    this.audioManager.setMuted(this.settings.muted);
+    this.audioManager.setMusicMuted(this.settings.musicMuted);
+    this.audioManager.setSfxMuted(this.settings.sfxMuted);
     this.game.registry.set('settings', this.settings);
   }
 

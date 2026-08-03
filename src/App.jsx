@@ -3,6 +3,7 @@ import { GameContainer } from './components/GameContainer.jsx';
 import { HUD } from './components/HUD.jsx';
 import { LevelSelectScreen } from './components/LevelSelectScreen.jsx';
 import { MainMenu } from './components/MainMenu.jsx';
+import { MenuMusic } from './components/MenuMusic.jsx';
 import { NonGameLinks } from './components/NonGameLinks.jsx';
 import { PauseMenu } from './components/PauseMenu.jsx';
 import { RecipeMenu } from './components/RecipeMenu.jsx';
@@ -54,7 +55,7 @@ const initialSelectedLevel = ['level-one', 'level-two'].includes(requestedReview
 export function App() {
   const [view, setView] = useState(artReviewMode ? 'game' : 'menu');
   const [snapshot, setSnapshot] = useState(initialSnapshot);
-  const [settings, setSettings] = useState({ muted: false, screenShake: true, reducedParticles: false });
+  const [settings, setSettings] = useState({ musicMuted: false, sfxMuted: false, screenShake: true, reducedParticles: false });
   const [selectedLevel, setSelectedLevel] = useState(initialSelectedLevel);
   const [progression, setProgression] = useState(() => sessionProgress.getSnapshot());
   const [gameError, setGameError] = useState('');
@@ -89,6 +90,7 @@ export function App() {
 
   const gameActive = view === 'game';
   const shellClass = useMemo(() => `app-shell ${gameActive ? 'is-playing' : 'is-menu'}`, [gameActive]);
+  const menuMusicActive = !gameActive || ['complete', 'defeat'].includes(snapshot.status);
 
   const startGame = (levelId = selectedLevel) => {
     if (!progression.unlockedLevels.includes(levelId) && !sessionProgress.isUnlocked(levelId)) return;
@@ -192,6 +194,7 @@ export function App() {
         </section>
       )}
       {!gameActive && <NonGameLinks />}
+      <MenuMusic active={menuMusicActive} muted={settings.musicMuted} />
     </main>
   );
 }

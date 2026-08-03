@@ -534,6 +534,64 @@ PLEASE IMPLEMENT THIS PLAN:
 
 - `e77f229 fix(enemies): face the sentinel toward its movement direction`
 
+## Feature: música por vista
+
+### PDM-029 — Reproducir la música de la carpeta music en cada vista
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “Puedes hacer que la musica de la carpeta music se reprodusca en su respectiva vista? tanto en el home (es la misma que el final) y la cancion de cada nivel”
+
+**Decisión de asignación acordada (confirmada con el usuario):** `riviera-swing-main.wav` para el home, la pantalla de selección de niveles y las pantallas de resultado (victoria y derrota); `tidal-siege-tutorial.wav` para el Tutorial (La Panadería Hundida, `level-one`); `heroic-depths-level-1.wav` para el Nivel I (El Mercado Sumergido, `level-two`). El tema principal también suena en el selector de niveles.
+
+**Resultado:** se integró la música de `assets/audio/music/` por vista. Se creó un manifiesto independiente del SFX (`musicManifest.js`) porque la música es estéreo y no debe entrar en el lote mono que validan `audio:generate`/`audio:validate`. `AudioManager` ganó `playMusic`/`stopMusic` con loop, volumen propio, corte de la pista anterior y reanudación al desmutear. Cada escena de nivel carga en su propio `preload()` únicamente su pista (carga perezosa, evitando descargar ~90 MB de música al arrancar), la reproduce al crear la escena, la reanuda al volver de pausa y la detiene al completar o fallar. En React, un componente `MenuMusic` reproduce el tema principal con `<audio loop>` en home, selector y resultados, respetando el mute global y desbloqueando el autoplay tras la primera interacción del navegador.
+
+**Validación:** `npm test` (46 pruebas, +5 de música), `npm run build`, `npm run audio:validate` (22 SFX) y `git diff --check` en verde. La revisión auditiva en navegador queda a cargo del usuario (práctica PDM-021).
+
+**Archivos:** `assets/audio/music/` (3 WAV), `src/game/audio/musicManifest.js`, `src/game/systems/AudioManager.js`, `src/game/systems/AudioManager.test.js`, `src/game/scenes/BaseLevelScene.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `src/components/MenuMusic.jsx`, `src/App.jsx` y `PROMPTS.md`.
+
+**Commits:**
+
+- `a96b515 feat(audio): add per-level looping music support`
+- `a244a2b feat(ui): add main theme music for menus and results`
+- `62e7f64 feat(assets): add per-view music tracks`
+
+**Corrección PDM-029 (2026-08-03):** “hay errores al pausar la musica \"this.musicSound.stop is not a function\"”. Causa raíz: `Phaser.Sound.BaseSoundManager.play()` devuelve `true` (booleano), no la instancia de sonido, por lo que `playMusic()` guardaba `true` como `musicSound` y `stop()`/`stopAll()` fallaban al llamar a `.stop()`/`.destroy()` sobre él. Se cambió `playMusic()` a `this.sound.add(key, { volume, loop })` (que sí devuelve la instancia `Phaser.Sound`) y `stopMusic()`/`stopAll()` ahora destruyen la instancia. `npm test` (46) y `npm run build` en verde. La corrección quedó incluida en el commit `a96b515` (la implementación aún no estaba commiteada).
+
+### PDM-030 — El tema principal no se reproduce en la pestaña principal (autoplay)
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “cuando entro a la pestaña principal no se reproduce, se reproduce cuando entro a los niveles”
+
+**Diagnóstico:** no era un bug de código: la política de autoplay del navegador bloquea cualquier audio antes de la primera interacción del usuario. Al abrir la app, la pestaña principal está silenciada por el navegador; el primer gesto (normalmente el clic en «Jugar», que navega al selector de niveles) desbloquea el contexto de audio, por lo que el tema principal solo se percibe a partir del selector. Se confirmó que el cableado era correcto (`App.jsx:93` activa el tema en `menu`/`levels`/resultados y el listener de desbloqueo respondía al primer `pointerdown`/`keydown`).
+
+**Decisión acordada (opción A):** añadir un aviso visible en el menú principal («Haz clic en cualquier lugar para activar el sonido») que desaparezca tras el primer gesto, y ampliar el desbloqueo del autoplay a `click`/`touchstart` además de `pointerdown`/`keydown` para compatibilidad con móvil. Queda incluido también el plan A pendiente (opción elegida previamente para el retardo del tema principal): `MenuMusic` usa `preload={active ? 'auto' : 'none'}` y llama `audio.load()` antes de `play()`, sin convertir los WAV.
+
+**Resultado:** `MenuMusic` recibe `onUnlocked`, notifica una única vez tras el primer gesto (ref de guarda) y registra listeners de desbloqueo en `pointerdown`, `click`, `touchstart` (pasivo) y `keydown`. `App` mantiene el estado `audioUnlocked` y lo pasa a `MainMenu`, que muestra el aviso pulsante (`.menu-audio-hint`, nueva animación `menu-hint-pulse` en `global.css`) solo mientras no haya interacción previa y no esté muteado. Una vez desbloqueado (o muteado), el aviso desaparece y no vuelve a mostrarse en la sesión.
+
+**Validación:** `npm test` (46 pruebas), `npm run build` y `git diff --check` en verde. La verificación auditiva en navegador (primer clic en la pestaña principal reproduce el tema) queda a cargo del usuario (práctica PDM-021).
+
+**Archivos:** `src/components/MenuMusic.jsx`, `src/App.jsx`, `src/components/MainMenu.jsx`, `src/styles/global.css` y `PROMPTS.md`.
+
+**Commits:** pendiente (working tree).
+
+**Reversión PDM-030 (2026-08-03):** “Mira, revierte esta ultima feature, no me sirv emucho la verdad”. El usuario solicitó revertir esta feature completa. Se restauraron los cuatro archivos de código al estado commiteado de PDM-029 (`git restore`): se eliminaron el aviso «Haz clic en cualquier lugar para activar el sonido», el estado `audioUnlocked` de `App`, el callback `onUnlocked` y los listeners ampliados de `MenuMusic` (que vuelven a `pointerdown`/`keydown` con `preload='metadata'`), y el estilo `.menu-audio-hint` de `global.css`. El tema principal por vista (PDM-029, ya commiteado) se conserva. No se creó ningún commit; la reversión vive en el working tree.
+
+### PDM-031 — Separar el silencio de música y efectos en ajustes independientes
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “mejor implementa en los ajustes que sea diferente el quitar la musica, a quitar los efectos del juego separa en dos opciones diferentes”
+
+**Resultado:** se sustituyó el único `muted` por dos ajustes independientes `musicMuted` y `sfxMuted`. `AudioManager` perdió `muted`/`setMuted` y ganó `setMusicMuted` (detiene la pista activa y la reanuda al desmutear), `setSfxMuted` y `stopSfx` (detiene los SFX activos con `sound.getAll()` sin tocar la instancia de música); `play()` queda bloqueado por `sfxMuted` y `playMusic()` por `musicMuted`. `BaseLevelScene` actualiza sus ajustes por defecto y aplica ambos mutes en `init` y en `setSettings`; se eliminó `setMuted` y el handler muerto `command:audio` de `PhaserGame`. En React, `App` usa la nueva forma de `settings`, `SettingsPanel` muestra dos checkboxes («Silenciar música» / «Silenciar efectos») y el atajo «Sonido activo/apagado» del menú principal pasa a ser un master toggle que silencia/restaura ambos. `MenuMusic` recibe `settings.musicMuted`.
+
+**Validación:** `npm test` (48 pruebas, +2 netas con cobertura de separación), `npm run build` y `git diff --check` en verde. La revisión auditiva en navegador (silenciar solo música, solo efectos, y el atajo del menú) queda a cargo del usuario (práctica PDM-021).
+
+**Archivos:** `src/game/systems/AudioManager.js`, `src/game/systems/AudioManager.test.js`, `src/game/scenes/BaseLevelScene.js`, `src/game/PhaserGame.js`, `src/App.jsx`, `src/components/SettingsPanel.jsx`, `src/components/MainMenu.jsx` y `PROMPTS.md`.
+
+**Commits:**
+
+- `2caea9a feat(audio): split music and sfx mute controls`
+- `f0573aa feat(ui): add separate music and effects mute toggles`
+
 ## Anexo A — Prompt original de la demo
 
 <details>

@@ -18,7 +18,6 @@ export function createPhaserGame(parent, initialSettings, initialLevel = 'level-
     eventBus.on('command:pause', () => getScene()?.pauseGame()),
     eventBus.on('command:resume', () => getScene()?.resumeGame()),
     eventBus.on('command:restart', () => getScene()?.restartGame()),
-    eventBus.on('command:audio', (muted) => getScene()?.setMuted(muted)),
     eventBus.on('command:settings', (settings) => getScene()?.setSettings(settings)),
     eventBus.on('command:menu', () => getScene()?.returnToMenu()),
     eventBus.on('command:recipe-craft', (payload) => getScene()?.craftRecipe(payload?.recipeId)),
