@@ -10,6 +10,7 @@ const createScene = ({ loaded = true, playResult = true } = {}) => ({
     mute: false,
     play: vi.fn(() => playResult),
     stopAll: vi.fn(),
+    getAll: vi.fn(() => []),
   },
 });
 
@@ -49,16 +50,28 @@ describe('AudioManager', () => {
     expect(scene.sound.play).toHaveBeenCalledTimes(2);
   });
 
-  it('silencia, detiene y vuelve a permitir efectos', () => {
+  it('silencia los efectos y vuelve a permitirlos', () => {
     const scene = createScene();
     const audio = new AudioManager(scene);
-    audio.setMuted(true);
-    expect(scene.sound.mute).toBe(true);
-    expect(scene.sound.stopAll).toHaveBeenCalledOnce();
+    audio.setSfxMuted(true);
     expect(audio.play('hurt')).toBe(false);
-    audio.setMuted(false);
-    expect(scene.sound.mute).toBe(false);
+    audio.setSfxMuted(false);
     expect(audio.play('hurt')).toBe(true);
+  });
+
+  it('al silenciar efectos detiene los SFX activos pero conserva la música', () => {
+    const scene = createScene();
+    const sfxSound = { stop: vi.fn(), destroy: vi.fn() };
+    scene.sound.getAll = vi.fn(() => [sfxSound]);
+    scene.sound.add = vi.fn(() => {
+      const sound = { play: vi.fn(() => true), stop: vi.fn(), destroy: vi.fn() };
+      return sound;
+    });
+    const audio = new AudioManager(scene);
+    expect(audio.playMusic('main')).toBe(true);
+    audio.setSfxMuted(true);
+    expect(sfxSound.stop).toHaveBeenCalledOnce();
+    expect(scene.sound.add.mock.results[0].value.destroy).not.toHaveBeenCalled();
   });
 
   it('usa silencio seguro y advierte una sola vez si falta una clave', () => {
@@ -133,18 +146,34 @@ describe('AudioManager música', () => {
     vi.spyOn(console, 'info').mockImplementation(() => {});
     const { scene } = createMusicScene();
     const audio = new AudioManager(scene);
-    audio.setMuted(true);
+    audio.setMusicMuted(true);
     expect(audio.playMusic('main')).toBe(false);
     expect(scene.sound.add).not.toHaveBeenCalled();
   });
 
-  it('reanuda la pista activa al desmutear', () => {
+  it('reanuda la pista activa al desmutear la música', () => {
     const { scene } = createMusicScene();
     const audio = new AudioManager(scene);
     audio.playMusic('main');
-    audio.setMuted(true);
-    audio.setMuted(false);
+    audio.setMusicMuted(true);
+    audio.setMusicMuted(false);
     expect(scene.sound.add).toHaveBeenLastCalledWith(MUSIC_MANIFEST.main.key, expect.any(Object));
+  });
+
+  it('mantiene independientes los mutes de música y efectos', () => {
+    const { scene, sounds } = createMusicScene();
+    const audio = new AudioManager(scene);
+    audio.play('jump');
+    expect(audio.playMusic('main')).toBe(true);
+    audio.setSfxMuted(true);
+    expect(audio.play('jump')).toBe(false);
+    expect(audio.playMusic('level-two')).toBe(true);
+    audio.setSfxMuted(false);
+    audio.setMusicMuted(true);
+    expect(audio.playMusic('main')).toBe(false);
+    scene.time.now += 100;
+    expect(audio.play('jump')).toBe(true);
+    expect(sounds).toHaveLength(2);
   });
 
   it('advierte una sola vez si la clave de música no está registrada', () => {

@@ -6,25 +6,38 @@ export class AudioManager {
     this.scene = scene;
     this.sound = scene?.sound ?? null;
     this.manifest = manifest;
-    this.muted = false;
+    this.musicMuted = false;
+    this.sfxMuted = false;
     this.warnedKeys = new Set();
     this.lastPlayedAt = new Map();
     this.musicSound = null;
     this.musicKey = null;
   }
 
-  setMuted(muted) {
-    this.muted = Boolean(muted);
-    if (this.sound) this.sound.mute = this.muted;
-    if (this.muted) {
-      this.stopAll();
+  setMusicMuted(muted) {
+    this.musicMuted = Boolean(muted);
+    if (this.musicMuted) {
+      this.stopMusic();
     } else if (this.musicKey) {
       this.playMusic(this.musicKey);
     }
   }
 
+  setSfxMuted(muted) {
+    this.sfxMuted = Boolean(muted);
+    if (this.sfxMuted) this.stopSfx();
+  }
+
+  stopSfx() {
+    if (!this.sound) return;
+    const sounds = typeof this.sound.getAll === 'function' ? this.sound.getAll() : [];
+    sounds.forEach((sound) => {
+      if (sound !== this.musicSound) sound.stop?.();
+    });
+  }
+
   play(key) {
-    if (this.muted) return false;
+    if (this.sfxMuted) return false;
     const asset = this.manifest[key];
     if (!asset) return this.warnOnce(key, 'clave no registrada');
     if (!this.sound || !this.scene?.cache?.audio?.exists(asset.key)) {
@@ -46,7 +59,7 @@ export class AudioManager {
   }
 
   playMusic(key, { loop = true } = {}) {
-    if (this.muted) return false;
+    if (this.musicMuted) return false;
     const asset = MUSIC_MANIFEST[key];
     if (!asset) return this.warnOnce(key, 'clave de música no registrada');
     if (!this.sound || !this.scene?.cache?.audio?.exists(asset.key)) {

@@ -68,14 +68,16 @@ export class BaseLevelScene extends Phaser.Scene {
     this.game.registry.set('currentLevel', this.levelId);
     this.status = 'playing';
     this.settings = {
-      muted: false,
+      musicMuted: false,
+      sfxMuted: false,
       screenShake: true,
       reducedParticles: false,
       ...(this.game.registry.get('settings') ?? {}),
     };
     this.assetResolver = new AssetResolver(this.textures, (payload) => eventBus.emit('fallback:used', payload));
     this.audioManager = new AudioManager(this);
-    this.audioManager.setMuted(this.settings.muted);
+    this.audioManager.setMusicMuted(this.settings.musicMuted);
+    this.audioManager.setSfxMuted(this.settings.sfxMuted);
     this.audioManager.playMusic(this.config.music);
     this.inventory = new InventorySystem();
     this.oxygenSystem = new OxygenSystem(this.config.oxygenConfig);
@@ -1109,14 +1111,10 @@ export class BaseLevelScene extends Phaser.Scene {
     this.audioManager.stopAll();
   }
 
-  setMuted(muted) {
-    this.settings.muted = Boolean(muted);
-    this.audioManager.setMuted(muted);
-  }
-
   setSettings(settings) {
     this.settings = { ...this.settings, ...settings };
-    this.audioManager.setMuted(this.settings.muted);
+    this.audioManager.setMusicMuted(this.settings.musicMuted);
+    this.audioManager.setSfxMuted(this.settings.sfxMuted);
     this.game.registry.set('settings', this.settings);
   }
 
