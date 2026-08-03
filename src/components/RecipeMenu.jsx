@@ -80,14 +80,19 @@ export function RecipeMenu({ menu, onCraft, onClose }) {
                 <div className="recipe-info">
                   <strong>{recipe.name}</strong>
                   <span>{recipe.description}</span>
-                  {recipe.unlocked ? (
+                  {!recipe.unlocked && <span className="recipe-stock is-muted">Receta futura</span>}
+                  {recipe.unlocked && recipe.infinite && (
+                    <span className="recipe-stock">
+                      {recipe.count > 0 ? 'Preparada · munición ∞' : `Requiere ${recipe.cost} Levaduras`}
+                    </span>
+                  )}
+                  {recipe.unlocked && !recipe.infinite && (
                     <span className="recipe-stock">
                       {recipe.count}/{recipe.maxStack} · {recipe.cost} Levadura
                     </span>
-                  ) : (
-                    <span className="recipe-stock is-muted">Receta futura</span>
                   )}
-                  {recipe.unlocked && !recipe.canCraft && recipe.reason && (
+                  {recipe.unlocked && !recipe.canCraft && recipe.reason
+                    && !(recipe.infinite && recipe.count > 0) && (
                     <span className="recipe-reason">{REASON_TEXT[recipe.reason]}</span>
                   )}
                 </div>
@@ -98,7 +103,8 @@ export function RecipeMenu({ menu, onCraft, onClose }) {
                   disabled={recipe.unlocked && !recipe.canCraft}
                   onClick={() => onCraft(recipe.id)}
                 >
-                  {recipe.unlocked ? 'Elaborar' : 'Bloqueada'}
+                  {!recipe.unlocked ? 'Bloqueada'
+                    : recipe.infinite && recipe.count > 0 ? 'Preparada' : 'Elaborar'}
                 </button>
               </li>
             ))}

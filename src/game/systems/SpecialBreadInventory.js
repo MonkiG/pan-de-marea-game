@@ -57,7 +57,8 @@ export class SpecialBreadInventory {
 
   use(id = this.selectedId, now = 0) {
     if (!this.canUse(id, now)) return false;
-    this.counts[id] -= 1;
+    // La munición infinita no descuenta existencias; sólo aplica el cooldown.
+    if (!this.recipes[id]?.infinite) this.counts[id] -= 1;
     this.lastUsedAt = now;
     return true;
   }

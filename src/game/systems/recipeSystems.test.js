@@ -15,19 +15,21 @@ const withYeast = (amount) => {
 };
 
 describe('SpecialBreadInventory', () => {
-  it('inicia en cero, respeta maxStack, consume una unidad y restaura snapshot', () => {
+  it('inicia en cero, se prepara una vez y usa munición infinita', () => {
     const inv = new SpecialBreadInventory();
     expect(inv.getCount(BAG)).toBe(0);
     expect(inv.selectedId).toBe(BAG);
-    expect(inv.add(BAG, 3)).toBe(true);
-    expect(inv.add(BAG, 1)).toBe(false);
-    expect(inv.getCount(BAG)).toBe(3);
+    expect(inv.add(BAG, 2)).toBe(false); // maxStack 1
+    expect(inv.add(BAG, 1)).toBe(true);
+    expect(inv.add(BAG, 1)).toBe(false); // ya preparada
+    expect(inv.getCount(BAG)).toBe(1);
+    // Munición infinita: usar no descuenta existencias.
     expect(inv.use(BAG, 1000)).toBe(true);
-    expect(inv.getCount(BAG)).toBe(2);
+    expect(inv.getCount(BAG)).toBe(1);
 
     const restored = new SpecialBreadInventory();
     restored.restore(inv.snapshot());
-    expect(restored.getCount(BAG)).toBe(2);
+    expect(restored.getCount(BAG)).toBe(1);
     expect(restored.selectedId).toBe(BAG);
     expect(restored.canUse(BAG, 0)).toBe(true);
   });
@@ -40,10 +42,10 @@ describe('SpecialBreadInventory', () => {
     expect(inv.getCount(BAG)).toBe(0);
   });
 
-  it('respeta el cooldown y no usa sin existencias', () => {
+  it('respeta el cooldown y no usa sin preparar', () => {
     const inv = new SpecialBreadInventory();
     expect(inv.canUse(BAG, 5000)).toBe(false);
-    inv.add(BAG, 2);
+    inv.add(BAG, 1);
     expect(inv.use(BAG, 1000)).toBe(true);
     expect(inv.canUse(BAG, 1100)).toBe(false);
     expect(inv.cooldownRemaining(BAG, 1100)).toBe(550);
@@ -68,47 +70,50 @@ describe('SpecialRecipeSystem', () => {
     expect(inv.availableYeast).toBe(5);
   });
 
-  it('la reserva de misión protege la Levadura del objetivo', () => {
+  it('la Baguette infinita necesita 3 Levaduras disponibles e ignora la reserva', () => {
     const sys = new SpecialRecipeSystem();
     const sbi = new SpecialBreadInventory();
-    expect(sys.getSpendableYeast(withYeast(3), mission(3, false))).toBe(0);
-    expect(sys.canCraft(BAG, withYeast(3), mission(3, false), sbi)).toEqual({ ok: false, reason: 'ingredients' });
-    expect(sys.canCraft(BAG, withYeast(4), mission(3, false), sbi).ok).toBe(true);
-    // Con la misión completada, ya no hay reserva.
-    expect(sys.getSpendableYeast(withYeast(2), mission(3, true))).toBe(2);
+    // Con 2 Levaduras no alcanza el umbral.
+    expect(sys.canCraft(BAG, withYeast(2), mission(3, false), sbi).reason).toBe('ingredients');
+    // Con 3 alcanza aunque la misión aún no esté completada (no hay reserva).
+    expect(sys.canCraft(BAG, withYeast(3), mission(3, false), sbi).ok).toBe(true);
   });
 
-  it('la reserva no impide preparar la receta de misión', () => {
-    const sys = new SpecialRecipeSystem();
-    const inv = withYeast(3);
-    const recipe = new RecipeSystem(3);
-    expect(sys.canCraft(BAG, inv, { cost: 3, completed: false }, new SpecialBreadInventory()).reason).toBe('ingredients');
-    expect(recipe.craft(inv)).toBe(true);
-    expect(inv.availableYeast).toBe(0);
-  });
-
-  it('elaborar Baguette consume exactamente 1 y añade exactamente 1', () => {
+  it('preparar la Baguette no gasta Levadura y deja munición infinita', () => {
     const sys = new SpecialRecipeSystem();
     const inv = withYeast(4);
     const sbi = new SpecialBreadInventory();
     expect(sys.beginCraft(BAG, inv, mission(3, false), sbi)).toBe(true);
-    expect(inv.availableYeast).toBe(3);
+    expect(inv.availableYeast).toBe(4); // no consume
     expect(sys.completeCraft(BAG, sbi)).toBe(true);
     expect(sbi.getCount(BAG)).toBe(1);
+    sbi.use(BAG, 1000);
+    expect(sbi.getCount(BAG)).toBe(1); // sigue infinita
   });
 
-  it('no elabora con el inventario especial lleno', () => {
+  it('preparar la Baguette no impide después preparar el pan de misión', () => {
+    const sys = new SpecialRecipeSystem();
+    const inv = withYeast(3);
+    const sbi = new SpecialBreadInventory();
+    expect(sys.beginCraft(BAG, inv, { cost: 3, completed: false }, sbi)).toBe(true);
+    expect(inv.availableYeast).toBe(3); // la Baguette no gastó Levadura
+    const recipe = new RecipeSystem(3);
+    expect(recipe.craft(inv)).toBe(true);
+    expect(inv.availableYeast).toBe(0);
+  });
+
+  it('no vuelve a prepararse una vez lista', () => {
     const sys = new SpecialRecipeSystem();
     const sbi = new SpecialBreadInventory();
-    sbi.add(BAG, 3);
+    sbi.add(BAG, 1);
     expect(sys.canCraft(BAG, withYeast(9), mission(3, true), sbi)).toEqual({ ok: false, reason: 'full' });
   });
 
-  it('reembolsa la Levadura sin inflar el total recogido', () => {
+  it('no reembolsa Levadura para recetas de munición infinita', () => {
     const sys = new SpecialRecipeSystem();
     const inv = withYeast(4);
     sys.beginCraft(BAG, inv, mission(3, false), new SpecialBreadInventory());
-    expect(inv.availableYeast).toBe(3);
+    expect(inv.availableYeast).toBe(4);
     sys.refund(BAG, inv);
     expect(inv.availableYeast).toBe(4);
     expect(inv.totalCollected).toBe(4);

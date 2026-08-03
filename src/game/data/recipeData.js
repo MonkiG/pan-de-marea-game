@@ -12,10 +12,14 @@ export const SPECIAL_BREAD_RECIPES = Object.freeze({
   'baguette-torpedo': Object.freeze({
     id: 'baguette-torpedo',
     name: 'Baguette Torpedo',
-    description: 'Proyectil de pan que causa 2 de daño.',
+    description: 'Munición infinita. Requiere 3 Levaduras para prepararla.',
     unlocked: true,
-    cost: 1,
-    maxStack: 3,
+    // `cost` es el umbral de Levadura para prepararla, no un gasto: al preparar
+    // no se consume Levadura (así nunca bloquea el pan de misión) y a partir de
+    // entonces la munición es infinita. Ver `infinite`.
+    cost: 3,
+    infinite: true,
+    maxStack: 1,
     icon: '/pixel-art/v1/recipes/icon-baguette-torpedo.png',
     damage: 2,
     speed: 280,

@@ -31,7 +31,7 @@ export function SpecialBreadBar({ special }) {
             >
               <img className="special-slot-icon" src={slot.icon} alt="" />
               {slot.unlocked
-                ? <b className="special-count">{slot.count}</b>
+                ? <b className="special-count">{slot.infinite && slot.count > 0 ? '∞' : slot.count}</b>
                 : <img className="special-lock" src={LOCK_ICON} alt="" />}
               {isSelected && cooldownRatio > 0 && (
                 <span className="special-cooldown" style={{ transform: `scaleY(${cooldownRatio})` }} />

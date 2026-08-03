@@ -23,20 +23,36 @@ export class SpecialRecipeSystem {
     return Math.max(0, available - this.getReserve(missionRecipe));
   }
 
+  /**
+   * Levadura que cuenta para preparar una receta. Las recetas de munición
+   * infinita usan un umbral sobre la Levadura recogida (no gastan), así que
+   * miran el total disponible; el resto respeta la reserva de misión.
+   */
+  getCraftYeast(recipe, inventory, missionRecipe) {
+    if (recipe.infinite) return Math.max(0, inventory?.availableYeast ?? 0);
+    return this.getSpendableYeast(inventory, missionRecipe);
+  }
+
   /** @returns {{ok: boolean, reason: null|'locked'|'unknown'|'ingredients'|'full'}} */
   canCraft(recipeId, inventory, missionRecipe, specialInventory) {
     const recipe = this.recipes[recipeId];
     if (!recipe) return { ok: false, reason: 'unknown' };
     if (!recipe.unlocked) return { ok: false, reason: 'locked' };
     if (specialInventory.getCount(recipeId) >= recipe.maxStack) return { ok: false, reason: 'full' };
-    if (this.getSpendableYeast(inventory, missionRecipe) < recipe.cost) return { ok: false, reason: 'ingredients' };
+    if (this.getCraftYeast(recipe, inventory, missionRecipe) < recipe.cost) return { ok: false, reason: 'ingredients' };
     return { ok: true, reason: null };
   }
 
-  /** Consume la Levadura de forma atómica sólo si la receta es válida. */
+  /**
+   * Prepara la receta si es válida. Las recetas infinitas no gastan Levadura
+   * (el coste es sólo un umbral); las normales consumen su coste de forma
+   * atómica.
+   */
   beginCraft(recipeId, inventory, missionRecipe, specialInventory) {
+    const recipe = this.recipes[recipeId];
     if (!this.canCraft(recipeId, inventory, missionRecipe, specialInventory).ok) return false;
-    return inventory.spend(this.recipes[recipeId].cost);
+    if (recipe.infinite) return true;
+    return inventory.spend(recipe.cost);
   }
 
   /** Añade exactamente una unidad de la receta elaborada. */
@@ -51,7 +67,7 @@ export class SpecialRecipeSystem {
    */
   refund(recipeId, inventory) {
     const recipe = this.recipes[recipeId];
-    if (!recipe?.cost || !inventory) return;
+    if (!recipe?.cost || recipe.infinite || !inventory) return;
     inventory.availableYeast += recipe.cost;
   }
 }

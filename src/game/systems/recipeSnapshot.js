@@ -27,6 +27,7 @@ export function buildRecipeMenuSnapshot({
       description: recipe.description,
       icon: recipe.icon,
       unlocked: recipe.unlocked,
+      infinite: Boolean(recipe.infinite),
       cost: recipe.cost,
       count: specialInventory.getCount(id),
       maxStack: recipe.maxStack,
@@ -66,6 +67,7 @@ export function buildSpecialBreadSnapshot({
     id,
     icon: recipes[id].icon,
     unlocked: recipes[id].unlocked,
+    infinite: Boolean(recipes[id].infinite),
     count: specialInventory.getCount(id),
   }));
   return {
