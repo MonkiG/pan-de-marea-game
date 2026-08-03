@@ -11,6 +11,14 @@ import { ResultScreen } from './components/ResultScreen.jsx';
 import { eventBus } from './game/EventBus.js';
 import { OBJECTIVES, OXYGEN, PLAYER, RECIPE } from './game/constants.js';
 import { mergeProgressionSnapshots, sessionProgress } from './game/systems/SessionProgress.js';
+import { STORAGE_KEYS, loadJSON, saveJSON } from './game/systems/Persistence.js';
+
+const DEFAULT_SETTINGS = Object.freeze({
+  musicMuted: false,
+  sfxMuted: false,
+  screenShake: true,
+  reducedParticles: false,
+});
 import { getLevelDefinition } from './game/data/levelCatalog.js';
 
 const initialSnapshot = Object.freeze({
@@ -55,7 +63,7 @@ const initialSelectedLevel = ['level-one', 'level-two'].includes(requestedReview
 export function App() {
   const [view, setView] = useState(artReviewMode ? 'game' : 'menu');
   const [snapshot, setSnapshot] = useState(initialSnapshot);
-  const [settings, setSettings] = useState({ musicMuted: false, sfxMuted: false, screenShake: true, reducedParticles: false });
+  const [settings, setSettings] = useState(() => loadJSON(STORAGE_KEYS.settings, DEFAULT_SETTINGS));
   const [selectedLevel, setSelectedLevel] = useState(initialSelectedLevel);
   const [progression, setProgression] = useState(() => sessionProgress.getSnapshot());
   const [gameError, setGameError] = useState('');
@@ -86,6 +94,10 @@ export function App() {
 
   useEffect(() => {
     eventBus.emit('command:settings', settings);
+  }, [settings]);
+
+  useEffect(() => {
+    saveJSON(STORAGE_KEYS.settings, settings);
   }, [settings]);
 
   const gameActive = view === 'game';
