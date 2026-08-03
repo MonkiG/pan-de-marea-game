@@ -1,4 +1,5 @@
 import { DEV_UNLOCK_ALL_LEVELS, LEVEL_IDS } from '../constants.js';
+import { STORAGE_KEYS, loadJSON, saveJSON } from './Persistence.js';
 
 const freshState = () => ({
   unlockedLevels: [LEVEL_IDS.bakery, ...(DEV_UNLOCK_ALL_LEVELS ? [LEVEL_IDS.market] : [])],
@@ -10,6 +11,23 @@ const freshState = () => ({
     yeastCollected: 0,
   },
 });
+
+const hydrateState = (saved) => {
+  const fallback = freshState();
+  if (!saved || typeof saved !== 'object') return fallback;
+  const validLevels = Object.values(LEVEL_IDS);
+  return {
+    unlockedLevels: Array.isArray(saved.unlockedLevels)
+      ? saved.unlockedLevels.filter((id) => validLevels.includes(id))
+      : fallback.unlockedLevels,
+    completedLevels: Array.isArray(saved.completedLevels)
+      ? saved.completedLevels.filter((id) => validLevels.includes(id))
+      : fallback.completedLevels,
+    globalStats: saved.globalStats && typeof saved.globalStats === 'object'
+      ? { ...fallback.globalStats, ...saved.globalStats }
+      : fallback.globalStats,
+  };
+};
 
 export const mergeProgressionSnapshots = (current = freshState(), incoming = freshState()) => {
   const currentStats = current.globalStats ?? {};
@@ -28,10 +46,15 @@ export const mergeProgressionSnapshots = (current = freshState(), incoming = fre
 export class SessionProgress {
   constructor() {
     this.reset();
+    this.state = hydrateState(loadJSON(STORAGE_KEYS.progress, this.state));
   }
 
   reset() {
     this.state = freshState();
+  }
+
+  persist() {
+    saveJSON(STORAGE_KEYS.progress, this.getSnapshot());
   }
 
   isUnlocked(levelId) {
@@ -46,6 +69,7 @@ export class SessionProgress {
     Object.keys(this.state.globalStats).forEach((key) => {
       this.state.globalStats[key] += Math.max(0, Number(stats[key]) || 0);
     });
+    this.persist();
     return this.getSnapshot();
   }
 
