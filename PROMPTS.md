@@ -534,6 +534,29 @@ PLEASE IMPLEMENT THIS PLAN:
 
 - `e77f229 fix(enemies): face the sentinel toward its movement direction`
 
+## Feature: música por vista
+
+### PDM-029 — Reproducir la música de la carpeta music en cada vista
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “Puedes hacer que la musica de la carpeta music se reprodusca en su respectiva vista? tanto en el home (es la misma que el final) y la cancion de cada nivel”
+
+**Decisión de asignación acordada (confirmada con el usuario):** `riviera-swing-main.wav` para el home, la pantalla de selección de niveles y las pantallas de resultado (victoria y derrota); `tidal-siege-tutorial.wav` para el Tutorial (La Panadería Hundida, `level-one`); `heroic-depths-level-1.wav` para el Nivel I (El Mercado Sumergido, `level-two`). El tema principal también suena en el selector de niveles.
+
+**Resultado:** se integró la música de `assets/audio/music/` por vista. Se creó un manifiesto independiente del SFX (`musicManifest.js`) porque la música es estéreo y no debe entrar en el lote mono que validan `audio:generate`/`audio:validate`. `AudioManager` ganó `playMusic`/`stopMusic` con loop, volumen propio, corte de la pista anterior y reanudación al desmutear. Cada escena de nivel carga en su propio `preload()` únicamente su pista (carga perezosa, evitando descargar ~90 MB de música al arrancar), la reproduce al crear la escena, la reanuda al volver de pausa y la detiene al completar o fallar. En React, un componente `MenuMusic` reproduce el tema principal con `<audio loop>` en home, selector y resultados, respetando el mute global y desbloqueando el autoplay tras la primera interacción del navegador.
+
+**Validación:** `npm test` (46 pruebas, +5 de música), `npm run build`, `npm run audio:validate` (22 SFX) y `git diff --check` en verde. La revisión auditiva en navegador queda a cargo del usuario (práctica PDM-021).
+
+**Archivos:** `assets/audio/music/` (3 WAV), `src/game/audio/musicManifest.js`, `src/game/systems/AudioManager.js`, `src/game/systems/AudioManager.test.js`, `src/game/scenes/BaseLevelScene.js`, `src/game/scenes/LevelOneScene.js`, `src/game/scenes/LevelTwoScene.js`, `src/components/MenuMusic.jsx`, `src/App.jsx` y `PROMPTS.md`.
+
+**Commits:**
+
+- `a96b515 feat(audio): add per-level looping music support`
+- `a244a2b feat(ui): add main theme music for menus and results`
+- `62e7f64 feat(assets): add per-view music tracks`
+
+**Corrección PDM-029 (2026-08-03):** “hay errores al pausar la musica \"this.musicSound.stop is not a function\"”. Causa raíz: `Phaser.Sound.BaseSoundManager.play()` devuelve `true` (booleano), no la instancia de sonido, por lo que `playMusic()` guardaba `true` como `musicSound` y `stop()`/`stopAll()` fallaban al llamar a `.stop()`/`.destroy()` sobre él. Se cambió `playMusic()` a `this.sound.add(key, { volume, loop })` (que sí devuelve la instancia `Phaser.Sound`) y `stopMusic()`/`stopAll()` ahora destruyen la instancia. `npm test` (46) y `npm run build` en verde. La corrección quedó incluida en el commit `a96b515` (la implementación aún no estaba commiteada).
+
 ## Anexo A — Prompt original de la demo
 
 <details>
