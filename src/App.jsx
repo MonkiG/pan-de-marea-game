@@ -3,6 +3,7 @@ import { GameContainer } from './components/GameContainer.jsx';
 import { HUD } from './components/HUD.jsx';
 import { LevelSelectScreen } from './components/LevelSelectScreen.jsx';
 import { MainMenu } from './components/MainMenu.jsx';
+import { MenuMusic } from './components/MenuMusic.jsx';
 import { NonGameLinks } from './components/NonGameLinks.jsx';
 import { PauseMenu } from './components/PauseMenu.jsx';
 import { RecipeMenu } from './components/RecipeMenu.jsx';
@@ -89,6 +90,7 @@ export function App() {
 
   const gameActive = view === 'game';
   const shellClass = useMemo(() => `app-shell ${gameActive ? 'is-playing' : 'is-menu'}`, [gameActive]);
+  const menuMusicActive = !gameActive || ['complete', 'defeat'].includes(snapshot.status);
 
   const startGame = (levelId = selectedLevel) => {
     if (!progression.unlockedLevels.includes(levelId) && !sessionProgress.isUnlocked(levelId)) return;
@@ -192,6 +194,7 @@ export function App() {
         </section>
       )}
       {!gameActive && <NonGameLinks />}
+      <MenuMusic active={menuMusicActive} muted={settings.muted} />
     </main>
   );
 }
