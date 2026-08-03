@@ -39,10 +39,24 @@ También se puede utilizar `pnpm install`, `pnpm test` y `pnpm run build`.
 | Moverse | A/D o flechas izquierda/derecha |
 | Saltar | W, flecha arriba o Espacio |
 | Atacar | J o X |
-| Interactuar | E o Enter |
+| Interactuar / abrir horno | E o Enter |
+| Cambiar pan especial | Q |
+| Usar pan especial | K |
 | Pausa | Esc |
 
 Los controles sólo se capturan mientras el juego está activo. Los botones del menú funcionan con Tab, Enter y Espacio.
+
+### Recetas y panes especiales
+
+Al interactuar con el horno se abre un menú React que pausa el nivel. Desde
+él se prepara el pan de misión (Pan Térmico o Pan de Presión) y la **Baguette
+Torpedo**, un proyectil de pan que causa 2 de daño. La Levadura necesaria para
+el pedido del nivel queda reservada, así que la Baguette sólo consume Levadura
+sobrante; el Tutorial incluye dos Levaduras opcionales para elaborarla sin
+arriesgar la salida. En el juego, Q cambia el pan especial seleccionado y K lo
+dispara respetando su cooldown. Las otras dos recetas son promesas visuales
+bloqueadas para niveles futuros. La especificación completa está en
+[`CLAUDE_RECIPES_IMPLEMENTATION.md`](CLAUDE_RECIPES_IMPLEMENTATION.md).
 
 ## Movimiento y alcance del salto
 

@@ -453,6 +453,30 @@ PLEASE IMPLEMENT THIS PLAN:
 
 **Commits relacionados:** `51fda2d fix(enemies): restore abyssal spitter attacks` y `68d81f4 docs(prompts): record spitter root cause`.
 
+## Feature: recetas y panes especiales
+
+### PDM-025 — Reanudar e integrar el sistema de recetas tras cortarse los créditos
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “continua con la tarea que dejaste pendiente porque se acabaron los creditos”
+
+**Contexto encontrado:** el trabajo de `feat/receipes` había quedado a medias. Los assets, SFX, scripts y la especificación `CLAUDE_RECIPES_IMPLEMENTATION.md` estaban commiteados en esa rama —creada antes de fusionar `feat/levels`, por lo que precedía a `BaseLevelScene`—, mientras que los módulos puros del sistema (datos de recetas, inventario especial, reglas de elaboración, snapshots, proyectil y pruebas) sólo existían como archivos sin seguimiento en el árbol de trabajo de `main`. La integración con escenas, HUD y React estaba pendiente.
+
+**Decisión acordada (pregunta al usuario):** aterrizar el trabajo restante en una rama nueva `feat/recipes-v2` creada desde `main`, trayendo los assets/audio/spec de `feat/receipes` e integrando sobre la arquitectura actual de `BaseLevelScene`. La rama vieja queda como archivo.
+
+**Resultado:** se completó el alcance de la especificación sobre la arquitectura vigente. El horno abre un menú React que pausa y reanuda la escena con bloqueo de controles; la receta de misión (Pan Térmico / de Presión) y la Baguette Torpedo comparten la reserva de Levadura del objetivo (`reserva = completada ? 0 : coste`), de modo que la Baguette nunca gasta los ingredientes de la salida. Se añadieron las teclas Q (cambiar) y K (usar), un pool de seis Baguettes que dañan con `enemy.takeDamage(2, x)` y sólo generan impacto cuando el golpe se confirma, la barra de panes especiales en el HUD con selección, candados, cooldown y pulso de no disponible, y dos Levaduras opcionales en el Tutorial para poder elaborar la Baguette sin arriesgar el pedido. El inventario especial se conserva en checkpoints y en el snapshot público. Las recetas futuras (oxígeno y defensa) aparecen bloqueadas y sólo dan feedback sonoro.
+
+**Validación:** `npm run recipes:assets:validate` (7 assets), `npm run audio:validate` (22 SFX), `npm run art:validate`, `npm test` (41 pruebas), `npm run build` y `git diff --check` limpios. Además el servidor de desarrollo sirvió y transformó todos los módulos nuevos sin errores. El recorrido jugable en navegador queda a cargo del usuario (ver PDM-021).
+
+**Archivos:** `CLAUDE_RECIPES_IMPLEMENTATION.md`, `art-source/pixel-art/v1/recipes/`, `assets/pixel-art/v1/recipes/`, `assets/audio/sfx/` (recetas y Baguette), `scripts/process-recipe-assets.mjs`, `scripts/validate-recipe-assets.mjs`, `scripts/generate-audio.mjs`, `scripts/validate-audio.mjs`, `package.json`, `src/game/data/recipeData.js`, `src/game/systems/{SpecialBreadInventory,SpecialRecipeSystem,recipeSnapshot,recipeSystems.test,AudioManager.test}.js`, `src/game/projectiles/BaguetteTorpedoProjectile.js`, `src/game/scenes/BaseLevelScene.js`, `src/game/entities/{Player,Oven,PressureOven}.js`, `src/game/PhaserGame.js`, `src/game/assetManifest.js`, `src/game/assets/assetRegistry.js`, `src/game/data/{animationData,levelOneData}.js`, `src/game/audio/audioManifest.js`, `src/App.jsx`, `src/components/{HUD,RecipeMenu,SpecialBreadBar}.jsx`, `src/styles/global.css`, `README.md` y `PROMPTS.md`.
+
+**Commits:**
+
+- `741c0ec feat(recipes): add pixel-art, audio and implementation spec`
+- `10a8f0a feat(recipes): add special bread systems and baguette projectile`
+- `2af969e feat(game): integrate oven recipe menu and baguette combat`
+- `2032764 feat(ui): add recipe menu overlay and special bread hud`
+
 ## Anexo A — Prompt original de la demo
 
 <details>
