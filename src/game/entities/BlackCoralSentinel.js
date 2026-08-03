@@ -41,6 +41,7 @@ export class BlackCoralSentinel extends Phaser.Physics.Arcade.Sprite {
     const distance = this.player.x - this.x;
     const absoluteDistance = Math.abs(distance);
     this.direction = Math.sign(distance) || this.direction;
+    this.updateFacing();
 
     if (this.state === 'dormant') {
       this.setVelocityX(0);
@@ -81,7 +82,6 @@ export class BlackCoralSentinel extends Phaser.Physics.Arcade.Sprite {
       this.setState('idle');
       return;
     }
-    this.setFlipX(this.direction > 0);
     if (absoluteDistance <= SENTINEL.attackRange && time >= this.nextAttackAt) {
       this.nextAttackAt = time + SENTINEL.basicAttackCooldownMs;
       this.strikeAt = time + 360;
@@ -99,6 +99,16 @@ export class BlackCoralSentinel extends Phaser.Physics.Arcade.Sprite {
     const nextX = Phaser.Math.Clamp(this.x + this.direction, this.patrolMin, this.patrolMax);
     this.setVelocityX(nextX === this.x ? 0 : this.direction * SENTINEL.walkSpeed);
     this.setState('walk');
+  }
+
+  /**
+   * Orientación centralizada: la hoja base del Sentinela mira a la derecha, así
+   * que se invierte con `flipX` sólo al orientarse hacia la izquierda. Se llama
+   * tras calcular `direction` y antes de cualquier retorno para que la mirada
+   * sea correcta en todos los estados (walk, basicAttack, chargeAttack, etc.).
+   */
+  updateFacing() {
+    this.setFlipX(this.direction < 0);
   }
 
   setState(state, until = 0) {
