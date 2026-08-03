@@ -55,7 +55,7 @@ const initialSelectedLevel = ['level-one', 'level-two'].includes(requestedReview
 export function App() {
   const [view, setView] = useState(artReviewMode ? 'game' : 'menu');
   const [snapshot, setSnapshot] = useState(initialSnapshot);
-  const [settings, setSettings] = useState({ muted: false, screenShake: true, reducedParticles: false });
+  const [settings, setSettings] = useState({ musicMuted: false, sfxMuted: false, screenShake: true, reducedParticles: false });
   const [selectedLevel, setSelectedLevel] = useState(initialSelectedLevel);
   const [progression, setProgression] = useState(() => sessionProgress.getSnapshot());
   const [gameError, setGameError] = useState('');
@@ -194,7 +194,7 @@ export function App() {
         </section>
       )}
       {!gameActive && <NonGameLinks />}
-      <MenuMusic active={menuMusicActive} muted={settings.muted} />
+      <MenuMusic active={menuMusicActive} muted={settings.musicMuted} />
     </main>
   );
 }

@@ -29,10 +29,13 @@ export function MainMenu({
         <button
           className="sound-shortcut"
           type="button"
-          aria-label={settings.muted ? 'Activar sonido' : 'Silenciar sonido'}
-          onClick={() => onSettingsChange({ muted: !settings.muted })}
+          aria-label={settings.musicMuted && settings.sfxMuted ? 'Activar sonido' : 'Silenciar sonido'}
+          onClick={() => {
+            const allMuted = settings.musicMuted && settings.sfxMuted;
+            onSettingsChange({ musicMuted: !allMuted, sfxMuted: !allMuted });
+          }}
         >
-          {settings.muted ? 'Sonido apagado' : 'Sonido activo'}
+          {settings.musicMuted && settings.sfxMuted ? 'Sonido apagado' : 'Sonido activo'}
         </button>
       </div>
     </section>
