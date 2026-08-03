@@ -477,6 +477,24 @@ PLEASE IMPLEMENT THIS PLAN:
 - `2af969e feat(game): integrate oven recipe menu and baguette combat`
 - `2032764 feat(ui): add recipe menu overlay and special bread hud`
 
+### PDM-026 — Munición infinita de la Baguette con umbral de 3 Levaduras
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “haz que la municion sea infinita solamente se necesiten 3 levaduras para poder hacerlo”
+
+**Interpretación aplicada:** la Baguette Torpedo pasa a tener munición infinita y su “coste” de 3 Levaduras se reinterpreta como un **umbral de preparación, no un gasto**. Se necesita tener 3 Levaduras disponibles para prepararla; al prepararla no se consume Levadura (evita cualquier bloqueo del pan de misión) y a partir de entonces se dispara sin límite, conservando sólo el cooldown. Se eligió el umbral sin consumo —en vez de gastar 3— porque gastarlas podría dejar un nivel sin la Levadura necesaria para su salida.
+
+**Resultado:** `recipeData` marca la Baguette con `infinite: true`, `cost: 3` y `maxStack: 1`. `SpecialRecipeSystem` valida las recetas infinitas contra la Levadura disponible (ignorando la reserva) y no las cobra; `SpecialBreadInventory.use()` no descuenta munición infinita; los snapshots exponen `infinite`. El HUD muestra `∞` cuando está preparada y el menú del horno indica “Preparada · munición ∞” o “Requiere 3 Levaduras”. Se actualizaron las pruebas puras al nuevo modelo.
+
+**Validación:** `npm test` (41 pruebas) y `npm run build`.
+
+**Archivos:** `src/game/data/recipeData.js`, `src/game/systems/{SpecialRecipeSystem,SpecialBreadInventory,recipeSnapshot,recipeSystems.test}.js`, `src/components/{RecipeMenu,SpecialBreadBar}.jsx`, `README.md` y `PROMPTS.md`.
+
+**Commits:**
+
+- `85c8a20 feat(recipes): make baguette torpedo infinite ammo`
+- `docs(recipes): record infinite baguette tweak` (este commit)
+
 ## Anexo A — Prompt original de la demo
 
 <details>
