@@ -106,6 +106,7 @@ export const SENTINEL = Object.freeze({
 export const OBJECTIVES = Object.freeze({
   explore: 'Explora la panadería',
   collect: 'Recolecta 3 Levaduras de Burbuja',
+  regulators: 'Activa el regulador de presión',
   oven: 'Llega al horno',
   bake: 'Prepara el Pan Térmico',
   gate: 'Activa la compuerta',
