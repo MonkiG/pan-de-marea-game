@@ -1,6 +1,8 @@
 # Encargo para Claude: Escupemasas inactivo y orientación del Sentinela
 
-> Actualización: el Escupemasas fue corregido en `51fda2d`. La causa era pasar un objeto simple a `Phaser.Geom.Rectangle.Overlaps()`, lo que mantenía falsa la guarda `nearCamera`. Conserva el diagnóstico como referencia y verifica el arreglo; el defecto de orientación del Sentinela sigue pendiente.
+> Actualización: el Escupemasas fue corregido en `51fda2d`. La causa era pasar un objeto simple a `Phaser.Geom.Rectangle.Overlaps()`, lo que mantenía falsa la guarda `nearCamera`.
+>
+> Actualización 2: la orientación del Sentinela quedó corregida en la rama `fix/sentinel-facing`. Se centralizó la mirada en `BlackCoralSentinel.updateFacing()` (`setFlipX(this.direction < 0)`, invirtiendo la condición previa) y se llama tras calcular `direction`, antes de cualquier retorno, por lo que ahora se actualiza en todos los estados (incluidos `walk`, `basicAttack` y `chargeAttack`). Verificado en juego con Chromium headless: con Bigotes a la izquierda del jefe `flipX=true` (mira a la izquierda) y a su derecha `flipX=false` (mira a la derecha), incluso durante la carga. **Ambos defectos quedan resueltos.**
 
 ## Contexto
 

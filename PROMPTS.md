@@ -515,6 +515,25 @@ PLEASE IMPLEMENT THIS PLAN:
 - `a7c4e72 fix(levels): stop group-collision arg-order crash that froze levels`
 - `1e2efc3 feat(app): forward uncaught errors to the retry overlay`
 
+### PDM-028 — Corregir la orientación del Sentinela (defecto pendiente del encargo)
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “desde main crea otra rama para solucionar el error faltante del CLAUDE_ENEMY_BUGS.md”
+
+**Contexto:** de los dos defectos de `README_CLAUDE_ENEMY_BUGS.md`, el del Escupemasas ya se había corregido (`51fda2d`); quedaba pendiente el Defecto 2: el Sentinela del Coral Negro caminaba/cargaba/atacaba hacia la izquierda pero seguía mirando a la derecha. Desde `main` actualizado se creó la rama `fix/sentinel-facing`.
+
+**Causa raíz:** la hoja base del Sentinela mira a la derecha, pero `BlackCoralSentinel.update()` usaba `this.setFlipX(this.direction > 0)` (condición invertida) y sólo la ejecutaba tras varios retornos tempranos, por lo que la mirada no se actualizaba durante `dormant`, `alert`, `basicAttack`, `chargeAttack`, `hurt` ni `stunned`.
+
+**Resultado:** se centralizó la orientación en `BlackCoralSentinel.updateFacing()` con `this.setFlipX(this.direction < 0)` y se invoca inmediatamente después de calcular `direction`, antes de cualquier retorno, de modo que la mirada es correcta en todos los estados. No se alteró velocidad, dirección física, geometría ni assets.
+
+**Validación:** verificación en juego con Chromium headless (Playwright) en Nivel I: con Bigotes a la izquierda del jefe `direction=-1, flipX=true` (mira a la izquierda) y a su derecha `direction=1, flipX=false` (mira a la derecha), confirmado incluso durante `chargeAttack`. `npm test` (41 pruebas) y `npm run build` en verde. Se retiró la instrumentación temporal antes de entregar.
+
+**Archivos:** `src/game/entities/BlackCoralSentinel.js`, `README_CLAUDE_ENEMY_BUGS.md` y `PROMPTS.md`.
+
+**Commits:**
+
+- `e77f229 fix(enemies): face the sentinel toward its movement direction`
+
 ## Anexo A — Prompt original de la demo
 
 <details>
