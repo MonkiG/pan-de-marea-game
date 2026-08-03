@@ -262,7 +262,7 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 - El tileset y las hojas de animación tienen separaciones irregulares; ciertos recortes pueden necesitar ajuste artístico fino.
 - No hay música, ambientes continuos ni controles táctiles.
 - El perfil `legacy` conserva recortes irregulares y algunos estados aproximados; se mantiene sólo para comparación y contingencia.
-- El progreso de desbloqueo y checkpoint vive en memoria de la sesión; no se persiste todavía en `localStorage`.
+- La configuración y el progreso de desbloqueo/completados se persisten en `localStorage`; los checkpoints de mitad de nivel siguen siendo por sesión.
 - Phaser constituye la mayor parte del tamaño del bundle; se carga de forma diferida para que el menú inicial siga siendo ligero.
 
 ## Pruebas

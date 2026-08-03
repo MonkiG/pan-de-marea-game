@@ -10,6 +10,7 @@ import { MarketProgressionSystem } from './MarketProgressionSystem.js';
 import { PressureRecipeSystem } from './PressureRecipeSystem.js';
 import { ProjectilePoolPolicy } from './ProjectilePoolPolicy.js';
 import { mergeProgressionSnapshots, SessionProgress } from './SessionProgress.js';
+import { STORAGE_KEYS } from './Persistence.js';
 import { resolveLevelPlacements, validateLevelSupports } from './LevelSupportSystem.js';
 import { PLAYER } from '../constants.js';
 import { validateJumpLink } from './JumpReachSystem.js';
@@ -118,6 +119,32 @@ describe('progresión del Mercado Sumergido', () => {
     progress.completeLevel('level-one', { enemiesDefeated: 2 });
     expect(progress.isUnlocked('level-two')).toBe(true);
     expect(progress.getSnapshot().globalStats.enemiesDefeated).toBe(2);
+  });
+
+  it('persiste la progresión y la hidrata al reconstruir la sesión', () => {
+    const store = new Map();
+    const originalWindow = global.window;
+    global.window = {
+      localStorage: {
+        getItem: (key) => (store.has(key) ? store.get(key) : null),
+        setItem: (key, value) => store.set(key, String(value)),
+      },
+    };
+    try {
+      const first = new SessionProgress();
+      expect(first.isUnlocked('level-two')).toBe(false);
+      first.completeLevel('level-one', { enemiesDefeated: 2, yeastCollected: 3 });
+      expect(store.has(STORAGE_KEYS.progress)).toBe(true);
+
+      const second = new SessionProgress();
+      expect(second.isUnlocked('level-two')).toBe(true);
+      expect(second.getSnapshot().completedLevels).toEqual(['level-one']);
+      expect(second.getSnapshot().globalStats.enemiesDefeated).toBe(2);
+      expect(second.getSnapshot().globalStats.yeastCollected).toBe(3);
+    } finally {
+      if (originalWindow === undefined) delete global.window;
+      else global.window = originalWindow;
+    }
   });
 
   it('conserva desbloqueos al sincronizar snapshots entre Phaser y React', () => {
