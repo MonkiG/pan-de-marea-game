@@ -151,6 +151,54 @@ const designs = {
     addTone(samples, { start: 1.25, duration: 1.05, from: 190, to: 520, amplitude: 0.34, wave: 'triangle', attack: 0.08, release: 0.46 });
     addBubble(samples, 1.7, 580, 0.22, 0.2);
   },
+  'recipe-open'(samples) {
+    addTone(samples, { duration: 0.34, from: 260, to: 620, amplitude: 0.44, wave: 'triangle', release: 0.16 });
+    addClick(samples, 0.025, 720, 0.2);
+    addBubble(samples, 0.17, 680, 0.18, 0.14);
+  },
+  'recipe-close'(samples) {
+    addTone(samples, { duration: 0.26, from: 520, to: 210, amplitude: 0.4, wave: 'triangle', release: 0.13 });
+    addClick(samples, 0.16, 430, 0.18);
+  },
+  'recipe-select'(samples) {
+    addClick(samples, 0.008, 980, 0.22);
+    addTone(samples, { start: 0.035, duration: 0.11, from: 610, to: 760, amplitude: 0.3, wave: 'triangle', release: 0.08 });
+  },
+  'recipe-locked'(samples) {
+    addClick(samples, 0.012, 340, 0.3);
+    addClick(samples, 0.105, 270, 0.24);
+    addTone(samples, { duration: 0.22, from: 190, to: 120, amplitude: 0.25, wave: 'square', release: 0.1 });
+  },
+  'recipe-craft'(samples) {
+    addTone(samples, { duration: 0.82, from: 85, to: 210, amplitude: 0.36, wave: 'triangle', attack: 0.06, release: 0.22 });
+    addNoise(samples, { start: 0.05, duration: 0.58, amplitude: 0.25, seed: 141, color: 0.045, attack: 0.06, release: 0.2 });
+    [0.09, 0.22, 0.35].forEach((start, index) => addClick(samples, start, 520 + index * 90, 0.2));
+    [440, 660, 880].forEach((pitch, index) => addTone(samples, {
+      start: 0.48 + index * 0.11, duration: 0.42, from: pitch, to: pitch * 1.04,
+      amplitude: 0.26, wave: 'triangle', release: 0.28,
+    }));
+  },
+  'bread-equip'(samples) {
+    addTone(samples, { duration: 0.25, from: 390, to: 720, amplitude: 0.38, wave: 'triangle', release: 0.14 });
+    addClick(samples, 0.02, 820, 0.18);
+    addBubble(samples, 0.13, 610, 0.14, 0.12);
+  },
+  'bread-unavailable'(samples) {
+    addTone(samples, { duration: 0.2, from: 220, to: 145, amplitude: 0.35, wave: 'square', release: 0.11 });
+    addClick(samples, 0.025, 300, 0.2);
+  },
+  'baguette-launch'(samples) {
+    addNoise(samples, { duration: 0.27, amplitude: 0.55, seed: 163, color: 0.09, release: 0.15 });
+    addTone(samples, { duration: 0.31, from: 145, to: 520, amplitude: 0.46, wave: 'triangle', release: 0.14 });
+    addBubble(samples, 0.19, 690, 0.18, 0.12);
+  },
+  'baguette-impact'(samples) {
+    addNoise(samples, { duration: 0.31, amplitude: 0.68, seed: 174, color: 0.18, release: 0.2 });
+    addTone(samples, { duration: 0.28, from: 420, to: 95, amplitude: 0.52, wave: 'triangle', release: 0.16 });
+    addClick(samples, 0.025, 1080, 0.34);
+    addBubble(samples, 0.19, 520, 0.2, 0.14);
+    addBubble(samples, 0.27, 760, 0.14, 0.12);
+  },
 };
 
 function finalize(samples) {

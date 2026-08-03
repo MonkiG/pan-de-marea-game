@@ -54,6 +54,6 @@ if (errors.length) {
   errors.forEach((error) => console.error(`FAIL ${error}`));
   process.exitCode = 1;
 } else {
-  console.info(`Audio MVP válido: ${Object.keys(AUDIO_MANIFEST).length} SFX.`);
+  console.info(`Biblioteca de audio válida: ${Object.keys(AUDIO_MANIFEST).length} SFX.`);
 }
 

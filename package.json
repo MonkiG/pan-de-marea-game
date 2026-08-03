@@ -11,6 +11,8 @@
     "art:validate": "node scripts/validate-pixel-art.mjs",
     "audio:generate": "node scripts/generate-audio.mjs",
     "audio:validate": "node scripts/validate-audio.mjs",
+    "recipes:assets:process": "node scripts/process-recipe-assets.mjs",
+    "recipes:assets:validate": "node scripts/validate-recipe-assets.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
