@@ -7,7 +7,12 @@ import { BubbleYeast } from '../entities/BubbleYeast.js';
 import { Player } from '../entities/Player.js';
 import { PressureRegulator } from '../entities/PressureRegulator.js';
 import { CorruptedDoughProjectile } from '../projectiles/CorruptedDoughProjectile.js';
+import { BaguetteTorpedoProjectile } from '../projectiles/BaguetteTorpedoProjectile.js';
 import { DEBUG_LEVEL_LAYOUT, PLAYER, SPITTER } from '../constants.js';
+import { SpecialBreadInventory } from '../systems/SpecialBreadInventory.js';
+import { SpecialRecipeSystem } from '../systems/SpecialRecipeSystem.js';
+import { buildRecipeMenuSnapshot, buildSpecialBreadSnapshot } from '../systems/recipeSnapshot.js';
+import { BAGUETTE_POOL_SIZE, SPECIAL_BREAD_RECIPES } from '../data/recipeData.js';
 import { eventBus } from '../EventBus.js';
 import { AudioManager } from '../systems/AudioManager.js';
 import { CheckpointSystem } from '../systems/CheckpointSystem.js';
@@ -68,6 +73,8 @@ export class BaseLevelScene extends Phaser.Scene {
     this.progression = new MarketProgressionSystem(this.config.regulatorsRequired);
     this.recipeSystem = new PressureRecipeSystem(this.config.yeastRequired, this.config.regulatorsRequired);
     this.checkpointSystem = new CheckpointSystem();
+    this.specialInventory = new SpecialBreadInventory();
+    this.specialRecipe = new SpecialRecipeSystem();
 
     this.restoreFromCheckpoint(data);
 
@@ -82,6 +89,7 @@ export class BaseLevelScene extends Phaser.Scene {
     this.createCollectibles();
     this.createEnemies();
     this.createProjectiles();
+    this.createBaguetteProjectiles();
     this.createRegulators();
     this.oven = this.createOven();
     this.exitObject = this.createExit();
@@ -94,7 +102,7 @@ export class BaseLevelScene extends Phaser.Scene {
     this.createDebugLayout();
 
     this.input.keyboard.addCapture([
-      'UP', 'DOWN', 'LEFT', 'RIGHT', 'SPACE', 'A', 'D', 'W', 'J', 'X', 'E', 'ENTER', 'ESC',
+      'UP', 'DOWN', 'LEFT', 'RIGHT', 'SPACE', 'A', 'D', 'W', 'J', 'X', 'E', 'ENTER', 'ESC', 'Q', 'K',
     ]);
     this.input.keyboard.on('keydown-ESC', this.handleEscape, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.shutdown, this);
@@ -132,6 +140,7 @@ export class BaseLevelScene extends Phaser.Scene {
     this.inventory.availableYeast = restored?.availableYeast ?? 0;
     this.progression.restore(restored?.activeRegulatorIds ?? []);
     this.recipeSystem.restore(restored?.recipe ?? {});
+    this.specialInventory.restore(restored?.specialBread ?? {});
     this.oxygenSystem.value = restored?.oxygen ?? this.config.oxygenConfig.max;
     this.enemiesDefeated = restored?.enemiesDefeated ?? 0;
     this.damageTaken = restored?.damageTaken ?? 0;
@@ -148,6 +157,9 @@ export class BaseLevelScene extends Phaser.Scene {
     this.tutorialUntil = 0;
     this.tutorialsSeen = new Set(restored?.tutorialsSeen ?? []);
     this.ending = false;
+    this.recipeMenuOpen = false;
+    this.recipeFeedback = null;
+    this.breadUnavailableUntil = -Infinity;
   }
 
   createBackground() {
@@ -387,6 +399,14 @@ export class BaseLevelScene extends Phaser.Scene {
     });
   }
 
+  createBaguetteProjectiles() {
+    this.baguettes = this.physics.add.group({
+      classType: BaguetteTorpedoProjectile,
+      maxSize: BAGUETTE_POOL_SIZE,
+      runChildUpdate: true,
+    });
+  }
+
   createRegulators() {
     this.regulators = (this.levelData.regulators ?? []).map((regulator) => new PressureRegulator(
       this,
@@ -491,6 +511,9 @@ export class BaseLevelScene extends Phaser.Scene {
       this.physics.add.overlap(this.player, this.checkpointZone, () => this.activateCheckpoint());
     }
     this.physics.add.overlap(this.player, this.hazardZones, (_player, hazard) => this.damagePlayer(1, hazard.x));
+    this.physics.add.overlap(this.baguettes, this.enemies, (baguette, enemy) => baguette.impactEnemy(enemy));
+    this.physics.add.collider(this.baguettes, this.solidObstacles, (baguette) => baguette.impactSurface());
+    this.physics.add.collider(this.baguettes, this.walkableSurfaces, (baguette) => baguette.impactSurface());
   }
 
   configureCamera() {
@@ -517,6 +540,7 @@ export class BaseLevelScene extends Phaser.Scene {
 
     this.updateTutorials(time);
     this.updateInteractions();
+    this.updateBreadInput();
     this.oven?.setAvailable(this.canBake());
     this.emitSnapshot(false, time);
   }
@@ -599,18 +623,10 @@ export class BaseLevelScene extends Phaser.Scene {
     if (this.oven?.isNearby(this.player)) {
       if (this.config.hasSentinel && !this.sentinelDefeated) {
         this.contextPrompt = this.config.ovenBlockedByBossPrompt ?? 'El guardián bloquea la estación';
-      } else if (this.recipeSystem.completed) {
-        this.contextPrompt = `El ${this.config.breadName} está listo`;
-      } else if (!this.progression.allRegulatorsActive) {
-        const missing = this.config.regulatorsRequired - this.progression.activeCount;
-        this.contextPrompt = `Faltan ${missing} regulador${missing === 1 ? '' : 'es'}`;
-      } else if (!this.inventory.canSpend(this.config.yeastRequired)) {
-        const missing = this.config.yeastRequired - this.inventory.availableYeast;
-        this.contextPrompt = `Faltan ${missing} Levadura${missing === 1 ? '' : 's'}`;
       } else {
-        this.contextPrompt = `Presiona E para preparar el ${this.config.breadName}`;
-        this.objective = this.objectives.bake;
-        if (interactPressed) this.startBaking();
+        this.contextPrompt = 'Presiona E para abrir el horno';
+        if (!this.recipeSystem.completed && this.canBake()) this.objective = this.objectives.bake;
+        if (interactPressed) this.openRecipeMenu();
       }
       return;
     }
@@ -705,6 +721,7 @@ export class BaseLevelScene extends Phaser.Scene {
         completed: this.recipeSystem.completed,
         hasPressureBread: this.recipeSystem.hasPressureBread,
       },
+      specialBread: this.specialInventory.snapshot(),
       oxygen: this.config.oxygenConfig.max,
       elapsedMs: this.getElapsedMs(),
       enemiesDefeated: this.enemiesDefeated,
@@ -731,6 +748,154 @@ export class BaseLevelScene extends Phaser.Scene {
       this.burst(this.oven.x, this.oven.y - 50, 0xffbd5f, true, 18);
       this.emitSnapshot(true);
     });
+  }
+
+  // --- Menú del horno y panes especiales -----------------------------------
+
+  /** Descriptor normalizado de la receta de misión (Pan Térmico / de Presión). */
+  getMissionRecipeState() {
+    return {
+      id: this.config.breadKind,
+      name: this.config.breadName,
+      cost: this.config.yeastRequired,
+      completed: this.recipeSystem.completed,
+      canCraft: this.canBake(),
+      requirements: {
+        yeast: this.config.yeastRequired,
+        regulators: this.config.regulatorsRequired,
+      },
+    };
+  }
+
+  /** Abre el menú React del horno y congela la simulación. */
+  openRecipeMenu() {
+    if (this.status !== 'playing' || this.recipeMenuOpen) return;
+    this.status = 'crafting';
+    this.recipeMenuOpen = true;
+    this.recipeFeedback = null;
+    this.player.finishAttack();
+    this.player.setVelocity(0, 0);
+    this.player.setAccelerationX(0);
+    this.player.setControlsEnabled(false);
+    this.audioManager.play('recipe-open');
+    this.emitSnapshot(true);
+    this.scene.pause();
+  }
+
+  /** Cierra el menú y reanuda exactamente una vez. */
+  closeRecipeMenu({ silent = false } = {}) {
+    if (!this.recipeMenuOpen) return;
+    this.recipeMenuOpen = false;
+    this.status = 'playing';
+    // Sólo se llega aquí con la escena pausada por openRecipeMenu().
+    this.scene.resume();
+    if (!silent) this.audioManager.play('recipe-close');
+    this.player.setControlsEnabled(true);
+    this.emitSnapshot(true);
+  }
+
+  /** Punto de entrada desde React para elaborar cualquier receta. */
+  craftRecipe(recipeId) {
+    if (recipeId === this.config.breadKind) return this.craftMissionBread();
+    return this.craftSpecial(recipeId);
+  }
+
+  craftMissionBread() {
+    if (!this.canBake()) {
+      this.recipeFeedback = 'ingredients';
+      this.audioManager.play('recipe-locked');
+      this.emitSnapshot(true);
+      return;
+    }
+    this.recipeFeedback = 'crafted';
+    this.audioManager.play('recipe-craft');
+    this.closeRecipeMenu({ silent: true });
+    this.startBaking();
+  }
+
+  craftSpecial(recipeId) {
+    const mission = this.getMissionRecipeState();
+    const { ok, reason } = this.specialRecipe.canCraft(recipeId, this.inventory, mission, this.specialInventory);
+    if (!ok) {
+      this.recipeFeedback = reason;
+      this.audioManager.play(reason === 'locked' ? 'recipe-locked' : 'bread-unavailable');
+      this.emitSnapshot(true);
+      return;
+    }
+    if (!this.specialRecipe.beginCraft(recipeId, this.inventory, mission, this.specialInventory)) {
+      this.recipeFeedback = 'ingredients';
+      this.emitSnapshot(true);
+      return;
+    }
+    this.recipeFeedback = 'crafted';
+    this.audioManager.play('recipe-craft');
+    this.closeRecipeMenu({ silent: true });
+    this.player.setControlsEnabled(false);
+    const finish = () => {
+      this.specialRecipe.completeCraft(recipeId, this.specialInventory);
+      this.showCraftedSpecial(recipeId);
+      this.player.setControlsEnabled(true);
+      this.recipeFeedback = 'crafted';
+      this.emitSnapshot(true);
+    };
+    const duration = this.config.specialBakeMs ?? 900;
+    const started = typeof this.oven?.pulse === 'function' && this.oven.pulse(duration, finish);
+    if (!started) this.time.delayedCall(duration, finish);
+  }
+
+  showCraftedSpecial() {
+    if (!this.oven) return;
+    this.burst(this.oven.x, this.oven.y - 50, 0xffbd5f, true, 16);
+    const hasItem = this.textures.exists('baguette-torpedo-item');
+    const item = hasItem
+      ? this.add.image(this.oven.x, this.oven.y - 72, 'baguette-torpedo-item').setDepth(22)
+      : this.add.rectangle(this.oven.x, this.oven.y - 72, 48, 24, 0xffca7a).setDepth(22);
+    this.tweens.add({
+      targets: item,
+      y: item.y - 18,
+      alpha: 0,
+      duration: 700,
+      onComplete: () => item.destroy(),
+    });
+  }
+
+  updateBreadInput() {
+    if (!this.player.controlsEnabled || this.player.isDefeated) return;
+    if (this.player.consumeBreadCyclePressed()) this.cycleSelectedBread(1);
+    if (this.player.consumeBreadUsePressed()) this.useSelectedBread();
+  }
+
+  cycleSelectedBread(direction = 1) {
+    if (this.status !== 'playing' || !this.player.controlsEnabled || this.player.isDefeated) return;
+    this.specialInventory.cycle(direction);
+    this.audioManager.play('bread-equip');
+    this.emitSnapshot(true);
+  }
+
+  useSelectedBread() {
+    if (this.status !== 'playing' || !this.player.controlsEnabled || this.player.isDefeated) return;
+    const id = this.specialInventory.selectedId;
+    const recipe = SPECIAL_BREAD_RECIPES[id];
+    const now = this.time.now;
+    if (!recipe?.unlocked || !this.specialInventory.canUse(id, now)) return this.rejectBreadUse();
+    const spawnX = this.player.x + this.player.facing * recipe.spawnOffset.x;
+    const spawnY = this.player.y + recipe.spawnOffset.y;
+    const projectile = this.baguettes.get(spawnX, spawnY);
+    if (!projectile) return this.rejectBreadUse();
+    if (!this.specialInventory.use(id, now)) {
+      projectile.deactivate();
+      return this.rejectBreadUse();
+    }
+    projectile.fire(spawnX, spawnY, this.player.facing, recipe);
+    this.emitSnapshot(true);
+    return true;
+  }
+
+  rejectBreadUse() {
+    this.audioManager.play('bread-unavailable');
+    this.breadUnavailableUntil = this.time.now + 500;
+    this.emitSnapshot(true);
+    return false;
   }
 
   activateExit() {
@@ -936,7 +1101,30 @@ export class BaseLevelScene extends Phaser.Scene {
       lowOxygen: this.oxygenSystem?.isLow() ?? false,
       fallbacksUsed: import.meta.env.DEV ? this.assetResolver.getFallbacksUsed() : [],
       progression: this.completionProgression,
+      recipeMenu: this.getRecipeMenuSnapshot(),
+      specialBread: this.getSpecialBreadSnapshot(),
     };
+  }
+
+  getRecipeMenuSnapshot() {
+    if (!this.specialInventory) return { open: false };
+    return buildRecipeMenuSnapshot({
+      open: this.recipeMenuOpen,
+      inventory: this.inventory,
+      mission: this.getMissionRecipeState(),
+      specialRecipe: this.specialRecipe,
+      specialInventory: this.specialInventory,
+      feedback: this.recipeFeedback,
+    });
+  }
+
+  getSpecialBreadSnapshot() {
+    if (!this.specialInventory) return { slots: [], selectedId: null };
+    return buildSpecialBreadSnapshot({
+      specialInventory: this.specialInventory,
+      now: this.time.now,
+      unavailablePulse: this.time.now < this.breadUnavailableUntil,
+    });
   }
 
   emitSnapshot(force = false, now = this.time.now) {

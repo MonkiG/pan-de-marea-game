@@ -68,6 +68,8 @@ export const ANIMATION_DATA = Object.freeze([
     { key: 'pressure-burst-effect-animation', texture: 'pressure-burst-effect', prefix: 'pressure-burst-effect', count: 6, frameRate: 14, repeat: 0 },
     { key: 'oxygen-vent-animation', texture: 'oxygen-vent-sheet', prefix: 'oxygen-vent', count: 4, frameRate: 6, repeat: -1 },
     { key: 'corrupted-projectile-animation', texture: 'corrupted-projectile-sheet', prefix: 'corrupted-projectile', count: 6, frameRate: 12, repeat: -1 },
+    { key: 'baguette-torpedo-projectile-animation', texture: 'baguette-torpedo-projectile-sheet', prefix: 'baguette-torpedo-projectile', count: 6, frameRate: 12, repeat: -1 },
+    { key: 'baguette-impact-animation', texture: 'baguette-impact-sheet', prefix: 'baguette-impact', count: 6, frameRate: 18, repeat: 0 },
   ] : []),
   ...crawlerAnimations,
   { key: 'yeast-idle', texture: 'yeast-sheet', prefix: 'yeast-idle', count: 6, frameRate: 7, repeat: -1 },

@@ -21,6 +21,10 @@ export function createPhaserGame(parent, initialSettings, initialLevel = 'level-
     eventBus.on('command:audio', (muted) => getScene()?.setMuted(muted)),
     eventBus.on('command:settings', (settings) => getScene()?.setSettings(settings)),
     eventBus.on('command:menu', () => getScene()?.returnToMenu()),
+    eventBus.on('command:recipe-craft', (payload) => getScene()?.craftRecipe(payload?.recipeId)),
+    eventBus.on('command:recipe-close', () => getScene()?.closeRecipeMenu()),
+    eventBus.on('command:bread-cycle', (payload) => getScene()?.cycleSelectedBread(payload?.direction ?? 1)),
+    eventBus.on('command:bread-use', () => getScene()?.useSelectedBread()),
     eventBus.on('command:level', (levelId) => {
       const scene = getScene();
       if (!scene || !['level-one', 'level-two'].includes(levelId)) return;

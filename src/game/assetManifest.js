@@ -116,6 +116,8 @@ export const FRAME_MANIFEST = Object.freeze({
     'thermal-oven-sheet': makeRow('thermal-oven', 4, 0, 0, 96, 80),
     'oxygen-vent-sheet': makeRow('oxygen-vent', 4, 0, 0, 48, 48),
     'corrupted-projectile-sheet': makeRow('corrupted-projectile', 6, 0, 0, 24, 24),
+    'baguette-torpedo-projectile-sheet': makeRow('baguette-torpedo-projectile', 6, 0, 0, 48, 24),
+    'baguette-impact-sheet': makeRow('baguette-impact', 6, 0, 0, 48, 48),
     'pressure-regulator-sheet': makeRow('pressure-regulator', 3, 0, 0, 48, 64),
     'pressure-oven-sheet': makeRow('pressure-oven', 4, 0, 0, 96, 96),
     'market-exit-sheet': makeRow('market-exit', 3, 0, 0, 128, 160),
