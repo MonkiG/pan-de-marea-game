@@ -420,6 +420,17 @@ PLEASE IMPLEMENT THIS PLAN:
 
 **Commits:** `88f61fd fix(levels): open space below floating platforms`.
 
+### PDM-022 — Preparar diagnóstico de enemigos para Claude
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “sigue sin funcionar el escupemasas, haz un readme en el que detalles el problema para que claude lo resuelva, tambien que el enemigo final no cambia de posicion cuando se mueve a la izquierda, se queda viendo a la derecha siempre”
+
+**Resultado:** no se modificó la jugabilidad. Se creó un encargo técnico autocontenido para Claude con reproducción de ambos defectos, flujo actual del Escupemasas, antecedentes del intento `88f61fd`, hipótesis auditables, archivos implicados y criterios de aceptación. La inspección de la hoja del Sentinela confirmó que el asset base mira a la derecha, mientras el código aplica `flipX` con la condición opuesta y después de varios retornos tempranos.
+
+**Archivos:** `README_CLAUDE_ENEMY_BUGS.md` y `PROMPTS.md`.
+
+**Commits:** `8717c22 docs(enemies): brief Claude on unresolved gameplay bugs`.
+
 ## Anexo A — Prompt original de la demo
 
 <details>
