@@ -396,6 +396,30 @@ PLEASE IMPLEMENT THIS PLAN:
 
 **Commits:** `55ae570 fix(levels): stabilize scene startup`.
 
+### PDM-020 — Liberar el espacio bajo las banquetas y activar al Escupemasas
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “Me encanta, solo como ultima tarea, que las banquetas flotantes no tengan nada debajo para que se pueda pasar por debajo, y haz que el enemigo escupemasas si dispare, porque ahorita como que no hace nada”
+
+**Corrección de alcance:** este prompt reemplaza para las banquetas elevadas la decisión de PDM-017 y PDM-018 que exigía soportes visuales hasta el suelo. Los objetos persistentes conservan `surfaceId`, pero las banquetas ahora permanecen libres por debajo.
+
+**Resultado:** las plataformas elevadas se renderizan como superficies delgadas de una sola dirección, sin relleno visual ni collider vertical, por lo que Bigotes puede cruzar por debajo y aterrizar encima. Al retirar esos bloques también se despejó la línea de visión del Escupemasas. Sus proyectiles de Masa Corrupta ya no colisionan con las banquetas de una sola dirección —incluida su propia percha—, aunque la cobertura sólida continúa bloqueándolos.
+
+**Archivos:** `src/game/scenes/BaseLevelScene.js`, `src/game/data/levelTwoData.js`, `src/game/systems/LevelSupportSystem.js`, `README.md` y `PROMPTS.md`.
+
+**Commits:** `88f61fd fix(levels): open space below floating platforms`.
+
+### PDM-021 — Omitir pruebas por solicitud del usuario
+
+**Fecha:** 2026-08-02
+**Prompt literal:** “Okey para ahorrar tokens no hagas pruebas, esas las hago yo, solo arregla lo que te pedi”
+
+**Resultado:** no produjo cambios funcionales adicionales. Por indicación expresa del usuario no se ejecutaron ni añadieron pruebas automáticas, build, validación de arte o recorrido en navegador para PDM-020; la validación manual queda a cargo del usuario.
+
+**Archivos:** `PROMPTS.md`.
+
+**Commits:** `88f61fd fix(levels): open space below floating platforms`.
+
 ## Anexo A — Prompt original de la demo
 
 <details>
