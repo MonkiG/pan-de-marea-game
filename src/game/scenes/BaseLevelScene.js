@@ -187,8 +187,8 @@ export class BaseLevelScene extends Phaser.Scene {
       this.levelData.worldWidth,
       this.levelData.collision.floorHeight,
     );
-    this.levelData.platforms.forEach((platform, index) => {
-      this.createSupportedPlatform(platform, { texture, pixelTiles, floorFrame, index });
+    this.levelData.platforms.forEach((platform) => {
+      this.createFloatingPlatform(platform, { texture, pixelTiles, floorFrame });
     });
 
     this.createDecorations(texture, pixelTiles);
@@ -196,46 +196,28 @@ export class BaseLevelScene extends Phaser.Scene {
     if (this.config.hasSentinel && !this.sentinelDefeated) this.createSentinelBarrier();
   }
 
-  createSupportedPlatform(platform, { texture, pixelTiles, floorFrame, index }) {
+  createFloatingPlatform(platform, { texture, pixelTiles, floorFrame }) {
     const top = platform.y - platform.height / 2;
-    const floorTop = this.levelData.collision.floorTop;
-    const supportHeight = floorTop - top;
     const colliderWidth = platform.width - this.levelData.collision.platformHorizontalInset * 2;
 
-    if (platform.supportKind === 'stall') {
-      const stallTexture = this.assetResolver.resolve('marketStall', 'fallback-market-stall');
-      const pixelStall = stallTexture === 'market-stalls-sheet';
-      this.add.image(
-        platform.x,
-        floorTop,
-        stallTexture,
-        pixelStall ? `market-stall-${index % 5}` : undefined,
-      )
-        .setOrigin(0.5, 1)
-        .setDisplaySize(platform.width, supportHeight)
-        .setDepth(8);
-    } else if (pixelTiles) {
+    if (pixelTiles) {
       createPixelPlatform(this, { texture, x: platform.x, top, width: platform.width, depth: 8 });
-      const fillHeight = Math.max(8, supportHeight - 12);
-      this.add.tileSprite(
-        platform.x,
-        top + 12,
-        Math.max(32, platform.width - 24),
-        fillHeight,
-        texture,
-        'tile-floor',
-      ).setOrigin(0.5, 0).setDepth(7);
     } else {
       const frame = texture === 'tileset' && this.textures.get(texture).has(platform.frame)
         ? platform.frame
         : floorFrame;
       this.add.image(platform.x, top, texture, frame)
         .setOrigin(0.5, 0)
-        .setDisplaySize(platform.width, supportHeight)
+        .setDisplaySize(platform.width, platform.height)
         .setDepth(8);
     }
 
-    this.createSolidObstacle(platform.x, top + supportHeight / 2, colliderWidth, supportHeight);
+    this.createOneWaySurface(
+      platform.x,
+      top,
+      colliderWidth,
+      this.levelData.collision.platformThickness,
+    );
   }
 
   /** Decoración ambiental. Sobrescribible por nivel (panadería usa frames del tileset). */
@@ -494,7 +476,6 @@ export class BaseLevelScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.solidObstacles);
     this.physics.add.collider(this.enemies, this.walkableSurfaces);
     this.physics.add.collider(this.enemies, this.solidObstacles);
-    this.physics.add.collider(this.projectiles, this.walkableSurfaces, (projectile) => this.splashProjectile(projectile));
     this.physics.add.collider(this.projectiles, this.solidObstacles, (projectile) => this.splashProjectile(projectile));
     this.physics.add.overlap(this.player, this.yeasts, (_player, yeast) => this.collectYeast(yeast));
     this.physics.add.overlap(this.player.attackZone, this.enemies, (_zone, enemy) => {

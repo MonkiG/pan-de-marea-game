@@ -83,7 +83,7 @@ export function validateLevelSupports(levelData) {
 
   levelData.platforms.forEach((platform) => {
     if (!['stone', 'stall'].includes(platform.supportKind)) {
-      errors.push(`La plataforma ${platform.id} no tiene soporte estructural válido.`);
+      errors.push(`La plataforma ${platform.id} no tiene un acabado visual válido.`);
     }
     if (platform.y - platform.height / 2 >= levelData.collision.floorTop) {
       errors.push(`La plataforma ${platform.id} no está elevada sobre el suelo.`);

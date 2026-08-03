@@ -78,7 +78,7 @@ No se añadieron doble salto, dash, wall jump ni nuevas habilidades.
 ## Colisiones y depuración de recorrido
 
 - El suelo visual repetido conserva un único collider continuo, sin bordes entre tiles.
-- Cada plataforma elevada es una estructura sólida conectada al suelo: terraza de piedra en el Tutorial o puesto/estructura del mercado en Nivel I.
+- Cada banqueta elevada es una plataforma delgada de una sola dirección: Bigotes puede pararse arriba y atravesar libremente el espacio inferior.
 - Enemigos, levaduras e interactivos declaran `surfaceId`; su altura se deriva de la superficie y no de coordenadas verticales independientes.
 - Decoración, levaduras, respiradero, horno y compuerta no forman paredes sólidas. Los triggers usan overlaps.
 - El collider de Bigotes mide 68×112 píxeles de la lámina antes de aplicar la escala, aproximadamente 28.6×47 px en el mundo.
@@ -89,7 +89,7 @@ No se añadieron doble salto, dash, wall jump ni nuevas habilidades.
 
 Las tres opciones están desactivadas en producción y se encuentran al inicio de `src/game/constants.js`.
 
-La validación de layout rechaza plataformas sin soporte, objetos fuera de su superficie, patrullas que abandonan una plataforma y saltos fuera del margen seguro. Horno, compuerta, estación de presión y salida se apoyan directamente en el suelo.
+La validación de layout rechaza superficies inválidas, objetos fuera de su banqueta, patrullas que abandonan una plataforma y saltos fuera del margen seguro. Horno, compuerta, estación de presión y salida se apoyan directamente en el suelo.
 
 ## Flujo de los niveles
 
@@ -262,7 +262,7 @@ No registres listeners ni crees objetos nuevos dentro del bucle `update`.
 - daño, invulnerabilidad y salud mínima;
 - reinicio de los sistemas principales;
 - alcance y margen de los saltos declarados.
-- soportes estructurales, `surfaceId`, posiciones derivadas y límites de patrulla;
+- banquetas de una sola dirección, `surfaceId`, posiciones derivadas y límites de patrulla;
 - auditoría y resolución de assets con fallback;
 - activación de reguladores en cualquier orden y bloqueo de salida;
 - receta del Pan de Presión con y sin requisitos;

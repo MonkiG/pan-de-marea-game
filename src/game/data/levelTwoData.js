@@ -1,6 +1,6 @@
 // Nivel I — El Mercado Sumergido.
-// Escala las mecánicas del Tutorial y apoya cada ruta elevada en estructuras
-// de piedra o puestos del mercado conectados al suelo.
+// Escala las mecánicas del Tutorial con banquetas elevadas de una sola
+// dirección, transitables por arriba y libres por debajo.
 export const LEVEL_TWO_DATA = Object.freeze({
   id: 'level-two',
   name: 'El Mercado Sumergido',
