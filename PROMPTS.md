@@ -592,6 +592,25 @@ PLEASE IMPLEMENT THIS PLAN:
 - `2caea9a feat(audio): split music and sfx mute controls`
 - `f0573aa feat(ui): add separate music and effects mute toggles`
 
+### PDM-032 — Persistir configuración y progresión en localStorage
+
+**Fecha:** 2026-08-03
+**Prompt literal:** “haz pull de main, e implementa algun tipo de persistencia local para que se guarde la configuracion y si se tienen desbloqueados los niveles se mantenga todo sabes”
+
+**Alcance acordado:** se persiste la configuración y la progresión (niveles desbloqueados, completados y estadísticas globales). Por decisión posterior del usuario (“Mira para no complicar mucho la interfaz, no incluyas los checkpoints”), los checkpoints de mitad de nivel quedan fuera y siguen viviendo en la sesión.
+
+**Resultado:** nuevo módulo `Persistence.js` con claves versionadas (`pan-de-marea:settings:v1`, `pan-de-marea:progress:v1`), `loadJSON` (fusiona sobre el fallback y tolera ausencia/corrupción) y `saveJSON`, con acceso a `localStorage` guardado para entornos sin `window`. `App` hidrata los ajustes al arrancar y los persiste en cada cambio vía `useEffect`. `SessionProgress` hidrata su estado en el constructor (con `hydrateState` que valida tipos y filtra ids de nivel conocidos) y llama `persist()` al final de `completeLevel()`; `reset()` queda en memoria y no borra el almacenamiento. Tests con un stub en memoria de `localStorage` (entorno node de vitest).
+
+**Validación:** `npm test` (53 pruebas, +5: 4 de `Persistence` y 1 de hidratación/persistencia de `SessionProgress`), `npm run build` y `git diff --check` en verde. La verificación en navegador (recargar conserva mutes, nivel desbloqueado y completados) queda a cargo del usuario (práctica PDM-021).
+
+**Archivos:** `src/game/systems/Persistence.js` (nuevo), `src/game/systems/Persistence.test.js` (nuevo), `src/game/systems/SessionProgress.js`, `src/game/systems/levelTwoSystems.test.js`, `src/App.jsx`, `README.md`, `CLAUDE_RECIPES_IMPLEMENTATION.md` y `PROMPTS.md`.
+
+**Commits:**
+
+- `08c3550 feat(persistence): add localStorage-backed save and load helpers`
+- `8d3f45c feat(ui): persist settings in localStorage`
+- `2ac3ede feat(progress): persist level unlocks and completion stats`
+
 ## Anexo A — Prompt original de la demo
 
 <details>

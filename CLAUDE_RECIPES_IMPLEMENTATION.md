@@ -15,7 +15,7 @@ El alcance de esta versión es:
 - utilizar los assets y SFX entregados en esta rama;
 - mantener LevelOneScene y LevelTwoScene como configuraciones ligeras de BaseLevelScene.
 
-No implementar todavía recuperación de oxígeno mediante pan, escudo, música, gamepad, persistencia en `localStorage` ni recetas desbloqueables. Las dos recetas futuras son sólo una promesa visual.
+No implementar todavía recuperación de oxígeno mediante pan, escudo, música, gamepad ni recetas desbloqueables. La persistencia en `localStorage` (ajustes y progresión de desbloqueo) ya está implementada; las dos recetas futuras son sólo una promesa visual.
 
 ## 2. Estado actual que debe preservarse
 
