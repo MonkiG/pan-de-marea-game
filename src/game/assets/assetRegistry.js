@@ -53,6 +53,15 @@ export const ASSET_REGISTRY = Object.freeze({
   corruptedDoughProjectile: IS_PIXEL_ART_V1
     ? { key: 'corrupted-projectile-sheet', path: 'pixel-art/v1/props/corrupted-dough-projectile.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 24, fallback: 'fallback-projectile' }
     : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-projectile' },
+  baguetteTorpedoProjectile: IS_PIXEL_ART_V1
+    ? { key: 'baguette-torpedo-projectile-sheet', path: 'pixel-art/v1/recipes/baguette-torpedo-projectile.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 288, height: 24, fallback: 'fallback-projectile' }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-projectile' },
+  baguetteImpact: IS_PIXEL_ART_V1
+    ? { key: 'baguette-impact-sheet', path: 'pixel-art/v1/recipes/baguette-impact.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 288, height: 48 }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'] },
+  baguetteTorpedoItem: IS_PIXEL_ART_V1
+    ? { key: 'baguette-torpedo-item', path: 'pixel-art/v1/recipes/baguette-torpedo-item.png', type: 'image', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 64, height: 32 }
+    : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'] },
   pressureRegulator: IS_PIXEL_ART_V1
     ? { key: 'pressure-regulator-sheet', path: 'pixel-art/v1/props/pressure-regulator.png', type: 'image-sheet', status: 'pixel-v1', usedIn: ['level-one', 'level-two'], width: 144, height: 64, fallback: 'fallback-regulator' }
     : { key: null, path: null, type: 'missing', status: 'fallback-required', usedIn: ['level-one', 'level-two'], fallback: 'fallback-regulator' },

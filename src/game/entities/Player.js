@@ -51,6 +51,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       attackAlt: Phaser.Input.Keyboard.KeyCodes.X,
       interact: Phaser.Input.Keyboard.KeyCodes.E,
       interactAlt: Phaser.Input.Keyboard.KeyCodes.ENTER,
+      cycleBread: Phaser.Input.Keyboard.KeyCodes.Q,
+      useBread: Phaser.Input.Keyboard.KeyCodes.K,
     });
     this.cursors = scene.input.keyboard.createCursorKeys();
 
@@ -241,6 +243,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   consumeInteractPressed() {
     return Phaser.Input.Keyboard.JustDown(this.keys.interact)
       || Phaser.Input.Keyboard.JustDown(this.keys.interactAlt);
+  }
+
+  consumeBreadCyclePressed() {
+    return Phaser.Input.Keyboard.JustDown(this.keys.cycleBread);
+  }
+
+  consumeBreadUsePressed() {
+    return Phaser.Input.Keyboard.JustDown(this.keys.useBread);
   }
 
   takeDamage(amount, sourceX = this.x) {

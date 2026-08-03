@@ -27,6 +27,19 @@ export class Oven {
     this.glow.setAlpha(available ? 0.2 : 0.08);
   }
 
+  /** Destello breve para elaborar un pan especial sin alterar el estado de misión. */
+  pulse(duration, onComplete) {
+    this.scene.tweens.add({
+      targets: this.glow,
+      alpha: 0.55,
+      scale: 1.35,
+      yoyo: true,
+      duration: Math.max(120, duration / 2),
+      onComplete: () => onComplete?.(),
+    });
+    return true;
+  }
+
   bake(duration, onComplete) {
     if (this.state === 'baking' || this.state === 'complete') return false;
     this.state = 'baking';

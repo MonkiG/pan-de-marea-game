@@ -1,3 +1,5 @@
+import { SpecialBreadBar } from './SpecialBreadBar.jsx';
+
 const percentage = (value, max) => `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
 
 export function HUD({ snapshot }) {
@@ -32,6 +34,7 @@ export function HUD({ snapshot }) {
           {breadReady ? `${breadName} listo` : `Sin ${breadName}`}
         </span>
         {snapshot.checkpointActive && <span className="checkpoint-badge">Checkpoint activo</span>}
+        <SpecialBreadBar special={snapshot.specialBread} />
       </div>
     </div>
   );

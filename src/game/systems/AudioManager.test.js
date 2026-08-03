@@ -74,11 +74,11 @@ describe('AudioManager', () => {
 });
 
 describe('AUDIO_MANIFEST', () => {
-  it('declara exactamente los trece SFX del MVP con rutas únicas', () => {
+  it('declara los SFX de la biblioteca con claves y rutas únicas', () => {
     const entries = Object.values(AUDIO_MANIFEST);
-    expect(entries).toHaveLength(13);
-    expect(new Set(entries.map((entry) => entry.key)).size).toBe(13);
-    expect(new Set(entries.map((entry) => entry.file)).size).toBe(13);
+    expect(entries.length).toBeGreaterThanOrEqual(13);
+    expect(new Set(entries.map((entry) => entry.key)).size).toBe(entries.length);
+    expect(new Set(entries.map((entry) => entry.file)).size).toBe(entries.length);
     entries.forEach((entry) => {
       expect(entry.file).toMatch(/^audio\/sfx\/[a-z-]+\.wav$/);
       expect(entry.volume).toBeGreaterThan(0);

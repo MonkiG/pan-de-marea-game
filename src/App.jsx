@@ -5,6 +5,7 @@ import { LevelSelectScreen } from './components/LevelSelectScreen.jsx';
 import { MainMenu } from './components/MainMenu.jsx';
 import { NonGameLinks } from './components/NonGameLinks.jsx';
 import { PauseMenu } from './components/PauseMenu.jsx';
+import { RecipeMenu } from './components/RecipeMenu.jsx';
 import { ResultScreen } from './components/ResultScreen.jsx';
 import { eventBus } from './game/EventBus.js';
 import { OBJECTIVES, OXYGEN, PLAYER, RECIPE } from './game/constants.js';
@@ -157,6 +158,13 @@ export function App() {
                 </div>
               </div>
             </div>
+          )}
+          {!artReviewMode && snapshot.recipeMenu?.open && (
+            <RecipeMenu
+              menu={snapshot.recipeMenu}
+              onCraft={(recipeId) => eventBus.emit('command:recipe-craft', { recipeId })}
+              onClose={() => eventBus.emit('command:recipe-close')}
+            />
           )}
           {!artReviewMode && snapshot.status === 'paused' && (
             <PauseMenu

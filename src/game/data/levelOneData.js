@@ -44,6 +44,10 @@ export const LEVEL_ONE_DATA = Object.freeze({
     { id: 'yeast-b', x: 1160, surfaceId: 'yeast-b-platform' },
     { id: 'yeast-c', x: 2050, surfaceId: 'yeast-c-platform' },
     { id: 'yeast-d', x: 3150, surfaceId: 'floor' },
+    // Levaduras opcionales: exceden el objetivo (3) para poder elaborar la
+    // Baguette Torpedo sin arriesgar la reserva del Pan Térmico.
+    { id: 'yeast-opt-a', x: 630, surfaceId: 'intro-rise' },
+    { id: 'yeast-opt-b', x: 3520, surfaceId: 'hazard-step' },
   ],
   enemies: [
     { id: 'crawler-a', x: 1750, surfaceId: 'floor', patrolMin: 1560, patrolMax: 1950 },
