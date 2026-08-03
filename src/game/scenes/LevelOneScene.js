@@ -43,6 +43,7 @@ export class LevelOneScene extends BaseLevelScene {
         complete: OBJECTIVES.complete,
       },
       hasSentinel: false,
+      music: 'level-one',
       audio: { oven: 'oven', exit: 'gate' },
       exitLockedPrompt: 'La compuerta necesita un Pan Térmico',
       exitOpenPrompt: 'El Nivel I está desbloqueado',

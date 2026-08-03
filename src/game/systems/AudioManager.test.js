@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AUDIO_MANIFEST } from '../audio/audioManifest.js';
+import { MUSIC_MANIFEST } from '../audio/musicManifest.js';
 import { AudioManager } from './AudioManager.js';
 
 const createScene = ({ loaded = true, playResult = true } = {}) => ({
@@ -11,6 +12,21 @@ const createScene = ({ loaded = true, playResult = true } = {}) => ({
     stopAll: vi.fn(),
   },
 });
+
+const createMusicScene = () => {
+  const sounds = [];
+  const scene = createScene();
+  scene.sound.add = vi.fn(() => {
+    const sound = {
+      play: vi.fn(() => true),
+      stop: vi.fn(),
+      destroy: vi.fn(),
+    };
+    sounds.push(sound);
+    return sound;
+  });
+  return { scene, sounds };
+};
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -85,5 +101,58 @@ describe('AUDIO_MANIFEST', () => {
       expect(entry.volume).toBeLessThanOrEqual(1);
       expect(entry.cooldownMs).toBeGreaterThan(0);
     });
+  });
+});
+
+describe('AudioManager música', () => {
+  it('reproduce una pista en loop con su volumen y permite detenerla', () => {
+    const { scene, sounds } = createMusicScene();
+    const audio = new AudioManager(scene);
+    expect(audio.playMusic('main')).toBe(true);
+    expect(scene.sound.add).toHaveBeenCalledWith(MUSIC_MANIFEST.main.key, {
+      volume: MUSIC_MANIFEST.main.volume,
+      loop: true,
+    });
+    expect(sounds[0].play).toHaveBeenCalledOnce();
+    audio.stopMusic();
+    expect(sounds[0].destroy).toHaveBeenCalledOnce();
+    expect(audio.musicKey).toBeNull();
+  });
+
+  it('detiene la pista anterior al cambiar de tema', () => {
+    const { scene, sounds } = createMusicScene();
+    const audio = new AudioManager(scene);
+    audio.playMusic('level-one');
+    const previous = sounds[sounds.length - 1];
+    audio.playMusic('level-two');
+    expect(previous.destroy).toHaveBeenCalledOnce();
+    expect(audio.musicKey).toBe('level-two');
+  });
+
+  it('no reproduce música silenciada y usa silencio seguro si falta el archivo', () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    const { scene } = createMusicScene();
+    const audio = new AudioManager(scene);
+    audio.setMuted(true);
+    expect(audio.playMusic('main')).toBe(false);
+    expect(scene.sound.add).not.toHaveBeenCalled();
+  });
+
+  it('reanuda la pista activa al desmutear', () => {
+    const { scene } = createMusicScene();
+    const audio = new AudioManager(scene);
+    audio.playMusic('main');
+    audio.setMuted(true);
+    audio.setMuted(false);
+    expect(scene.sound.add).toHaveBeenLastCalledWith(MUSIC_MANIFEST.main.key, expect.any(Object));
+  });
+
+  it('advierte una sola vez si la clave de música no está registrada', () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    const { scene } = createMusicScene();
+    const audio = new AudioManager(scene);
+    expect(audio.playMusic('missing')).toBe(false);
+    expect(audio.playMusic('missing')).toBe(false);
+    expect(console.info).toHaveBeenCalledTimes(1);
   });
 });

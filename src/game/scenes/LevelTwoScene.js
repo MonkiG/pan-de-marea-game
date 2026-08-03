@@ -43,6 +43,7 @@ export class LevelTwoScene extends BaseLevelScene {
         complete: MARKET_OBJECTIVES.complete,
       },
       hasSentinel: true,
+      music: 'level-two',
       audio: { oven: 'pressure-oven', exit: 'market-exit' },
       ovenBlockedByBossPrompt: 'El guardián bloquea la estación',
       exitLockedPrompt: 'La salida necesita presión estable y el Pan de Presión',
