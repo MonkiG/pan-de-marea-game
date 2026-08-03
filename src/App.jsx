@@ -56,9 +56,12 @@ export function App() {
   const [settings, setSettings] = useState({ muted: false, screenShake: true, reducedParticles: false });
   const [selectedLevel, setSelectedLevel] = useState(initialSelectedLevel);
   const [progression, setProgression] = useState(() => sessionProgress.getSnapshot());
+  const [gameError, setGameError] = useState('');
+  const [gameRunId, setGameRunId] = useState(0);
 
   useEffect(() => {
     const update = (next) => {
+      setGameError('');
       setSnapshot(next);
       if (next.progression) {
         setProgression((current) => mergeProgressionSnapshots(current, next.progression));
@@ -70,7 +73,11 @@ export function App() {
       eventBus.on('game:pause', update),
       eventBus.on('game:defeat', update),
       eventBus.on('game:complete', update),
-      eventBus.on('game:error', (error) => console.error('[Juego]', error)),
+      eventBus.on('game:error', (error) => {
+        console.error('[Juego]', error);
+        setGameError(error instanceof Error ? error.message : 'Error desconocido al iniciar el nivel.');
+        setSnapshot((current) => ({ ...current, status: 'error' }));
+      }),
     ];
     return () => off.forEach((unsubscribe) => unsubscribe());
   }, []);
@@ -85,12 +92,14 @@ export function App() {
   const startGame = (levelId = selectedLevel) => {
     if (!progression.unlockedLevels.includes(levelId) && !sessionProgress.isUnlocked(levelId)) return;
     setSelectedLevel(levelId);
+    setGameError('');
     setSnapshot({ ...initialSnapshot, levelId, levelName: getLevelDefinition(levelId).name });
     setView('game');
   };
 
   const changeLevel = (levelId) => {
     setSelectedLevel(levelId);
+    setGameError('');
     setSnapshot({ ...initialSnapshot, levelId, levelName: getLevelDefinition(levelId).name });
     eventBus.emit('command:level', levelId);
   };
@@ -99,7 +108,14 @@ export function App() {
     eventBus.emit('command:menu');
     setProgression((current) => mergeProgressionSnapshots(current, sessionProgress.getSnapshot()));
     setView('menu');
+    setGameError('');
     setSnapshot(initialSnapshot);
+  };
+
+  const retryLevel = () => {
+    setGameError('');
+    setSnapshot({ ...initialSnapshot, levelId: selectedLevel, levelName: getLevelDefinition(selectedLevel).name });
+    setGameRunId((current) => current + 1);
   };
 
   const updateSettings = (patch) => {
@@ -124,10 +140,23 @@ export function App() {
         />
       ) : (
         <section className="game-screen" aria-label={artReviewMode ? `Revisión de arte: ${artReviewAsset}` : snapshot.levelName}>
-          <GameContainer settings={settings} initialLevel={selectedLevel} />
+          <GameContainer key={gameRunId} settings={settings} initialLevel={selectedLevel} />
           {!artReviewMode && <HUD snapshot={snapshot} />}
           {!artReviewMode && snapshot.status === 'loading' && (
             <div className="loading-badge" role="status">Sumergiendo la panadería…</div>
+          )}
+          {!artReviewMode && snapshot.status === 'error' && (
+            <div className="overlay" role="alertdialog" aria-modal="true" aria-label="No se pudo iniciar el nivel">
+              <div className="overlay-card">
+                <p className="eyebrow">La marea interrumpió el viaje</p>
+                <h2>No se pudo iniciar el nivel</h2>
+                <p>{gameError || 'El juego no pudo completar la carga.'}</p>
+                <div className="overlay-actions">
+                  <button className="primary-button" type="button" onClick={retryLevel} autoFocus>Reintentar</button>
+                  <button type="button" onClick={returnToMenu}>Volver al menú</button>
+                </div>
+              </div>
+            </div>
           )}
           {!artReviewMode && snapshot.status === 'paused' && (
             <PauseMenu

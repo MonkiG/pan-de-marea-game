@@ -5,8 +5,9 @@ import { PreloadScene } from './scenes/PreloadScene.js';
 import { LevelOneScene } from './scenes/LevelOneScene.js';
 import { LevelTwoScene } from './scenes/LevelTwoScene.js';
 import { ArtReviewScene } from './scenes/ArtReviewScene.js';
+import { initializeGameRegistry } from './startup.js';
 
-export const createGameConfig = (parent) => ({
+export const createGameConfig = (parent, initialSettings, initialLevel) => ({
   type: Phaser.AUTO,
   parent,
   width: GAME_WIDTH,
@@ -32,6 +33,9 @@ export const createGameConfig = (parent) => ({
     antialias: false,
     pixelArt: true,
     roundPixels: true,
+  },
+  callbacks: {
+    preBoot: (game) => initializeGameRegistry(game, initialSettings, initialLevel),
   },
   scene: [BootScene, PreloadScene, ArtReviewScene, LevelOneScene, LevelTwoScene],
 });
